@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B0BD2116-DD83-427C-8964-81467A983659}</ProjectGuid>
+    <Keyword>QtVS_v302</Keyword>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
+  </Target>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
+    <Import Project="$(QtMsBuild)\qt_defaults.props" />
+  </ImportGroup>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <QtInstall>Qt_5.15</QtInstall>
+    <QtModules>core;gui;opengl;openglextensions;widgets</QtModules>
+  </PropertyGroup>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <QtInstall>Qt_5.15</QtInstall>
+    <QtModules>core;gui;opengl;openglextensions;widgets</QtModules>
+  </PropertyGroup>
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
+    <Import Project="$(QtMsBuild)\qt.props" />
+  </ImportGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <AdditionalIncludeDirectories>E:\Glew i Glut\glew-1.11.0\include;E:\Glew i Glut\freeglut\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>freeglut.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>E:\Glew i Glut\glew-1.11.0\lib;E:\Glew i Glut\freeglut\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat />
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <AdditionalIncludeDirectories>E:\Glew i Glut\glew-1.11.0\include;E:\Glew i Glut\freeglut\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalDependencies>freeglut.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>E:\Glew i Glut\glew-1.11.0\lib;E:\Glew i Glut\freeglut\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Bmp.cpp" />
+    <ClCompile Include="CAnimationThread.cpp" />
+    <ClCompile Include="CAvability.cpp" />
+    <ClCompile Include="CCachedTerrainData.cpp" />
+    <ClCompile Include="CCachedTerrainDataGroup.cpp" />
+    <ClCompile Include="CCacheManager.cpp" />
+    <ClCompile Include="CCamera.cpp" />
+    <ClCompile Include="CCommons.cpp" />
+    <ClCompile Include="CDrawingState.cpp" />
+    <ClCompile Include="CDrawingStateSnapshot.cpp" />
+    <ClCompile Include="CEarth.cpp" />
+    <ClCompile Include="CEarthPointsList.cpp" />
+    <ClCompile Include="CHgtFile.cpp" />
+    <ClCompile Include="CObjects.cpp" />
+    <ClCompile Include="COpenGl.cpp" />
+    <ClCompile Include="COpenGlThread.cpp" />
+    <ClCompile Include="CPerformance.cpp" />
+    <ClCompile Include="CRawFile.cpp" />
+    <ClCompile Include="CTerrain.cpp" />
+    <ClCompile Include="CTerrainData.cpp" />
+    <ClCompile Include="CTerrainLoaderThread.cpp" />
+    <ClCompile Include="GClipmap.cpp" />
+    <ClCompile Include="GClipmapThread.cpp" />
+    <ClCompile Include="glew.cpp" />
+    <ClCompile Include="GLayer.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="mainwindow.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="PlaneGame.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="mainwindow.ui" />
+    <QtUic Include="PlaneGame.ui" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="PlaneGame.qrc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Bmp.h" />
+    <ClInclude Include="CAvability.h" />
+    <ClInclude Include="CCachedTerrainData.h" />
+    <ClInclude Include="CCachedTerrainDataGroup.h" />
+    <ClInclude Include="CCacheManager.h" />
+    <ClInclude Include="CCommons.h" />
+    <ClInclude Include="CDrawingStateSnapshot.h" />
+    <ClInclude Include="CEarth.h" />
+    <ClInclude Include="CEarthPointsList.h" />
+    <ClInclude Include="CHgtFile.h" />
+    <ClInclude Include="core.h" />
+    <ClInclude Include="GClipmapThread.h" />
+    <ClInclude Include="CObjects.h" />
+    <ClInclude Include="GLayer.h" />
+    <ClInclude Include="GClipmap.h" />
+    <ClInclude Include="glsl.h" />
+    <ClInclude Include="mathlib\bbox.h" />
+    <ClInclude Include="mathlib\envelopecurve.h" />
+    <ClInclude Include="mathlib\euler.h" />
+    <ClInclude Include="mathlib\eulerangles.h" />
+    <ClInclude Include="mathlib\line.h" />
+    <ClInclude Include="mathlib\matrix.h" />
+    <ClInclude Include="mathlib\matrixdefs.h" />
+    <ClInclude Include="mathlib\nmath.h" />
+    <ClInclude Include="mathlib\noise.h" />
+    <ClInclude Include="mathlib\ntypes.h" />
+    <ClInclude Include="mathlib\pknorm.h" />
+    <ClInclude Include="mathlib\plane.h" />
+    <ClInclude Include="mathlib\polar.h" />
+    <ClInclude Include="mathlib\quaternion.h" />
+    <ClInclude Include="mathlib\rectangle.h" />
+    <ClInclude Include="mathlib\sphere.h" />
+    <ClInclude Include="mathlib\transform33.h" />
+    <ClInclude Include="mathlib\transform44.h" />
+    <ClInclude Include="mathlib\triangle.h" />
+    <ClInclude Include="mathlib\vector.h" />
+    <ClInclude Include="mathlib\vector3envelopecurve.h" />
+    <ClInclude Include="mathlib\_matrix33.h" />
+    <ClInclude Include="mathlib\_matrix33_sse.h" />
+    <ClInclude Include="mathlib\_matrix44.h" />
+    <ClInclude Include="mathlib\_matrix44_sse.h" />
+    <ClInclude Include="mathlib\_vector2.h" />
+    <ClInclude Include="mathlib\_vector3.h" />
+    <ClInclude Include="mathlib\_vector3_sse.h" />
+    <ClInclude Include="mathlib\_vector4.h" />
+    <ClInclude Include="mathlib\_vector4_sse.h" />
+    <ClInclude Include="ogl.h" />
+    <QtMoc Include="CPerformance.h" />
+    <QtMoc Include="COpenGlThread.h" />
+    <QtMoc Include="COpenGl.h" />
+    <QtMoc Include="CDrawingState.h" />
+    <QtMoc Include="CCamera.h" />
+    <QtMoc Include="CAnimationThread.h" />
+    <ClInclude Include="CRawFile.h" />
+    <ClInclude Include="CTerrain.h" />
+    <ClInclude Include="CTerrainData.h" />
+    <QtMoc Include="mainwindow.h" />
+    <QtMoc Include="CTerrainLoaderThread.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="HgtReader.pro" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="FragmentShader.txt" />
+    <Text Include="VertexShader.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
+    <Import Project="$(QtMsBuild)\qt.targets" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

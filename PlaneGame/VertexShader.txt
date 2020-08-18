@@ -1,0 +1,39 @@
+
+#version 400 core
+layout (location = 0) in vec2 position;
+out vec2 texCoordOut;
+
+uniform sampler2D tex_heightmap; 
+uniform sampler2D tex_pixelmap; 
+//uniform sampler2D tex_pixelmap; 
+
+uniform vec2 patchOrigin;
+uniform vec2 levelScaleFactor;
+uniform vec2 worldScaleFactor;
+uniform vec2 worldOffset;
+uniform mat4 modelView;
+
+int earthRadius;
+float CONST_PIDIV180;
+float x;
+float y;
+float z;
+
+void main()
+{
+
+    vec2 levelPosition = position + patchOrigin;
+
+    vec2 worldPosition = (levelPosition * levelScaleFactor * worldScaleFactor) + worldOffset;
+
+    float texelValue = texelFetch(tex_heightmap, ivec2(levelPosition.xy), 0).x;
+
+    earthRadius = 6378100;
+    CONST_PIDIV180 = 0.01745329251;
+    x = (earthRadius + texelValue*10) * sin(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
+    y = (earthRadius + texelValue*10) * sin(worldPosition.y * CONST_PIDIV180);
+    z = (earthRadius + texelValue*10) * cos(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
+
+    texCoordOut = levelPosition;
+    gl_Position = modelView*vec4(x, y, z, 1.0);
+}

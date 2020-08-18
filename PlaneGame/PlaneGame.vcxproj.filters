@@ -1,0 +1,323 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="matlib">
+      <UniqueIdentifier>{5d0366e3-9477-4cb2-acea-686a9f34d128}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{7657bfc9-9c66-46ec-a555-55d0828fbc3b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CRawFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CTerrain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CTerrainData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CTerrainLoaderThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mainwindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CAnimationThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CAvability.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CCachedTerrainData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CCachedTerrainDataGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CCacheManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CCamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CCommons.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CDrawingState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CDrawingStateSnapshot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CEarth.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CEarthPointsList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CHgtFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CObjects.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="COpenGl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="COpenGlThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CPerformance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GClipmapThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GClipmap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Bmp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="glew.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="PlaneGame.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="mainwindow.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
+    <QtMoc Include="CCamera.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="CDrawingState.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="COpenGl.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="COpenGlThread.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="CPerformance.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="CTerrainLoaderThread.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="CAnimationThread.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="PlaneGame.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="mainwindow.ui">
+      <Filter>Source Files</Filter>
+    </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="PlaneGame.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CAvability.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CCachedTerrainData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CCachedTerrainDataGroup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CCacheManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CCommons.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CDrawingStateSnapshot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CEarth.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CEarthPointsList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CHgtFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CObjects.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CRawFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CTerrain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CTerrainData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GLayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GClipmapThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GClipmap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Bmp.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="core.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="glsl.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\vector3envelopecurve.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\vector.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\triangle.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\transform44.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\transform33.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\sphere.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\rectangle.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\quaternion.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\polar.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\plane.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\pknorm.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\ntypes.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\noise.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\nmath.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\matrixdefs.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\matrix.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\line.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\envelopecurve.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\eulerangles.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\euler.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\_matrix33.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\_matrix33_sse.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\_matrix44.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\_matrix44_sse.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\_vector2.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\_vector3.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\_vector3_sse.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\_vector4.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\_vector4_sse.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="mathlib\bbox.h">
+      <Filter>matlib</Filter>
+    </ClInclude>
+    <ClInclude Include="ogl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="HgtReader.pro">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="VertexShader.txt">
+      <Filter>Shaders</Filter>
+    </Text>
+    <Text Include="FragmentShader.txt">
+      <Filter>Shaders</Filter>
+    </Text>
+  </ItemGroup>
+</Project>

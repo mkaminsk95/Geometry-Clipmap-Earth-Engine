@@ -1,0 +1,55 @@
+#version 430 core
+layout (location = 0) in vec2 position;
+
+out vec4 color;
+in vec2 texCoordOut;
+
+uniform int layerIndex;
+uniform sampler2D tex_pixelmap; 
+uniform sampler2D tex_pixelmap1;
+uniform sampler2D tex_pixelmap2;
+uniform sampler2D tex_pixelmap3;
+uniform sampler2D tex_pixelmap4;
+uniform sampler2D tex_pixelmap5;
+uniform sampler2D tex_pixelmap6;
+uniform sampler2D tex_pixelmap7;
+uniform sampler2D tex_pixelmap8;
+uniform sampler2D tex_pixelmap9;
+uniform sampler2D tex_pixelmap10;
+uniform sampler2D tex_pixelmap11;
+uniform sampler2D tex_pixelmap12;
+
+void main()
+{
+	vec3 pixel;
+	
+	
+	if(layerIndex == 0)
+		pixel = texelFetch( tex_pixelmap, ivec2(texCoordOut.xy), 0).rgb;
+	else if(layerIndex == 1) 
+		pixel = texelFetch( tex_pixelmap1, ivec2(texCoordOut.xy), 0).rgb;
+	else if(layerIndex == 2) 
+		pixel = texelFetch( tex_pixelmap2, ivec2(texCoordOut.xy), 0).rgb;
+	else if(layerIndex == 3) 
+		pixel = texelFetch( tex_pixelmap3, ivec2(texCoordOut.xy), 0).rgb;
+	else if(layerIndex == 4) 
+		pixel = texelFetch( tex_pixelmap4, ivec2(texCoordOut.xy), 0).rgb;
+	else if(layerIndex == 5) 
+		pixel = texelFetch( tex_pixelmap5, ivec2(texCoordOut.xy), 0).rgb;
+	else if(layerIndex == 6) 
+		pixel = texelFetch( tex_pixelmap6, ivec2(texCoordOut.xy), 0).rgb;
+	else if(layerIndex == 7) 
+		pixel = texelFetch( tex_pixelmap7, ivec2(texCoordOut.xy), 0).rgb;
+	else if(layerIndex == 8) 
+		pixel = texelFetch( tex_pixelmap8, ivec2(texCoordOut.xy), 0).rgb;
+	else if(layerIndex == 9) 
+		pixel = texelFetch( tex_pixelmap9, ivec2(texCoordOut.xy), 0).rgb;
+	else if(layerIndex == 10) 
+		pixel = texelFetch( tex_pixelmap10, ivec2(texCoordOut.xy), 0).rgb;
+	else if(layerIndex == 11) 
+		pixel = texelFetch( tex_pixelmap11, ivec2(texCoordOut.xy), 0).rgb;
+	else if(layerIndex == 12) 
+		pixel = texelFetch( tex_pixelmap12, ivec2(texCoordOut.xy), 0).rgb;
+
+	color = vec4(pixel, 0);
+}
