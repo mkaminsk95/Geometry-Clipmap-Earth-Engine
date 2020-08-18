@@ -245,7 +245,7 @@ void CRawFile::loadPixelDataToImage(QImage* image, int imageOffsetX, int imageOf
         for (int x = imageOffsetX; x < imageOffsetX+xToRead; x++) {
 
             if (false) {
-
+                int tmp = 1;
             }
 
             filePixel.read((char*)&pixel[0], 1);
