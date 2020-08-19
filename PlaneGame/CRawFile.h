@@ -95,8 +95,8 @@ public:
     void setPixelsPointer(int sx, int sy, CRawPixel *p);
 
     //clipmap functions
-    static void loadPixelDataToImage(QImage* image, int imageOffsetX, int imageOffsetY, QString name, int verticalPosition, int horizontalPosition, int xToRead, int yToRead, int fileResolution, int skip, int position3HorizontalOffset, int position3VerticalOffset);
-	static void loadPixelDataToImage2(QImage* image, int imageOffsetX, int imageOffsetY, QString name, int verticalPosition, int horizontalPosition, int xToRead, int yToRead, int fileResolution, int skip, int positionHorizontalOffset, int positionVerticalOffset, int textureBegginingLon, int textureBegginingLat, int movementCase);
+    static void loadPixelDataToImage(QImage* image, int imageOffsetX, int imageOffsetY, QString name, int xToRead, int yToRead, int fileResolution, int skip, int positionHorizontalOffset, int positionVerticalOffset);
+    static void loadPixelDataToImage2(QImage* image, int imageOffsetX, int imageOffsetY, QString name, int xToRead, int yToRead, int fileResolution, int skip, int filePositionHorizontalOffset, int filePositionVerticalOffset, int textureBegginingLon, int textureBegginingLat, int movementCase);
 	static void sphericalToFilePath(QString* filePath, float lon, float lat, int LOD);
 
 private:

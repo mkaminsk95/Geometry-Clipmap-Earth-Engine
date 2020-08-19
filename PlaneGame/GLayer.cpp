@@ -32,8 +32,8 @@ GLayer::GLayer(GClipmap* clipmapPointer, float inDegree, float inHgtFileDegree, 
     pixelMap =  new QImage(n, n, QImage::Format_RGB888);
 
     QOpenGLTexture* heightTexture;
-    textureBegginingLon = 0;  //x
-    textureBegginingLat = n;  //y
+    textureBegginingX = 0;  //x
+    textureBegginingY = n;  //y
 
     program = clipmapPointer->program;
     vaoA = clipmapPointer->vaoA;
@@ -83,12 +83,13 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
     
 
     if (true) {//(lonDifference != 0 || latDifference != 0) {
-        
+
         //textureBegginingLon += lonDifference;
         //textureBegginingLat += latDifference;
 
         int movementCase;
 
+        {
         if (lonDifference == 0) {
 
             if (latDifference == 0) {       //no movement (should not be in this block
@@ -128,7 +129,7 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
             }
 
         }
-
+        }
 
   
         double lonTopLeftNew =  lonTopLeft + lonDifference * degree; //Left Right
@@ -166,8 +167,8 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
         
         int howManyToReadX;
         int howManyToReadY;
-        int positionHorizontalOffset;
-        int positionVerticalOffset;
+        int filePositionHorizontalOffset;
+        int filePositionVerticalOffset;
 
         QString filePath;
 
@@ -199,43 +200,44 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
                     ///////////vertical
                     if (verticalPosition == 0) {
                         howManyToReadY = (latTopLeftNew - (j - rawFileDegree)) / readResolution + 1;
-                        positionVerticalOffset = (maxTilesLat - latTopLeftNew) / readResolution;
+                        filePositionVerticalOffset = (maxTilesLat - latTopLeftNew) / readResolution;
                     }
                     else if (verticalPosition == 1) {
                         howManyToReadY = rawFileDegree / readResolution;
-                        positionVerticalOffset = 0;
+                        filePositionVerticalOffset = 0;
                     }
                     else if (verticalPosition == 2) {
                         howManyToReadY = (j - latDownLeftNew) / readResolution + 1;
-                        positionVerticalOffset = 0;
+                        filePositionVerticalOffset = 0;
                     }
                     else if (verticalPosition == 3) {
                         howManyToReadY = (latTopLeftNew - latDownLeftNew) / readResolution + 1;
-                        positionVerticalOffset = (maxTilesLat - latTopLeftNew) / readResolution;
+                        filePositionVerticalOffset = (maxTilesLat - latTopLeftNew) / readResolution;
                     }
 
                     ///////////horizontal
                     if (horizontalPosition == 0) {
                         howManyToReadX = ((i + rawFileDegree) - lonTopLeftNew) / readResolution + 1;
-                        positionHorizontalOffset = (lonTopLeftNew - maxTilesLon) / readResolution;
+                        filePositionHorizontalOffset = (lonTopLeftNew - maxTilesLon) / readResolution;
                     }
                     else if (horizontalPosition == 1) {
                         howManyToReadX = rawFileDegree / readResolution;
-                        positionHorizontalOffset = 0;
+                        filePositionHorizontalOffset = 0;
                     }
                     else if (horizontalPosition == 2) {
                         howManyToReadX = (lonTopRightNew - i) / readResolution + 1;
-                        positionHorizontalOffset = 0;
+                        filePositionHorizontalOffset = 0;
                     }
                     else if (horizontalPosition == 3) {
                         howManyToReadX = (lonTopRight - lonTopLeftNew) / readResolution + 1;
-                        positionHorizontalOffset = (lonTopLeftNew - maxTilesLon) / readResolution;
+                        filePositionHorizontalOffset = (lonTopLeftNew - maxTilesLon) / readResolution;
                     }
 
 
-                    CRawFile::loadPixelDataToImage2(pixelMap, imageOffsetX, imageOffsetY, filePath, verticalPosition, horizontalPosition,
-                        howManyToReadX, howManyToReadY, rawFileResolution, rawSkipping, positionHorizontalOffset, positionVerticalOffset,
-                        textureBegginingLon, textureBegginingLat, movementCase);
+
+                    CRawFile::loadPixelDataToImage2(pixelMap, imageOffsetX, imageOffsetY, filePath,
+                        howManyToReadX, howManyToReadY, rawFileResolution, rawSkipping, filePositionHorizontalOffset, filePositionVerticalOffset,
+                        textureBegginingX, textureBegginingY, movementCase);
 
                     
                     
@@ -357,8 +359,10 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
                 }
                 
 
-                CRawFile::loadPixelDataToImage(pixelMap, imageOffsetX, imageOffsetY, filePath, verticalPosition, horizontalPosition,
-                    howManyToReadX, howManyToReadY, rawFileResolution, rawSkipping, positionHorizontalOffset, positionVerticalOffset);
+                CRawFile::loadPixelDataToImage(pixelMap, imageOffsetX, imageOffsetY, 
+                                               filePath, howManyToReadX, howManyToReadY,
+                                               rawFileResolution, rawSkipping, 
+                                               positionHorizontalOffset, positionVerticalOffset);
 
 
 

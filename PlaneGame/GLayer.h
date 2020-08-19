@@ -63,7 +63,7 @@ public:
 
 private: 
 
-	int textureBegginingLat, textureBegginingLon;
+	int textureBegginingY, textureBegginingX;
 	double oldLonTopLeft, oldLatTopLeft;
 
 	float degree;			//How big is angle between two neighbours points in layer

@@ -217,8 +217,7 @@ void CRawFile::fileSetPixelBlock(CRawPixel *buffer, int x, int y, int sx, int sy
 
 
 void CRawFile::loadPixelDataToImage(QImage* image, int imageOffsetX, int imageOffsetY, QString name,
-    int verticalPosition, int horizontalPosition, int xToRead, int yToRead, int fileResolution, int skip,
-    int positionHorizontalOffset, int positionVerticalOffset)
+    int xToRead, int yToRead, int fileResolution, int skip, int positionHorizontalOffset, int positionVerticalOffset)
 {
     fstream filePixel;
     quint8 pixel[3];
@@ -244,8 +243,8 @@ void CRawFile::loadPixelDataToImage(QImage* image, int imageOffsetX, int imageOf
 
         for (int x = imageOffsetX; x < imageOffsetX+xToRead; x++) {
 
-            if (false) {
-                int tmp = 1;
+            if (true) {
+
             }
 
             filePixel.read((char*)&pixel[0], 1);
@@ -267,9 +266,8 @@ void CRawFile::loadPixelDataToImage(QImage* image, int imageOffsetX, int imageOf
 }
 
 void CRawFile::loadPixelDataToImage2(QImage* image, int imageOffsetX, int imageOffsetY, QString name,
-    int verticalPosition, int horizontalPosition, int xToRead, int yToRead, int fileResolution, int skip,
-    int positionHorizontalOffset, int positionVerticalOffset, int textureBegginingLon, int textureBegginingLat,
-    int movementCase)
+    int xToRead, int yToRead, int fileResolution, int skip, int filePositionHorizontalOffset, int filePositionVerticalOffset, 
+    int textureBegginingLon, int textureBegginingLat, int movementCase)
 {
     fstream filePixel;
     quint8 pixel[3];
@@ -278,32 +276,37 @@ void CRawFile::loadPixelDataToImage2(QImage* image, int imageOffsetX, int imageO
     long offset;
     int n = image->height() - 1;
 
-    offset = (positionVerticalOffset * fileResolution + positionHorizontalOffset) * skip * 3;
+    //calculation offset for reading exact bites in raw files
+    offset = (filePositionHorizontalOffset * fileResolution + filePositionVerticalOffset) * skip * 3;
   
    
 
     // load HGT file to memory
     filePixel.open(name.toUtf8(), fstream::in | fstream::binary);
-
     bool opened = filePixel.is_open();
 
-    int z = 0;
+    imageOffsetX;
+    imageOffsetY;
+
+    int z = 0;  //z variable tracks next rows in raw file
     for (int y = imageOffsetY; y < imageOffsetY + yToRead; y++) {
 
         filePixel.seekg(offset + 3 * skip * z * fileResolution);
         long tmp = offset + 3 * skip * z * fileResolution;
 
-        bits = image->scanLine(n - y);
+        bits = image->scanLine(n - y);  //finding right place to write in image 
 
         for (int x = imageOffsetX; x < imageOffsetX + xToRead; x++) {
 
+            //reading next three bites (3bite format - rgb) from raw file 
             filePixel.read((char*)&pixel[0], 1);
             filePixel.read((char*)&pixel[1], 1);
             filePixel.read((char*)&pixel[2], 1);
 
-
+            //jumping to the next bites block depending on the layer resolution
             filePixel.seekg(skip * 3 - 3, filePixel.cur);
 
+            //writing to the image
             *(bits + 3 * x) = pixel[0];
             *(bits + 3 * x + 1) = pixel[1];
             *(bits + 3 * x + 2) = pixel[2];
