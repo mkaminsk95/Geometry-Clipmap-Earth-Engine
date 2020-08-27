@@ -63,8 +63,10 @@ public:
 
 private: 
 
+	bool firstGothrough;
+
 	int textureBegginingY, textureBegginingX;
-	double oldLonTopLeft, oldLatTopLeft;
+	double oldLonTopLeft, oldLatTopLeft, oldLatDownLeft;
 
 	float degree;			//How big is angle between two neighbours points in layer
 	float scale;				

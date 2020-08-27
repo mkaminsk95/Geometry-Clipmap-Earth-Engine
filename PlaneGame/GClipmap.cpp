@@ -62,7 +62,9 @@ void GClipmap::draw() {
         initializeF_Buffer();
 
         //setting drawing mode
+        //drawingMode = GL_TRIANGLE_STRIP;
         drawingMode = GL_TRIANGLE_STRIP;
+
 
         //building layers
        
@@ -150,7 +152,7 @@ void GClipmap::draw() {
     else
         activeLevelOfDetail = 8;
    
-    
+    activeLevelOfDetail = 8;
     for (int x = activeLevelOfDetail; x < 9; x++) 
         layer[x].buildLayer(tlon, tlat);
         
