@@ -96,14 +96,6 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
 
         if (latDifference != 0) {
             
-            CCommons::stringIntoVSConsole("\n New movement \t");
-            //CCommons::doubleIntoVSConsole(tlat);
-            ////CCommons::stringIntoVSConsole("  ");
-            CCommons::doubleIntoVSConsole(latDifference);
-
-            //CCommons::stringIntoVSConsole("\n");
-
-
             int movementCaseX;
             int movementCaseY;
             int orientationPointX;
@@ -136,14 +128,10 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
             if (movementCaseY == 1) {
                 latTopLeftHor = latTopLeft;
                 latDownLeftHor = oldLatTopLeft;
-                CCommons::stringIntoVSConsole("Lat ");
-                CCommons::doubleIntoVSConsole(latTopLeftHor);
             }
             else if (movementCaseY == -1) {
                 latTopLeftHor = oldLatDownLeft;
                 latDownLeftHor = latDownLeft;
-                CCommons::stringIntoVSConsole("Lat ");
-                CCommons::doubleIntoVSConsole(latDownLeftHor);
             }
 
             
@@ -251,27 +239,26 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
                         ///////////vertical
                         if (verticalPosition == 0) {
                             howManyToReadY = (latTopLeftHor - (j - rawFileDegree)) / readResolution + 1;
-                            CCommons::doubleIntoVSConsole(filePositionVerticalOffset);
+                            
                             filePositionVerticalOffset = (maxTilesLat - latTopLeftHor) / readResolution;
                         }
                         else if (verticalPosition == 1) {
                             howManyToReadY = rawFileDegree / readResolution;
-                            CCommons::doubleIntoVSConsole(filePositionVerticalOffset);
+                            
                             filePositionVerticalOffset = 0;
                         }
                         else if (verticalPosition == 2) {
                             howManyToReadY = (j - latDownLeftHor) / readResolution + 1;
-                            CCommons::doubleIntoVSConsole(filePositionVerticalOffset);
+                            
                             filePositionVerticalOffset = 0;
                         }
                         else if (verticalPosition == 3) {
                             howManyToReadY = (latTopLeftHor - latDownLeftHor) / readResolution;
-                            CCommons::doubleIntoVSConsole(filePositionVerticalOffset);
+                            
                             filePositionVerticalOffset = (maxTilesLat - latTopLeftHor) / readResolution;
                         }
 
-                        CCommons::doubleIntoVSConsole(filePositionVerticalOffset);
-                        //CCommons::stringIntoVSConsole("\t");
+                    
 
                         CRawFile::sphericalToFilePath(&filePath, i, j, LOD);
 
@@ -317,8 +304,10 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
             else if (textureBegginingX < 0)
                 textureBegginingX = n + textureBegginingX;*/
 
-            oldLatTopLeft = latTopLeft;
-            oldLatDownLeft = latDownLeft;
+            //oldLatTopLeft = latTopLeft;
+            //oldLatDownLeft = latDownLeft;
+            oldLatTopLeft  = oldLatTopLeft  + latDifference * readResolution;
+            oldLatDownLeft = oldLatDownLeft + latDifference * readResolution;
         }
 
         bool result = pixelMap->save("mapka.png", nullptr, -1);
