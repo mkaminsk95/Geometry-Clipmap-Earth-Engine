@@ -84,9 +84,177 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
 
     if (lonDifference != 0 || latDifference != 0) {
 
-        if (latDifference != 0)   
+        if (latDifference != 0) {
+            
             verticalRawTextureReading(lonDifference, latDifference, lonTopLeft, lonTopRight, latTopLeft, latDownLeft);
-          
+            //int movementCaseX;
+            //int movementCaseY;
+            //int orientationPointX;
+            //int orientationPointY;
+
+            //if (lonDifference > 0)
+            //    movementCaseX = 1;
+            //else if (lonDifference == 0)
+            //    movementCaseX = 0;
+            //else if (lonDifference < 0)
+            //    movementCaseX = -1;
+
+            //if (latDifference > 0)
+            //    movementCaseY = 1;
+            //else if (latDifference == 0)
+            //    movementCaseY = 0;
+            //else if (latDifference < 0)
+            //    movementCaseY = -1;
+
+            //double lonTopLeftHor = lonTopLeft + lonDifference * readDegree;
+            //double lonTopRightHor = lonTopRight + lonDifference * readDegree;
+
+
+            ////finding latitude of corners
+            //double latTopLeftHor;
+            //double latDownLeftHor;
+            //if (movementCaseY == 1) {
+            //    latTopLeftHor = latTopLeft;
+            //    latDownLeftHor = oldLatTopLeft;
+            //}
+            //else if (movementCaseY == -1) {
+            //    latTopLeftHor = oldLatDownLeft;
+            //    latDownLeftHor = latDownLeft;
+            //}
+
+            //
+
+            ////finding longitude of corners         !!!!!!!!DO OGARNIECIA!!!!!!!
+            ////if (movementCaseY == 1) {
+            ///*     latTopLeftHor = latTopLeft + latDifference * degree;
+            //    latDownLeftHor = latTopLeft;
+            //}
+            //else if (movementCaseY == -1) {
+            //    latTopLeftHor = latDownLeft;
+            //    latDownLeftHor = latDownLeft + latDifference * degree;
+            //}*/
+
+
+            ////Finding top left tile 
+            //if (lonTopLeftHor < 0) {
+            //    if (fmod(lonTopLeftHor, RAW_FILE_DEGREE) != 0)
+            //        maxTilesLon = lonTopLeftHor - fmod(lonTopLeftHor, RAW_FILE_DEGREE) - RAW_FILE_DEGREE;
+            //    else
+            //        maxTilesLon = lonTopLeftHor;
+            //}
+            //else {
+            //    maxTilesLon = lonTopLeftHor - fmod(lonTopLeftHor, RAW_FILE_DEGREE);
+            //}
+
+            //if (latTopLeftHor < 0) {
+            //    maxTilesLat = latTopLeftHor - fmod(latTopLeftHor, RAW_FILE_DEGREE);
+            //}
+            //else {
+            //    if (fmod(latTopLeftHor * 2, RAW_FILE_DEGREE) != 0)
+            //        maxTilesLat = latTopLeftHor - fmod(latTopLeftHor, RAW_FILE_DEGREE) + RAW_FILE_DEGREE;
+            //    else
+            //        maxTilesLat = latTopLeftHor;
+            //}
+
+            //int horizontalPosition; //0 means top wall, 1 middle, 2 bottom wall
+            //int verticalPosition;   //0 means left wall, 1 middle, 2 right wall
+            //int filePositionHorizontalOffset;
+            //int filePositionVerticalOffset;
+
+            //int imageOffsetX = 0;
+            //int imageOffsetY = 0;
+            //int howManyToReadX;
+            //int howManyToReadY;
+
+            //if (movementCaseY == 1) {
+            //    textureBegginingY = textureBegginingY + latDifference;
+
+            //    if (textureBegginingY > n - 1)
+            //        textureBegginingY = fmod(textureBegginingY, n - 1);               
+            //}
+
+            //QString filePath;
+
+            //if ((maxTilesLon + RAW_FILE_DEGREE) - lonTopLeftHor > lonTopRightHor - lonTopLeftHor)
+            //    horizontalPosition = 3; //left and right wall at once   
+            //else
+            //    horizontalPosition = 0; //left wall
+            //
+
+            //////////////////////////X///////////////////////////
+            //for (float i = maxTilesLon; i < lonTopRightHor; i += RAW_FILE_DEGREE) {
+
+            //    
+
+            //    int readingCheck = abs(latDifference);
+
+            //    if (latTopLeftHor - (maxTilesLat - RAW_FILE_DEGREE) > latTopLeftHor - latDownLeftHor)
+            //        verticalPosition = 3; //left and right wall at once   
+            //    else
+            //        verticalPosition = 0; //top wall
+
+            //    imageOffsetY = 0;
+
+
+            //    ///////////horizontal
+            //    checkHowManyPixelsToReadFromRaw_X(&howManyToReadX, horizontalPosition, lonTopLeftHor, lonTopRightHor, i);
+            //    checkRawFileOffset_X(&filePositionHorizontalOffset, horizontalPosition, lonTopLeftHor, maxTilesLon);
+
+
+            //    //////////////////////////Y///////////////////////////
+            //    for (float j = maxTilesLat; j > latDownLeftHor; j -= RAW_FILE_DEGREE) {
+
+            //       
+            //        checkHowManyPixelsToReadFromRaw_Y(&howManyToReadY, verticalPosition, latTopLeftHor, latDownLeftHor, j);
+            //        checkRawFileOffset_Y(&filePositionVerticalOffset, verticalPosition, latTopLeftHor, maxTilesLat);
+
+
+            //        if (readingCheck - howManyToReadY < 0) 
+            //            howManyToReadY = readingCheck;
+            //   
+
+            //        readingCheck -= howManyToReadY;
+
+            //        if (howManyToReadY > 0) {
+
+            //            CRawFile::sphericalToFilePath(&filePath, i, j, LOD);
+
+            //            CRawFile::loadPixelDataToImage2(pixelMap, imageOffsetX, imageOffsetY,
+            //                filePath, howManyToReadX, howManyToReadY, rawFileResolution, rawSkipping,
+            //                filePositionHorizontalOffset, filePositionVerticalOffset,
+            //                textureBegginingX, n - 1 - textureBegginingY);
+            //        }
+
+
+            //        if (j - 2 * RAW_FILE_DEGREE > latDownLeft)
+            //            verticalPosition = 1;   //middle 
+            //        else
+            //            verticalPosition = 2;   //down wall
+
+            //        imageOffsetY -= howManyToReadY;
+
+            //        
+            //    }
+
+            //    if (i + 2 * RAW_FILE_DEGREE < lonTopRight)
+            //        horizontalPosition = 1;   //middle 
+            //    else
+            //        horizontalPosition = 2;   //right wall
+
+            //    imageOffsetX += howManyToReadX;
+
+            //}
+
+            //if (movementCaseY == -1) {
+            //    textureBegginingY = textureBegginingY + latDifference;
+
+            //    if (textureBegginingY < 1)
+            //        textureBegginingY = n - 1 + textureBegginingY;
+            //}
+            //
+            //oldLatTopLeft  = oldLatTopLeft  + latDifference * readDegree;
+            //oldLatDownLeft = oldLatDownLeft + latDifference * readDegree;
+        }
 
         bool result = pixelMap->save("mapka.png", nullptr, -1);
 

@@ -24,18 +24,8 @@ public:
 	GLayer(GClipmap* clipmapPointer, float degree, float inHgtFiledegree, float inScale, int inLOD, int inLayerIndex, 
 			int inHgtSkipping, int inFileResolution, int inRawSkipping,int inRawFileResolution, int n);
 
-	void cumputeOffsets();
-
-	void drawLayer();
-	void drawA(float originX, float originY);
-	void drawB(float originX, float originY);
-	void drawC(float originX, float originY);
-	void drawD(float originX, float originY);
-	void drawE(float originX, float originY);
-	void drawF(float originX, float originY);
-
 	void buildLayer(double tlon, double tlat);
-
+	
 	void setFillerPosition(int inFillerPositionHorizontal, int inFillerPositionVertical) {
 		
 		fillerPositionHorizontal = inFillerPositionHorizontal;
@@ -68,7 +58,7 @@ private:
 	int textureBegginingY, textureBegginingX;
 	double oldLonTopLeft, oldLatTopLeft, oldLatDownLeft;
 
-	float degree;			//How big is angle between two neighbours points in layer
+	float readDegree;	//How big is angle between two neighbours points in layer
 	float scale;				
 	float HgtFiledegree;    //How big is the angle that file covers
 
@@ -118,6 +108,21 @@ private:
 	void mapPixelDataIntoTexture(double tlon, double tlat);
 	void mapHeightDataIntoTexture(double tlon, double tlat);
 	
+	void verticalRawTextureReading(int lonDifference, int latDifference, double lonTopLeft, double lonTopRight, double latTopLeft, double latDownLeft);
+	void checkHowManyPixelsToReadFromRaw_X(int* howManyToReadX, int horizontalPosition, double lonTopLeftHor, double lonTopRightHor, float i);
+	void checkHowManyPixelsToReadFromRaw_Y(int* howManyToReadY, int verticalPosition, double latTopLeftHor, double latDownLeftHor, float j);
+
+	void checkRawFileOffset_X(int* filePositionHorizontalOffset, int horizontalPosition, double latTopLeftHor, float maxTilesLat);
+	void checkRawFileOffset_Y(int* filePositionVerticalOffset, int verticalPosition, double latTopLeftHor, float maxTilesLat);
+
+	void cumputeOffsets();
+	void drawA(float originX, float originY);
+	void drawB(float originX, float originY);
+	void drawC(float originX, float originY);
+	void drawD(float originX, float originY);
+	void drawE(float originX, float originY);
+	void drawF(float originX, float originY);
+
 };
 
 #endif
