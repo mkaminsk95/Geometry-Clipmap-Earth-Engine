@@ -4,7 +4,7 @@
 #include "CHgtFile.h"
 #include "GLayer.h"
 
-int n = 127;          //7, 15, 31, 63
+int n = 15;          //7, 15, 31, 63, 127, 255, 511, 1023
 int m = (n + 1) / 4; //2,  4,  8, 16
 
 GClipmap::GClipmap(COpenGl* openGlPointer) : openGl(openGlPointer)
@@ -128,8 +128,8 @@ void GClipmap::draw() {
     layer[4].setPosition(0,0);
     layer[5].setPosition(0,0);
     layer[6].setPosition(1,1);
-    layer[7].setPosition(0,0);
-    layer[8].setPosition(0,0);
+    layer[7].setPosition(1,1);
+    layer[8].setPosition(0,1);
 
     double treshold = 3000;
     
@@ -152,7 +152,7 @@ void GClipmap::draw() {
     else
         activeLevelOfDetail = 8;
    
-    activeLevelOfDetail = 8;
+    activeLevelOfDetail = 6;
     for (int x = activeLevelOfDetail; x < 9; x++) 
         layer[x].buildLayer(tlon, tlat);
         

@@ -2,10 +2,10 @@
 #version 400 core
 layout (location = 0) in vec2 position;
 out vec2 texCoordOut;
+out vec2 levelPositionOut;
 
 uniform sampler2D tex_heightmap; 
 uniform sampler2D tex_pixelmap; 
-//uniform sampler2D tex_pixelmap; 
 
 uniform vec2 patchOrigin;
 uniform vec2 levelScaleFactor;
@@ -38,9 +38,10 @@ void main()
 
 
     float moduloX = mod(levelPosition.x + texOffset.x, n);
-    float moduloY = mod(levelPosition.y + texOffset.y, n);
+    float moduloY = mod(levelPosition.y + texOffset.y, n - 1);
 
     texCoordOut = vec2(moduloX, moduloY);
-    //texCoordOut = levelPosition;
-    gl_Position = modelView*vec4(x, y, z, 1.0);
+    levelPositionOut = levelPosition;
+
+    gl_Position = modelView*vec4(x, y, z, 1.0);    
 }

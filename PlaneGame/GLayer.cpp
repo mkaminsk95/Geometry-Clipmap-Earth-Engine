@@ -33,7 +33,7 @@ GLayer::GLayer(GClipmap* clipmapPointer, float inDegree, float inHgtFileDegree, 
 
     QOpenGLTexture* heightTexture;
     textureBegginingX = 0;  //x
-    textureBegginingY = 0;  //y
+    textureBegginingY = n - 1;  //y
 
     program = clipmapPointer->program;
     vaoA = clipmapPointer->vaoA;
@@ -179,10 +179,10 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
             int howManyToReadY;
 
             if (movementCaseY == 1) {
-                textureBegginingY -= latDifference;
+                textureBegginingY = textureBegginingY + latDifference;
 
-                if (textureBegginingY < 0)
-                    textureBegginingY = n - 1 + textureBegginingX;
+                if (textureBegginingY > n - 1)
+                    textureBegginingY = fmod(textureBegginingY, n - 1);               
             }
 
 
@@ -203,81 +203,85 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
 
                 int readingCheck = abs(latDifference);
 
-                    if (latTopLeftHor - (maxTilesLat - rawFileDegree) > latTopLeftHor - latDownLeftHor)
-                        verticalPosition = 3; //left and right wall at once   
+                if (latTopLeftHor - (maxTilesLat - rawFileDegree) > latTopLeftHor - latDownLeftHor)
+                    verticalPosition = 3; //left and right wall at once   
+                else
+                    verticalPosition = 0; //top wall
+
+                imageOffsetY = 0;
+
+
+                ///////////horizontal
+                if (horizontalPosition == 0) {
+                    howManyToReadX = ((i + rawFileDegree) - lonTopLeftHor) / readResolution + 1;
+                    filePositionHorizontalOffset = (lonTopLeftHor - maxTilesLon) / readResolution;
+                }
+                else if (horizontalPosition == 1) {
+                    howManyToReadX = rawFileDegree / readResolution;
+                    filePositionHorizontalOffset = 0;
+                }
+                else if (horizontalPosition == 2) {
+                    howManyToReadX = (lonTopRightHor - i) / readResolution + 1;
+                    filePositionHorizontalOffset = 0;
+                }
+                else if (horizontalPosition == 3) {
+                    howManyToReadX = (lonTopRightHor - lonTopLeftHor) / readResolution + 1;
+                    filePositionHorizontalOffset = (lonTopLeftHor - maxTilesLon) / readResolution;
+                }
+
+
+                //////////////////////////Y///////////////////////////
+                for (float j = maxTilesLat; j > latDownLeftHor; j -= rawFileDegree) {
+
+                    
+
+                    ///////////vertical
+                    if (verticalPosition == 0) {
+                        double tmp = (latTopLeftHor - (j - rawFileDegree));
+                        howManyToReadY = (latTopLeftHor - (j - rawFileDegree)) / readResolution + 1;
+                        filePositionVerticalOffset = (maxTilesLat - latTopLeftHor) / readResolution;
+                    }
+                    else if (verticalPosition == 1) {
+                        howManyToReadY = rawFileDegree / readResolution;
+                        filePositionVerticalOffset = 0;
+                    }
+                    else if (verticalPosition == 2) {
+                        double tmp = (j - latDownLeftHor);
+                         howManyToReadY = (j - latDownLeftHor) / readResolution + 1;
+                        filePositionVerticalOffset = 0;
+                    }
+                    else if (verticalPosition == 3) {
+                        howManyToReadY = (latTopLeftHor - latDownLeftHor) / readResolution;
+                        filePositionVerticalOffset = (maxTilesLat - latTopLeftHor) / readResolution;
+                    }
+
+
+                    if (readingCheck - howManyToReadY < 0) {
+                        howManyToReadY = readingCheck;
+                    }
+
+                    readingCheck -= howManyToReadY;
+
+                    if (howManyToReadY > 0) {
+
+                    CRawFile::sphericalToFilePath(&filePath, i, j, LOD);
+
+                    CRawFile::loadPixelDataToImage2(pixelMap, imageOffsetX, imageOffsetY,
+                        filePath, howManyToReadX, howManyToReadY, rawFileResolution, rawSkipping,
+                        filePositionHorizontalOffset, filePositionVerticalOffset,
+                        textureBegginingX, n - 1 - textureBegginingY);
+                    }
+
+
+                    if (j - 2 * rawFileDegree > latDownLeft)
+                        verticalPosition = 1;   //middle 
                     else
-                        verticalPosition = 0; //top wall
+                        verticalPosition = 2;   //down wall
 
-                    imageOffsetY = 0;
-
-                    
-
-                    ///////////horizontal
-                    if (horizontalPosition == 0) {
-                        howManyToReadX = ((i + rawFileDegree) - lonTopLeftHor) / readResolution + 1;
-                        filePositionHorizontalOffset = (lonTopLeftHor - maxTilesLon) / readResolution;
-                    }
-                    else if (horizontalPosition == 1) {
-                        howManyToReadX = rawFileDegree / readResolution;
-                        filePositionHorizontalOffset = 0;
-                    }
-                    else if (horizontalPosition == 2) {
-                        howManyToReadX = (lonTopRightHor - i) / readResolution + 1;
-                        filePositionHorizontalOffset = 0;
-                    }
-                    else if (horizontalPosition == 3) {
-                        howManyToReadX = (lonTopRightHor - lonTopLeftHor) / readResolution + 1;
-                        filePositionHorizontalOffset = (lonTopLeftHor - maxTilesLon) / readResolution;
-                    }
-
-
-                    //////////////////////////Y///////////////////////////
-                    for (float j = maxTilesLat; j > latDownLeftHor; j -= rawFileDegree) {
-
-                        if (readingCheck > 0) {
-
-                        ///////////vertical
-                        if (verticalPosition == 0) {
-                            howManyToReadY = (latTopLeftHor - (j - rawFileDegree)) / readResolution + 1;
-                            
-                            filePositionVerticalOffset = (maxTilesLat - latTopLeftHor) / readResolution;
-                        }
-                        else if (verticalPosition == 1) {
-                            howManyToReadY = rawFileDegree / readResolution;
-                            
-                            filePositionVerticalOffset = 0;
-                        }
-                        else if (verticalPosition == 2) {
-                            howManyToReadY = (j - latDownLeftHor) / readResolution + 1;
-                            
-                            filePositionVerticalOffset = 0;
-                        }
-                        else if (verticalPosition == 3) {
-                            howManyToReadY = (latTopLeftHor - latDownLeftHor) / readResolution;
-                            
-                            filePositionVerticalOffset = (maxTilesLat - latTopLeftHor) / readResolution;
-                        }
+                    imageOffsetY -= howManyToReadY;
 
                     
-
-                        CRawFile::sphericalToFilePath(&filePath, i, j, LOD);
-
-                        CRawFile::loadPixelDataToImage2(pixelMap, imageOffsetX, imageOffsetY,
-                            filePath, howManyToReadX, howManyToReadY, rawFileResolution, rawSkipping,
-                            filePositionHorizontalOffset, filePositionVerticalOffset,
-                            textureBegginingX, textureBegginingY);
-
-                        readingCheck -= howManyToReadY;
-
-                        if (j - 2 * rawFileDegree > latDownLeft)
-                            verticalPosition = 1;   //middle 
-                        else
-                            verticalPosition = 2;   //down wall
-
-                        imageOffsetY -= howManyToReadY;
-
-                        }
-                    }
+                }
 
                 if (i + 2 * rawFileDegree < lonTopRight)
                     horizontalPosition = 1;   //middle 
@@ -290,10 +294,10 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
 
             //textureBegginingX += lonDifference;
             if (movementCaseY == -1) {
-                textureBegginingY -= latDifference;
+                textureBegginingY = textureBegginingY + latDifference;
 
-                if (textureBegginingY > n - 2)
-                    textureBegginingY = fmod(textureBegginingY, n - 1);
+                if (textureBegginingY < 1)
+                    textureBegginingY = n - 1 + textureBegginingY;
             }
 
             
@@ -312,10 +316,7 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
 
         bool result = pixelMap->save("mapka.png", nullptr, -1);
 
-        pixelMap->setPixelColor(0, 0, QColor(0, 255, 14));
         pixelTexture = new QOpenGLTexture(*pixelMap, QOpenGLTexture::DontGenerateMipMaps);
-        pixelTexture->setMinMagFilters(QOpenGLTexture::Linear, QOpenGLTexture::Linear);
-        pixelTexture->create();
         pixelTexture->bind(layerIndex, QOpenGLTexture::DontResetTextureUnit);
 
 
@@ -323,6 +324,7 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
 
         oldLonTopLeft = lonTopLeft;
         
+        CCommons::doubleIntoVSConsole(textureBegginingY);
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -646,8 +648,8 @@ void GLayer::buildLayer(double tlon, double tlat) {
 
     mapPixelDataIntoTexture(tlon, tlat);
 
-    program->setUniformValue("n", n-1);
-    program->setUniformValue("texOffset", QVector2D(textureBegginingX, n - textureBegginingY));
+    program->setUniformValue("n", n);
+    program->setUniformValue("texOffset", QVector2D(textureBegginingX, textureBegginingY));
 
     int m = (n + 1) / 4 - 1;
 
@@ -670,13 +672,13 @@ void GLayer::buildLayer(double tlon, double tlat) {
 
     if (clipmap->activeLevelOfDetail == layerIndex) {
         drawA(m,        m);
-        drawC(2*m,      m);
+        drawB(2*m,      m);
         drawA(2*m+2,    m);
-        drawB(2*m+2,    2*m);
+        drawC(2*m+2,    2*m);
         drawA(2*m+2,    2*m+2);
-        drawC(2*m,      2*m+2);
+        drawB(2*m,      2*m+2);
         drawA(m,        2*m+2);
-        drawB(m,        2*m);
+        drawC(m,        2*m);
         drawF(2*m,      2*m);
     }
     else {
