@@ -60,216 +60,86 @@ GLayer::GLayer(GClipmap* clipmapPointer, float inDegree, float inHgtFileDegree, 
 void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
     
     double latDifference, lonDifference;
+    double lonLeft, lonRight;
+    double latTop, latDown;
 
-    double tlonConst;
-    if (firstGothrough == true)
-        tlonConst = tlat;
-
-    double lonTopLeft = tlon - horizontalOffset * readDegree; //Left Right
-    double lonTopRight = lonTopLeft + (n - 1) * readDegree;
-
-    double latTopLeft = tlat + verticalOffset * readDegree;   //Top Down
-    double latDownLeft = latTopLeft - (n - 1) * readDegree;
 
     if (firstGothrough == true) {
-        oldLonTopLeft = lonTopLeft;
-        oldLonTopRight = lonTopRight;
+        computeNewLonAndLat(tlon, tlat, &lonLeft, &lonRight, &latTop, &latDown);
+        
+        oldLon = tlon;
+        oldLonLeft = lonLeft;
+        oldLonRight = lonRight;
 
-        oldLatTopLeft = latTopLeft;
-        oldLatDownLeft = latDownLeft;
+        oldLat = tlat;
+        oldLatTop = latTop;
+        oldLatDown = latDown;
     }
 
-    
-    lonDifference = (-1)*(oldLonTopLeft - lonTopLeft - fmod(oldLonTopLeft - lonTopLeft, readDegree))/readDegree;
-    latDifference = (-1)*(oldLatTopLeft - latTopLeft - fmod(oldLatTopLeft - latTopLeft, readDegree))/readDegree;
-   
+    //checking if there was a movement
+    lonDifference = (-1) * (oldLon - tlon - fmod(oldLon - tlon, readDegree)) / readDegree;
+    latDifference = (-1) * (oldLat - tlat - fmod(oldLat - tlat, readDegree)) / readDegree;
 
-
-    CCommons::doubleIntoVSConsole(lonTopLeft);
-    CCommons::doubleIntoVSConsole(latTopLeft);
-    CCommons::stringIntoVSConsole(" Old: ");
-    CCommons::doubleIntoVSConsole(oldLonTopLeft);
-    CCommons::doubleIntoVSConsole(oldLatTopLeft);
-    CCommons::stringIntoVSConsole("\n");
 
     if (firstGothrough == true || (abs(latDifference) > n - 1 || abs(latDifference) > n - 1)) {
 
-        float maxTilesLon, maxTilesLat;
-        //Finding top left tile 
-        if (lonTopLeft < 0) {
-            if (fmod(lonTopLeft, RAW_FILE_DEGREE) != 0)
-                maxTilesLon = lonTopLeft - fmod(lonTopLeft, RAW_FILE_DEGREE) - RAW_FILE_DEGREE;
-            else
-                maxTilesLon = lonTopLeft;
-        }
-        else {
-            maxTilesLon = lonTopLeft - fmod(lonTopLeft, RAW_FILE_DEGREE);
-        }
+        fullRawTextureReading(lonLeft, lonRight, latTop, latDown);
 
-        if (latTopLeft < 0) {
-            maxTilesLat = latTopLeft - fmod(latTopLeft, RAW_FILE_DEGREE);
-        }
-        else {
-            if (fmod(latTopLeft * 2, RAW_FILE_DEGREE) != 0)
-                maxTilesLat = latTopLeft - fmod(latTopLeft, RAW_FILE_DEGREE) + RAW_FILE_DEGREE;
-            else
-                maxTilesLat = latTopLeft;
-        }
-
-        int imageOffsetX = 0;
-        int imageOffsetY = 0;
-        int horizontalPosition; //0 means top wall, 1 middle, 2 bottom wall
-        int verticalPosition;   //0 means left wall, 1 middle, 2 right wall
-
-        int howManyToReadX;
-        int howManyToReadY;
-        int filePositionHorizontalOffset;
-        int filePositionVerticalOffset;
-
-        QString filePath;
-
-        if ((maxTilesLon + RAW_FILE_DEGREE) - lonTopLeft > lonTopRight - lonTopLeft) {
-            horizontalPosition = 3; //left and right wall at once 
-        }
-        else {
-            horizontalPosition = 0; //left wall
-        }
-
-        for (float i = maxTilesLon; i < lonTopRight; i += RAW_FILE_DEGREE) {
-
-            if (latTopLeft - (maxTilesLat - RAW_FILE_DEGREE) > latTopLeft - latDownLeft) {
-                verticalPosition = 3; //left and right wall at once 
-            }
-            else {
-                verticalPosition = 0; //top wall
-            }
-
-            imageOffsetY = 0;
-
-            ///////////horizontal
-            if (horizontalPosition == 0) {
-                howManyToReadX = ((i + RAW_FILE_DEGREE) - lonTopLeft) / readDegree + 1;
-                filePositionHorizontalOffset = (lonTopLeft - maxTilesLon) / readDegree;
-            }
-            else if (horizontalPosition == 1) {
-                howManyToReadX = RAW_FILE_DEGREE / readDegree;
-                filePositionHorizontalOffset = 0;
-            }
-            else if (horizontalPosition == 2) {
-                howManyToReadX = (lonTopRight - i) / readDegree + 1;
-                filePositionHorizontalOffset = 0;
-            }
-            else if (horizontalPosition == 3) {
-                howManyToReadX = (lonTopRight - lonTopLeft) / readDegree + 1;
-                filePositionHorizontalOffset = (lonTopLeft - maxTilesLon) / readDegree;
-            }
-
-
-            for (float j = maxTilesLat; j > latDownLeft; j -= RAW_FILE_DEGREE) {
-
-                CRawFile::sphericalToFilePath(&filePath, i, j, LOD);
-
-
-                checkHowManyPixelsToReadFromRaw_Y(&howManyToReadY, verticalPosition, latTopLeft, latDownLeft, j);
-                checkRawFileOffset_Y(&filePositionVerticalOffset, verticalPosition, latTopLeft, maxTilesLat);
-
-
-                CRawFile::loadPixelDataToImage(pixelMap, imageOffsetX, imageOffsetY,
-                    filePath, howManyToReadX, howManyToReadY,
-                    rawFileResolution, rawSkipping,
-                    filePositionHorizontalOffset, filePositionVerticalOffset);
-
-                if (j - 2 * RAW_FILE_DEGREE > latDownLeft)
-                    verticalPosition = 1;   //middle 
-                else
-                    verticalPosition = 2;   //down wall
-
-                imageOffsetY += howManyToReadY;
-            }
-
-            if (i + 2 * RAW_FILE_DEGREE < lonTopRight)
-                horizontalPosition = 1;   //middle 
-            else
-                horizontalPosition = 2;   //right wall
-
-            imageOffsetX += howManyToReadX;
-        }
-
-        //bool result = pixelMap->save("mapka.png", nullptr, -1);
-
-
-        pixelMap->setPixelColor(0, 0, QColor(0, 255, 14));
-        pixelTexture = new QOpenGLTexture(*pixelMap, QOpenGLTexture::DontGenerateMipMaps);
-        pixelTexture->setMinMagFilters(QOpenGLTexture::Linear, QOpenGLTexture::Linear);
-        pixelTexture->create();
-        pixelTexture->bind(layerIndex, QOpenGLTexture::DontResetTextureUnit);
-
-        program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);
-
-        oldLonTopLeft =  oldLonTopLeft  + lonDifference * readDegree;
-        oldLonTopRight = oldLonTopRight + lonDifference * readDegree;
-        oldLatTopLeft =  oldLatTopLeft  + latDifference * readDegree;
-        oldLatDownLeft = oldLatDownLeft + latDifference * readDegree;
+        //updating old lon and lat
+        oldLat = oldLat + latDifference * readDegree;
+        oldLon = oldLon + lonDifference * readDegree;
+        oldLonLeft =  oldLonLeft  + lonDifference * readDegree;
+        oldLonRight = oldLonRight + lonDifference * readDegree;
+        oldLatTop =  oldLatTop  + latDifference * readDegree;
+        oldLatDown = oldLatDown + latDifference * readDegree;
         
+        //reseting texture beggining coordinate
         textureBegginingX = 0;  //x
         textureBegginingY = n - 1;  //y
-        
-        
+            
         firstGothrough = false;
     }
     else if (lonDifference != 0 || latDifference != 0) {
 
-        
         point texBegHor, texBegVer;
-
+        
+        //computing coordinates of corners of new moved clipmap 
+        computeNewLonAndLat(tlon, tlat, &lonLeft, &lonRight, &latTop, &latDown);
+        //checking texture begginings for horizontal and vertical reading based on movement case 
         computeTextureOffsets(latDifference, lonDifference, &texBegHor, &texBegVer);
-        pixelMap->save("mapka.png", nullptr, -1);
+        
+        //pixelMap->save("mapka.png", nullptr, -1);
+
         if (latDifference != 0)   
-            horizontalBlockRawTextureReading(lonDifference, latDifference, lonTopLeft, lonTopRight, latTopLeft, latDownLeft, texBegHor);
+            horizontalBlockRawTextureReading(lonDifference, latDifference, lonLeft, lonRight, latTop, latDown, texBegHor);
           
-        pixelMap->save("poHor.png", nullptr, -1);
+        //pixelMap->save("poHor.png", nullptr, -1);
 
         if (lonDifference != 0)
-            verticalBlockRawTextureReading(lonDifference, latDifference, lonTopLeft, lonTopRight, latTopLeft, latDownLeft, texBegVer);
+            verticalBlockRawTextureReading(lonDifference, latDifference, lonLeft, lonRight, latTop, latDown, texBegVer);
 
-        pixelMap->save("poVer.png", nullptr, -1);
+        //pixelMap->save("poVer.png", nullptr, -1);
 
         pixelTexture = new QOpenGLTexture(*pixelMap, QOpenGLTexture::DontGenerateMipMaps);
         pixelTexture->bind(layerIndex, QOpenGLTexture::DontResetTextureUnit);
         program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);
 
-        if (latDifference > 0) {
-            textureBegginingY = textureBegginingY + latDifference;
+        if (latDifference > 0) 
+            textureBegginingY = (int)(textureBegginingY + latDifference) % (n - 1);
+        if (latDifference < 0) 
+            textureBegginingY = (int)(textureBegginingY + latDifference + n - 1) % (n - 1);
+        if (lonDifference > 0) 
+            textureBegginingX = (int)(textureBegginingX + lonDifference) % (n - 1);
+        if (lonDifference < 0) 
+            textureBegginingX = (int)(textureBegginingX + lonDifference + n - 1) % (n - 1);
 
-            if (textureBegginingY > n - 2)
-                textureBegginingY = fmod(textureBegginingY, n - 1);
-        }
-        if (latDifference < 0) {
-            textureBegginingY = textureBegginingY + latDifference;
-
-            if (textureBegginingY < 0)
-                textureBegginingY = n - 1 + textureBegginingY;
-        }
-        if (lonDifference > 0) {
-            textureBegginingX = textureBegginingX + lonDifference;
-
-            if (textureBegginingX > n - 2)
-                textureBegginingX = fmod(textureBegginingX, n - 1);
-        }
-        if (lonDifference < 0) {
-            textureBegginingX = textureBegginingX + lonDifference;
-
-            if (textureBegginingX < 0)
-                textureBegginingX = n - 1 + textureBegginingX;
-        }
-        oldLatTopLeft = oldLatTopLeft + latDifference * readDegree;
-        oldLatDownLeft = oldLatDownLeft + latDifference * readDegree;
-        oldLonTopLeft = oldLonTopLeft + lonDifference * readDegree;
-        oldLonTopRight = oldLonTopRight + lonDifference * readDegree;
+        oldLat = oldLat + latDifference * readDegree;
+        oldLon = oldLon + lonDifference * readDegree;
+        oldLatTop  = oldLatTop  + latDifference * readDegree;
+        oldLatDown = oldLatDown + latDifference * readDegree;
+        oldLonLeft  = oldLonLeft  + lonDifference * readDegree;
+        oldLonRight = oldLonRight + lonDifference * readDegree;
     }
-
-    ////////////////////////////////////////////////////////////////////////////
-
 
 }
 
@@ -278,33 +148,33 @@ void GLayer::mapHeightDataIntoTexture(double tlon, double tlat) {
 
     //int n = 15;  //should be (2^n)-1 e.g. 3,7,15,31
  
-    double lonTopLeft = tlon - horizontalOffset * readDegree;    //Left Right
-    double lonTopRight = lonTopLeft + (n - 1) * readDegree;
+    double lonLeft = tlon - horizontalOffset * readDegree;    //Left Right
+    double lonRight = lonLeft + (n - 1) * readDegree;
 
-    double latTopLeft = tlat + verticalOffset * readDegree;   //Top Down
-    double latDownLeft = latTopLeft - (n - 1) * readDegree;
+    double latTop = tlat + verticalOffset * readDegree;   //Top Down
+    double latDown = latTop - (n - 1) * readDegree;
 
     float maxTilesLon, maxTilesLat;
 
     //Finding top left tile 
-    if (lonTopLeft < 0) {
-        if (fmod(lonTopLeft, HgtFiledegree) != 0)
-            maxTilesLon = lonTopLeft - fmod(lonTopLeft, HgtFiledegree) - HgtFiledegree;
+    if (lonLeft < 0) {
+        if (fmod(lonLeft, HgtFiledegree) != 0)
+            maxTilesLon = lonLeft - fmod(lonLeft, HgtFiledegree) - HgtFiledegree;
         else
-            maxTilesLon = lonTopLeft;
+            maxTilesLon = lonLeft;
     }
     else {
-        maxTilesLon = lonTopLeft - fmod(lonTopLeft, HgtFiledegree);
+        maxTilesLon = lonLeft - fmod(lonLeft, HgtFiledegree);
     }
 
-    if (latTopLeft < 0) {
-        maxTilesLat = latTopLeft - fmod(latTopLeft, HgtFiledegree) - 30;
+    if (latTop < 0) {
+        maxTilesLat = latTop - fmod(latTop, HgtFiledegree) - 30;
     }
     else {
-        if (fmod(latTopLeft * 2, HgtFiledegree) != 0)
-            maxTilesLat = latTopLeft - fmod(latTopLeft, HgtFiledegree) + HgtFiledegree;
+        if (fmod(latTop * 2, HgtFiledegree) != 0)
+            maxTilesLat = latTop - fmod(latTop, HgtFiledegree) + HgtFiledegree;
         else
-            maxTilesLat = latTopLeft;
+            maxTilesLat = latTop;
     }
 
 
@@ -321,16 +191,16 @@ void GLayer::mapHeightDataIntoTexture(double tlon, double tlat) {
 
 
 
-    if ((maxTilesLon + HgtFiledegree) - lonTopLeft > lonTopRight - lonTopLeft) {
+    if ((maxTilesLon + HgtFiledegree) - lonLeft > lonRight - lonLeft) {
         horizontalPosition = 3; //left and right wall at once 
     }
     else {
         horizontalPosition = 0; //left wall
     }
 
-    for (float i = maxTilesLon; i < lonTopRight; i += HgtFiledegree) {
+    for (float i = maxTilesLon; i < lonRight; i += HgtFiledegree) {
 
-        if (latTopLeft - (maxTilesLat - HgtFiledegree) > latTopLeft - latDownLeft) {
+        if (latTop - (maxTilesLat - HgtFiledegree) > latTop - latDown) {
             verticalPosition = 3; //left and right wall at once 
         }
         else {
@@ -339,27 +209,27 @@ void GLayer::mapHeightDataIntoTexture(double tlon, double tlat) {
 
         imageOffsetY = 0;
 
-        for (float j = maxTilesLat; j > latDownLeft; j -= HgtFiledegree) {
+        for (float j = maxTilesLat; j > latDown; j -= HgtFiledegree) {
 
             CHgtFile::sphericalToFilePath(&filePath, i, j, LOD);
 
             if (horizontalPosition == 0)
-                howManyToReadX = ((i + HgtFiledegree) - lonTopLeft) / readDegree + 1;
+                howManyToReadX = ((i + HgtFiledegree) - lonLeft) / readDegree + 1;
             else if (horizontalPosition == 1)
                 howManyToReadX = HgtFiledegree / readDegree;
             else if (horizontalPosition == 2)
-                howManyToReadX = (lonTopRight - i) / readDegree + 1;
+                howManyToReadX = (lonRight - i) / readDegree + 1;
             else if (horizontalPosition == 3)
-                howManyToReadX = (lonTopRight - lonTopLeft) / readDegree + 1;
+                howManyToReadX = (lonRight - lonLeft) / readDegree + 1;
 
             if (verticalPosition == 0)
-                howManyToReadY = (latTopLeft - (j - HgtFiledegree)) / readDegree + 1;
+                howManyToReadY = (latTop - (j - HgtFiledegree)) / readDegree + 1;
             else if (verticalPosition == 1)
                 howManyToReadY = HgtFiledegree / readDegree;
             else if (verticalPosition == 2)
-                howManyToReadY = (j - latDownLeft) / readDegree + 1;
+                howManyToReadY = (j - latDown) / readDegree + 1;
             else if (verticalPosition == 3)
-                howManyToReadY = (latTopLeft - latDownLeft) / readDegree + 1;
+                howManyToReadY = (latTop - latDown) / readDegree + 1;
 
 
 
@@ -367,7 +237,7 @@ void GLayer::mapHeightDataIntoTexture(double tlon, double tlat) {
                 howManyToReadX, howManyToReadY, HgtFileResolution, HgtSkipping);
             
 
-            if (j - 2 * HgtFiledegree > latDownLeft)
+            if (j - 2 * HgtFiledegree > latDown)
                 verticalPosition = 1;   //middle 
             else
                 verticalPosition = 2;   //down wall
@@ -375,7 +245,7 @@ void GLayer::mapHeightDataIntoTexture(double tlon, double tlat) {
             imageOffsetY += howManyToReadY;
         }
 
-        if (i + 2 * HgtFiledegree < lonTopRight)
+        if (i + 2 * HgtFiledegree < lonRight)
             horizontalPosition = 1;   //middle 
         else
             horizontalPosition = 2;   //right wall
@@ -520,115 +390,157 @@ void GLayer::buildLayer(double tlon, double tlat) {
 }
 
 
-void GLayer::checkHowManyPixelsToReadFromRaw_X(int* howManyToReadX, int horizontalPosition, double lonTopLeftHor, double lonTopRightHor, float i) {
+void GLayer::checkHowManyPixelsToReadFromRaw_X(int* howManyToReadX, int horizontalPosition, double lonLeftHor, double lonRightHor, float i) {
 
     if (horizontalPosition == 0)
-        *howManyToReadX = ((i + RAW_FILE_DEGREE) - lonTopLeftHor) / readDegree + 1;
+        *howManyToReadX = ((i + RAW_FILE_DEGREE) - lonLeftHor) / readDegree + 1;
     else if (horizontalPosition == 1)
         *howManyToReadX = RAW_FILE_DEGREE / readDegree;
     else if (horizontalPosition == 2)
-        *howManyToReadX = (lonTopRightHor - i) / readDegree + 1;
+        *howManyToReadX = (lonRightHor - i) / readDegree + 1;
     else if (horizontalPosition == 3)
-        *howManyToReadX = (lonTopRightHor - lonTopLeftHor) / readDegree + 1;
+        *howManyToReadX = (lonRightHor - lonLeftHor) / readDegree + 1;
 
 }
 
-void GLayer::checkHowManyPixelsToReadFromRaw_Y(int *howManyToReadY, int verticalPosition, double latTopLeftHor, double latDownLeftHor, float j) {
+void GLayer::checkHowManyPixelsToReadFromRaw_Y(int *howManyToReadY, int verticalPosition, double latTopHor, double latDownHor, float j) {
     
     if (verticalPosition == 0) 
-        *howManyToReadY = (latTopLeftHor - (j - RAW_FILE_DEGREE)) / readDegree + 1;
+        *howManyToReadY = (latTopHor - (j - RAW_FILE_DEGREE)) / readDegree + 1;
     else if (verticalPosition == 1) 
         *howManyToReadY = RAW_FILE_DEGREE / readDegree;
     else if (verticalPosition == 2) 
-        *howManyToReadY = (j - latDownLeftHor) / readDegree + 1;
+        *howManyToReadY = (j - latDownHor) / readDegree + 1;
     else if (verticalPosition == 3) 
-        *howManyToReadY = (latTopLeftHor - latDownLeftHor) / readDegree;
+        *howManyToReadY = (latTopHor - latDownHor) / readDegree;
      
 }
 
-void GLayer::checkRawFileOffset_X(int* filePositionHorizontalOffset, int horizontalPosition, double lonTopLeftHor, float maxTilesLon) {
+void GLayer::checkRawFileOffset_X(int* filePositionHorizontalOffset, int horizontalPosition, double lonLeftHor, float maxTilesLon) {
 
     if (horizontalPosition == 0)
-        *filePositionHorizontalOffset = (lonTopLeftHor - maxTilesLon) / readDegree;
+        *filePositionHorizontalOffset = (lonLeftHor - maxTilesLon) / readDegree;
     else if (horizontalPosition == 1)
         *filePositionHorizontalOffset = 0;
     else if (horizontalPosition == 2)
         *filePositionHorizontalOffset = 0;
     else if (horizontalPosition == 3)
-        *filePositionHorizontalOffset = (lonTopLeftHor - maxTilesLon) / readDegree;
+        *filePositionHorizontalOffset = (lonLeftHor - maxTilesLon) / readDegree;
    
 }
 
-void GLayer::checkRawFileOffset_Y(int* filePositionVerticalOffset, int verticalPosition, double latTopLeftHor, float maxTilesLat) {
+void GLayer::checkRawFileOffset_Y(int* filePositionVerticalOffset, int verticalPosition, double latTopHor, float maxTilesLat) {
     
     if (verticalPosition == 0) 
-        *filePositionVerticalOffset = (maxTilesLat - latTopLeftHor) / readDegree;
+        *filePositionVerticalOffset = (maxTilesLat - latTopHor) / readDegree;
     else if (verticalPosition == 1) 
         *filePositionVerticalOffset = 0;   
     else if (verticalPosition == 2)       
         *filePositionVerticalOffset = 0;  
     else if (verticalPosition == 3)    
-        *filePositionVerticalOffset = (maxTilesLat - latTopLeftHor) / readDegree;
+        *filePositionVerticalOffset = (maxTilesLat - latTopHor) / readDegree;
     
 }
 
-void GLayer::horizontalBlockRawTextureReading(int lonDifference, int latDifference, 
-                double lonTopLeft, double lonTopRight, double latTopLeft, double latDownLeft, point texBegHor) {
+void GLayer::fullRawTextureReading(double lonLeft, double lonRight, double latTop, double latDown) {
 
     float maxTilesLon, maxTilesLat;
-    int movementCaseX, movementCaseY;
+    //Finding top left tile 
+    findingTopLeftFileToRead(&maxTilesLon, &maxTilesLat, lonLeft, latTop);
+   
+    int imageOffsetX = 0;
+    int imageOffsetY = 0;
+    int horizontalPosition; //0 means top wall, 1 middle, 2 bottom wall
+    int verticalPosition;   //0 means left wall, 1 middle, 2 right wall
+
+    int howManyToReadX;
+    int howManyToReadY;
+    int filePositionHorizontalOffset;
+    int filePositionVerticalOffset;
+
+    QString filePath;
+
+    if ((maxTilesLon + RAW_FILE_DEGREE) - lonLeft > lonRight - lonLeft) 
+        horizontalPosition = 3; //left and right wall at once 
+    else 
+        horizontalPosition = 0; //left wall
+    
+
+    for (float i = maxTilesLon; i < lonRight; i += RAW_FILE_DEGREE) {
+
+        if (latTop - (maxTilesLat - RAW_FILE_DEGREE) > latTop - latDown)
+            verticalPosition = 3; //left and right wall at once 
+        else 
+            verticalPosition = 0; //top wall
+        
+
+        imageOffsetY = 0;
+
+        ///////////horizontal
+        checkHowManyPixelsToReadFromRaw_X(&howManyToReadX, horizontalPosition, lonLeft, lonRight, i);
+        checkRawFileOffset_X(&filePositionHorizontalOffset, horizontalPosition, lonLeft, maxTilesLon);
+
+
+        for (float j = maxTilesLat; j > latDown; j -= RAW_FILE_DEGREE) {
+
+            checkHowManyPixelsToReadFromRaw_Y(&howManyToReadY, verticalPosition, latTop, latDown, j);
+            checkRawFileOffset_Y(&filePositionVerticalOffset, verticalPosition, latTop, maxTilesLat);
+
+            CRawFile::sphericalToFilePath(&filePath, i, j, LOD);
+            CRawFile::loadPixelDataToImage(pixelMap, imageOffsetX, imageOffsetY,
+                filePath, howManyToReadX, howManyToReadY,
+                rawFileResolution, rawSkipping,
+                filePositionHorizontalOffset, filePositionVerticalOffset);
+
+            if (j - 2 * RAW_FILE_DEGREE > latDown)
+                verticalPosition = 1;   //middle 
+            else
+                verticalPosition = 2;   //down wall
+
+            imageOffsetY += howManyToReadY;
+        }
+
+        if (i + 2 * RAW_FILE_DEGREE < lonRight)
+            horizontalPosition = 1;   //middle 
+        else
+            horizontalPosition = 2;   //right wall
+
+        imageOffsetX += howManyToReadX;
+    }
+
+    pixelMap->setPixelColor(0, 0, QColor(0, 255, 14));
+    pixelTexture = new QOpenGLTexture(*pixelMap, QOpenGLTexture::DontGenerateMipMaps);
+    pixelTexture->setMinMagFilters(QOpenGLTexture::Linear, QOpenGLTexture::Linear);
+    pixelTexture->create();
+    pixelTexture->bind(layerIndex, QOpenGLTexture::DontResetTextureUnit);
+
+    program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);
+}
+
+void GLayer::horizontalBlockRawTextureReading(int lonDifference, int latDifference, 
+                double lonLeft, double lonRight, double latTop, double latDown, point texBegHor) {
+
+    float maxTilesLon, maxTilesLat;
     int orientationPointX, orientationPointY;
 
-    if (lonDifference > 0)
-        movementCaseX = 1;
-    else if (lonDifference == 0)
-        movementCaseX = 0;
-    else if (lonDifference < 0)
-        movementCaseX = -1;
-
-    if (latDifference > 0)
-        movementCaseY = 1;
-    else if (latDifference == 0)
-        movementCaseY = 0;
-    else if (latDifference < 0)
-        movementCaseY = -1;
-
-    double lonTopLeftHor = oldLonTopLeft + lonDifference * readDegree;
-    double lonTopRightHor = oldLonTopRight + lonDifference * readDegree;
+    double lonLeftHor = oldLonLeft + lonDifference * readDegree;
+    double lonRightHor = oldLonRight + lonDifference * readDegree;
 
 
     //finding latitude of corners
-    double latTopLeftHor;
-    double latDownLeftHor;
-    if (movementCaseY == 1) {
-        latTopLeftHor = oldLatTopLeft + latDifference * readDegree;
-        latDownLeftHor = oldLatTopLeft;
+    double latTopHor;
+    double latDownHor;
+    if (latDifference > 0) {
+        latTopHor = oldLatTop + latDifference * readDegree;
+        latDownHor = oldLatTop;
     }
-    else if (movementCaseY == -1) {
-        latTopLeftHor = oldLatDownLeft;
-        latDownLeftHor = oldLatDownLeft + latDifference * readDegree;
+    else if (latDifference < 0) {
+        latTopHor = oldLatDown;
+        latDownHor = oldLatDown + latDifference * readDegree;
     }
 
     //Finding top left tile 
-    if (lonTopLeftHor < 0) {
-        if (fmod(lonTopLeftHor, RAW_FILE_DEGREE) != 0)
-            maxTilesLon = lonTopLeftHor - fmod(lonTopLeftHor, RAW_FILE_DEGREE) - RAW_FILE_DEGREE;
-        else
-            maxTilesLon = lonTopLeftHor;
-    }
-    else {
-        maxTilesLon = lonTopLeftHor - fmod(lonTopLeftHor, RAW_FILE_DEGREE);
-    }
-
-    if (latTopLeftHor < 0) {
-        maxTilesLat = latTopLeftHor - fmod(latTopLeftHor, RAW_FILE_DEGREE);
-    }
-    else {
-        if (fmod(latTopLeftHor * 2, RAW_FILE_DEGREE) != 0)
-            maxTilesLat = latTopLeftHor - fmod(latTopLeftHor, RAW_FILE_DEGREE) + RAW_FILE_DEGREE;
-        else
-            maxTilesLat = latTopLeftHor;
-    }
+    findingTopLeftFileToRead(&maxTilesLon, &maxTilesLat, lonLeftHor, latTopHor);
 
     int horizontalPosition; //0 means top wall, 1 middle, 2 bottom wall
     int verticalPosition;   //0 means left wall, 1 middle, 2 right wall
@@ -639,12 +551,11 @@ void GLayer::horizontalBlockRawTextureReading(int lonDifference, int latDifferen
     int imageOffsetY = 0;
     int howManyToReadX;
     int howManyToReadY;
-
-   
+ 
 
     QString filePath;
 
-    if ((maxTilesLon + RAW_FILE_DEGREE) - lonTopLeftHor > lonTopRightHor - lonTopLeftHor)
+    if ((maxTilesLon + RAW_FILE_DEGREE) - lonLeftHor > lonRightHor - lonLeftHor)
         horizontalPosition = 3; //left and right wall at once   
     else
         horizontalPosition = 0; //left wall
@@ -652,13 +563,13 @@ void GLayer::horizontalBlockRawTextureReading(int lonDifference, int latDifferen
     int readingCheckX = n - 1;
 
     ////////////////////////X///////////////////////////
-    for (float i = maxTilesLon; i < lonTopRightHor; i += RAW_FILE_DEGREE) {
+    for (float i = maxTilesLon; i < lonRightHor; i += RAW_FILE_DEGREE) {
 
 
 
         int readingCheckY = abs(latDifference);
 
-        if (latTopLeftHor - (maxTilesLat - RAW_FILE_DEGREE) > latTopLeftHor - latDownLeftHor)
+        if (latTopHor - (maxTilesLat - RAW_FILE_DEGREE) > latTopHor - latDownHor)
             verticalPosition = 3; //left and right wall at once   
         else
             verticalPosition = 0; //top wall
@@ -667,8 +578,8 @@ void GLayer::horizontalBlockRawTextureReading(int lonDifference, int latDifferen
 
 
         ///////////horizontal
-        checkHowManyPixelsToReadFromRaw_X(&howManyToReadX, horizontalPosition, lonTopLeftHor, lonTopRightHor, i);
-        checkRawFileOffset_X(&filePositionHorizontalOffset, horizontalPosition, lonTopLeftHor, maxTilesLon);
+        checkHowManyPixelsToReadFromRaw_X(&howManyToReadX, horizontalPosition, lonLeftHor, lonRightHor, i);
+        checkRawFileOffset_X(&filePositionHorizontalOffset, horizontalPosition, lonLeftHor, maxTilesLon);
 
         if (readingCheckX - howManyToReadX < 0)
             howManyToReadX = readingCheckX;
@@ -676,11 +587,11 @@ void GLayer::horizontalBlockRawTextureReading(int lonDifference, int latDifferen
         readingCheckX -= howManyToReadX;
 
         //////////////////////////Y///////////////////////////
-        for (float j = maxTilesLat; j > latDownLeftHor; j -= RAW_FILE_DEGREE) {
+        for (float j = maxTilesLat; j > latDownHor; j -= RAW_FILE_DEGREE) {
 
 
-            checkHowManyPixelsToReadFromRaw_Y(&howManyToReadY, verticalPosition, latTopLeftHor, latDownLeftHor, j);
-            checkRawFileOffset_Y(&filePositionVerticalOffset, verticalPosition, latTopLeftHor, maxTilesLat);
+            checkHowManyPixelsToReadFromRaw_Y(&howManyToReadY, verticalPosition, latTopHor, latDownHor, j);
+            checkRawFileOffset_Y(&filePositionVerticalOffset, verticalPosition, latTopHor, maxTilesLat);
 
 
             if (readingCheckY - howManyToReadY < 0)
@@ -692,7 +603,6 @@ void GLayer::horizontalBlockRawTextureReading(int lonDifference, int latDifferen
 
                 CRawFile::sphericalToFilePath(&filePath, i, j, LOD);
 
-           
                 CRawFile::loadPixelDataToImage2(pixelMap, imageOffsetX, imageOffsetY,
                     filePath, howManyToReadX, howManyToReadY, rawFileResolution, rawSkipping,
                     filePositionHorizontalOffset, filePositionVerticalOffset,
@@ -700,7 +610,7 @@ void GLayer::horizontalBlockRawTextureReading(int lonDifference, int latDifferen
             }
 
 
-            if (j - 2 * RAW_FILE_DEGREE > latDownLeft)
+            if (j - 2 * RAW_FILE_DEGREE > latDown)
                 verticalPosition = 1;   //middle 
             else
                 verticalPosition = 2;   //down wall
@@ -710,7 +620,7 @@ void GLayer::horizontalBlockRawTextureReading(int lonDifference, int latDifferen
 
         }
 
-        if (i + 2 * RAW_FILE_DEGREE < lonTopRight)
+        if (i + 2 * RAW_FILE_DEGREE < lonRight)
             horizontalPosition = 1;   //middle 
         else
             horizontalPosition = 2;   //right wall
@@ -724,86 +634,40 @@ void GLayer::horizontalBlockRawTextureReading(int lonDifference, int latDifferen
 }
 
 void GLayer::verticalBlockRawTextureReading(int lonDifference, int latDifference, 
-                double lonTopLeft, double lonTopRight, double latTopLeft, double latDownLeft, point texBegVer) {
+                double lonLeft, double lonRight, double latTop, double latDown, point texBegVer) {
     
     float maxTilesLon, maxTilesLat;
-    int movementCaseX, movementCaseY;
     int orientationPointX, orientationPointY;
 
-    if (lonDifference > 0)
-        movementCaseX = 1;
-    else if (lonDifference == 0)
-        movementCaseX = 0;
-    else if (lonDifference < 0)
-        movementCaseX = -1;
+    double lonLeftVer, lonRightVer;
+    double latTopVer, latDownVer;
 
-    if (latDifference > 0)
-        movementCaseY = 1;
-    else if (latDifference == 0)
-        movementCaseY = 0;
-    else if (latDifference < 0)
-        movementCaseY = -1;
-
-    double lonTopLeftVer;
-    double lonTopRightVer;
     //finding longitude of corners
-    if (movementCaseX == -1) {
-        lonTopLeftVer = oldLonTopLeft + lonDifference * readDegree;
-        lonTopRightVer = oldLonTopLeft;
+    if (lonDifference < 0) {
+        lonLeftVer = oldLonLeft + lonDifference * readDegree;
+        lonRightVer = oldLonLeft;
     }
-    else if (movementCaseX == 1) {
-        lonTopLeftVer = oldLonTopRight;
-        lonTopRightVer = oldLonTopRight + lonDifference * readDegree;
+    else if (lonDifference > 0) {
+        lonLeftVer = oldLonRight;
+        lonRightVer = oldLonRight + lonDifference * readDegree;
     }
 
-    double latTopLeftVer;
-    double latDownLeftVer;
-    /*if (movementCaseY == 1) {
-        latTopLeftVer = oldLatTopLeft;
-        latDownLeftVer = oldLatDownLeft + latDifference * readDegree;
+    if (latDifference > 0) {
+        latTopVer = oldLatTop;
+        latDownVer = oldLatDown + latDifference * readDegree;
     }
-    else if (movementCaseY == 0) {
-        latTopLeftVer = oldLatTopLeft;
-        latDownLeftVer = oldLatDownLeft;
+    else if (latDifference == 0) {
+        latTopVer = oldLatTop;
+        latDownVer = oldLatDown;
     }
-    else if (movementCaseY == -1) {
-        latTopLeftVer = oldLatTopLeft + latDifference * readDegree;
-        latDownLeftVer = oldLatDownLeft;
-    }*/
-    if (movementCaseY == 1) {
-        latTopLeftVer = oldLatTopLeft;
-        latDownLeftVer = oldLatDownLeft + latDifference * readDegree;
-    }
-    else if (movementCaseY == 0) {
-        latTopLeftVer = oldLatTopLeft;
-        latDownLeftVer = oldLatDownLeft;
-    }
-    else if (movementCaseY == -1) {
-        latTopLeftVer = oldLatTopLeft + latDifference * readDegree;
-        latDownLeftVer = oldLatDownLeft;
+    else if (latDifference < 0) {
+        latTopVer = oldLatTop + latDifference * readDegree;
+        latDownVer = oldLatDown;
     }
 
 
     //Finding top left tile 
-    if (lonTopLeftVer < 0) {
-        if (fmod(lonTopLeftVer, RAW_FILE_DEGREE) != 0)
-            maxTilesLon = lonTopLeftVer - fmod(lonTopLeftVer, RAW_FILE_DEGREE) - RAW_FILE_DEGREE;
-        else
-            maxTilesLon = lonTopLeftVer;
-    }
-    else {
-        maxTilesLon = lonTopLeftVer - fmod(lonTopLeftVer, RAW_FILE_DEGREE);
-    }
-
-    if (latTopLeftVer < 0) {
-        maxTilesLat = latTopLeftVer - fmod(latTopLeftVer, RAW_FILE_DEGREE);
-    }
-    else {
-        if (fmod(latTopLeftVer * 2, RAW_FILE_DEGREE) != 0)
-            maxTilesLat = latTopLeftVer - fmod(latTopLeftVer, RAW_FILE_DEGREE) + RAW_FILE_DEGREE;
-        else
-            maxTilesLat = latTopLeftVer;
-    }
+    findingTopLeftFileToRead(&maxTilesLon, &maxTilesLat, lonLeftVer, latTopVer);
 
     int horizontalPosition; //0 means top wall, 1 middle, 2 bottom wall
     int verticalPosition;   //0 means left wall, 1 middle, 2 right wall
@@ -814,14 +678,10 @@ void GLayer::verticalBlockRawTextureReading(int lonDifference, int latDifference
     int imageOffsetY = 0;
     int howManyToReadX;
     int howManyToReadY;
-   
-   
-    
-    
-
+     
     QString filePath;
 
-    if ((maxTilesLon + RAW_FILE_DEGREE) - lonTopLeftVer > lonTopRightVer - lonTopLeftVer)
+    if ((maxTilesLon + RAW_FILE_DEGREE) - lonLeftVer > lonRightVer - lonLeftVer)
         horizontalPosition = 3; //left and right wall at once   
     else
         horizontalPosition = 0; //left wall
@@ -829,12 +689,12 @@ void GLayer::verticalBlockRawTextureReading(int lonDifference, int latDifference
     int readingCheckX = abs(lonDifference);
 
     ////////////////////////X///////////////////////////
-    for (float i = maxTilesLon; i < lonTopRightVer; i += RAW_FILE_DEGREE) {
+    for (float i = maxTilesLon; i < lonRightVer; i += RAW_FILE_DEGREE) {
 
 
         int readingCheckY = n - 1 - abs(latDifference);
 
-        if (latTopLeftVer - (maxTilesLat - RAW_FILE_DEGREE) > latTopLeftVer - latDownLeftVer)
+        if (latTopVer - (maxTilesLat - RAW_FILE_DEGREE) > latTopVer - latDownVer)
             verticalPosition = 3; //left and right wall at once   
         else
             verticalPosition = 0; //top wall
@@ -843,8 +703,8 @@ void GLayer::verticalBlockRawTextureReading(int lonDifference, int latDifference
 
 
         ///////////horizontal
-        checkHowManyPixelsToReadFromRaw_X(&howManyToReadX, horizontalPosition, lonTopLeftVer, lonTopRightVer, i);
-        checkRawFileOffset_X(&filePositionHorizontalOffset, horizontalPosition, lonTopLeftVer, maxTilesLon);
+        checkHowManyPixelsToReadFromRaw_X(&howManyToReadX, horizontalPosition, lonLeftVer, lonRightVer, i);
+        checkRawFileOffset_X(&filePositionHorizontalOffset, horizontalPosition, lonLeftVer, maxTilesLon);
 
         if (readingCheckX - howManyToReadX < 0)
             howManyToReadX = readingCheckX;
@@ -852,19 +712,16 @@ void GLayer::verticalBlockRawTextureReading(int lonDifference, int latDifference
         readingCheckX -= howManyToReadX;
 
         //////////////////////////Y///////////////////////////
-        for (float j = maxTilesLat; j > latDownLeftVer; j -= RAW_FILE_DEGREE) {
+        for (float j = maxTilesLat; j > latDownVer; j -= RAW_FILE_DEGREE) {
 
 
-            checkHowManyPixelsToReadFromRaw_Y(&howManyToReadY, verticalPosition, latTopLeftVer, latDownLeftVer, j);
-            checkRawFileOffset_Y(&filePositionVerticalOffset, verticalPosition, latTopLeftVer, maxTilesLat);
-
+            checkHowManyPixelsToReadFromRaw_Y(&howManyToReadY, verticalPosition, latTopVer, latDownVer, j);
+            checkRawFileOffset_Y(&filePositionVerticalOffset, verticalPosition, latTopVer, maxTilesLat);
 
             if (readingCheckY - howManyToReadY < 0)
                 howManyToReadY = readingCheckY;
 
             readingCheckY -= howManyToReadY;          
-
-            int xd = (filePositionVerticalOffset * rawFileResolution + filePositionHorizontalOffset) % 3;
 
             if (howManyToReadY > 0 && howManyToReadX > 0) {
 
@@ -878,7 +735,7 @@ void GLayer::verticalBlockRawTextureReading(int lonDifference, int latDifference
             }
 
 
-            if (j - 2 * RAW_FILE_DEGREE > latDownLeft)
+            if (j - 2 * RAW_FILE_DEGREE > latDown)
                 verticalPosition = 1;   //middle 
             else
                 verticalPosition = 2;   //down wall
@@ -887,7 +744,7 @@ void GLayer::verticalBlockRawTextureReading(int lonDifference, int latDifference
 
         }
 
-        if (i + 2 * RAW_FILE_DEGREE < lonTopRight)
+        if (i + 2 * RAW_FILE_DEGREE < lonRight)
             horizontalPosition = 1;   //middle 
         else
             horizontalPosition = 2;   //right wall
@@ -953,6 +810,36 @@ void GLayer::computeTextureOffsets(int latDifference, int lonDifference, point *
     }
 }
 
+void GLayer::computeNewLonAndLat(double tlon, double tlat, double *lonLeft, double *lonRight, double *latTop, double *latDown) {
+
+    *lonLeft = tlon - horizontalOffset * readDegree; //Left Right
+    *lonRight = *lonLeft + (n - 1) * readDegree;
+    *latTop = tlat + verticalOffset * readDegree;   //Top Down
+    *latDown = *latTop - (n - 1) * readDegree;
+}
+
+void GLayer::findingTopLeftFileToRead(float *maxTilesLon, float *maxTilesLat, double lonLeft, double latTop) {
+
+    if (lonLeft < 0) {
+        if (fmod(lonLeft, RAW_FILE_DEGREE) != 0)
+            *maxTilesLon = lonLeft - fmod(lonLeft, RAW_FILE_DEGREE) - RAW_FILE_DEGREE;
+        else
+            *maxTilesLon = lonLeft;
+    }
+    else {
+        *maxTilesLon = lonLeft - fmod(lonLeft, RAW_FILE_DEGREE);
+    }
+
+    if (latTop < 0) {
+        *maxTilesLat = latTop - fmod(latTop, RAW_FILE_DEGREE);
+    }
+    else {
+        if (fmod(latTop * 2, RAW_FILE_DEGREE) != 0)
+            *maxTilesLat = latTop - fmod(latTop, RAW_FILE_DEGREE) + RAW_FILE_DEGREE;
+        else
+            *maxTilesLat = latTop;
+    }
+}
 
 void GLayer::drawA(float originX, float originY) {
     

@@ -65,7 +65,7 @@ private:
 	int textureBegginingYtmp;
 
 	float oldLon, oldLat;
-	double oldLonTopLeft, oldLonTopRight, oldLatTopLeft, oldLatDownLeft;
+	double oldLonLeft, oldLonRight, oldLatTop, oldLatDown;
 
 	float readDegree;	//How big is angle between two neighbours points in layer
 	float scale;				
@@ -117,16 +117,21 @@ private:
 	void mapPixelDataIntoTexture(double tlon, double tlat);
 	void mapHeightDataIntoTexture(double tlon, double tlat);
 	
-	void verticalBlockRawTextureReading(int lonDifference, int latDifference, double lonTopLeft, double lonTopRight, double latTopLeft, double latDownLeft, point texBegHVer);
-	void horizontalBlockRawTextureReading(int lonDifference, int latDifference, double lonTopLeft, double lonTopRight, double latTopLeft, double latDownLeft, point texBegHor);
+	void fullRawTextureReading(double lonLeft, double lonRight, double latTop, double latDown);
+	void verticalBlockRawTextureReading(int lonDifference, int latDifference, double lonLeft, double lonRight, double latTop, double latDown, point texBegHVer);
+	void horizontalBlockRawTextureReading(int lonDifference, int latDifference, double lonLeft, double lonRight, double latTop, double latDown, point texBegHor);
 	
-	void checkHowManyPixelsToReadFromRaw_X(int* howManyToReadX, int horizontalPosition, double lonTopLeftHor, double lonTopRightHor, float i);
-	void checkHowManyPixelsToReadFromRaw_Y(int* howManyToReadY, int verticalPosition, double latTopLeftHor, double latDownLeftHor, float j);
+	void checkHowManyPixelsToReadFromRaw_X(int* howManyToReadX, int horizontalPosition, double lonLeftHor, double lonRightHor, float i);
+	void checkHowManyPixelsToReadFromRaw_Y(int* howManyToReadY, int verticalPosition, double latTopHor, double latDownHor, float j);
 
-	void checkRawFileOffset_X(int* filePositionHorizontalOffset, int horizontalPosition, double latTopLeftHor, float maxTilesLat);
-	void checkRawFileOffset_Y(int* filePositionVerticalOffset, int verticalPosition, double latTopLeftHor, float maxTilesLat);
+	void checkRawFileOffset_X(int* filePositionHorizontalOffset, int horizontalPosition, double latTopHor, float maxTilesLat);
+	void checkRawFileOffset_Y(int* filePositionVerticalOffset, int verticalPosition, double latTopHor, float maxTilesLat);
+
+	void findingTopLeftFileToRead(float *maxTilesLon, float *maxTilesLat, double lonLeft, double latTop);
 
 	void computeTextureOffsets(int latDifference, int lonDifference, point* texBegHor, point* texBegVer);
+	void computeNewLonAndLat(double tlon, double tlat, double *lonLeft, double *lonRight, double *latTop, double *latDown);
+
 
 	void cumputeOffsets();
 	void drawA(float originX, float originY);

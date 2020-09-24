@@ -4,7 +4,7 @@
 #include "CHgtFile.h"
 #include "GLayer.h"
 
-int n = 127;          //7, 15, 31, 63, 127, 255, 511, 1023
+int n = 63;          //7, 15, 31, 63, 127, 255, 511, 1023
 int m = (n + 1) / 4; //2,  4,  8, 16
 
 GClipmap::GClipmap(COpenGl* openGlPointer) : openGl(openGlPointer)

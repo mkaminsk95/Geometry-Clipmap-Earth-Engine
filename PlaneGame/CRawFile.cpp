@@ -294,16 +294,14 @@ void CRawFile::loadPixelDataToImage2(QImage* image, int imageOffsetX, int imageO
     // load HGT file to memory
     filePixel.open(name.toUtf8(), fstream::in | fstream::binary);
     bool opened = filePixel.is_open();
-    image->save("tmp.png", nullptr, -1);
+
     for (y = imageOffsetY; y < yStopCondition; y++) {
 
+        //finding right input data
         filePixel.seekg(offset + 3 * skip * z * fileResolution);
-        long tmp = offset + 3 * skip * z * fileResolution;
-
-        //bits = image->scanLine(n - y);  //finding right place to write in image 
+   
+        //finding right row of image (texture)
         bits = image->scanLine((n - 1) - fmod(textureBegginingY + y, n));
-        //int fmodTmp = fmod(textureBegginingY + y, n+1);
-
         
         for (x = imageOffsetX; x < xStopCondition; x++) {
 
@@ -317,18 +315,14 @@ void CRawFile::loadPixelDataToImage2(QImage* image, int imageOffsetX, int imageO
             filePixel.seekg(skip * 3 - 3, filePixel.cur);
 
             //writing to the image
-            //tmp = (textureBegginingX + x) % (n);
-
             *(bits + 3 * ( (textureBegginingX + x) % (n) )    ) = pixel[0];
             *(bits + 3 * ( (textureBegginingX + x) % (n) ) + 1) = pixel[1];
             *(bits + 3 * ( (textureBegginingX + x) % (n) ) + 2) = pixel[2];
-           // image->save("map.png", nullptr, -1);
-
+           
         }
       
         z++;
     }
-    image->save("map.png", nullptr, -1);
     filePixel.close();
 }
 

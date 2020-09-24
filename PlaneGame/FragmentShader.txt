@@ -32,33 +32,47 @@ void main()
 	int texPosX = int(mod(levelPositionOut.x + texOffset.x, n - 1));
 	int texPosY = int(mod(levelPositionOut.y + texOffset.y, n - 1));
 
-
-	if(layerIndex == 0)
+	switch (layerIndex) {
+	case 0:
 		pixel = texelFetch( tex_pixelmap, ivec2(texPosX, texPosY), 0).rgb;
-	else if(layerIndex == 1) 
+		break;
+	case 1:
 		pixel = texelFetch( tex_pixelmap1, ivec2(texPosX, texPosY), 0).rgb;
-	else if(layerIndex == 2) 
+		break;
+	case 2:
 		pixel = texelFetch( tex_pixelmap2, ivec2(texPosX, texPosY), 0).rgb;
-	else if(layerIndex == 3) 
+		break;
+	case 3:
 		pixel = texelFetch( tex_pixelmap3, ivec2(texPosX, texPosY), 0).rgb;
-	else if(layerIndex == 4) 
+		break;
+	case 4:
 		pixel = texelFetch( tex_pixelmap4, ivec2(texPosX, texPosY), 0).rgb;
-	else if(layerIndex == 5) 
+		break;
+	case 5:
 		pixel = texelFetch( tex_pixelmap5, ivec2(texPosX, texPosY), 0).rgb;
-	else if(layerIndex == 6) 
+		break;
+	case 6:
 		pixel = texelFetch( tex_pixelmap6, ivec2(texPosX, texPosY), 0).rgb;
-	else if(layerIndex == 7) 
+		break;
+	case 7:
 		pixel = texelFetch( tex_pixelmap7, ivec2(texPosX, texPosY), 0).rgb;
-	else if(layerIndex == 8) 
+		break;
+	case 8:
 		pixel = texelFetch( tex_pixelmap8, ivec2(texPosX, texPosY), 0).rgb;
-	else if(layerIndex == 9) 
+		break;
+	case 9:
 		pixel = texelFetch( tex_pixelmap9, ivec2(texPosX, texPosY), 0).rgb;
-	else if(layerIndex == 10) 
+		break;
+	case 10:
 		pixel = texelFetch( tex_pixelmap10, ivec2(texPosX, texPosY), 0).rgb;
-	else if(layerIndex == 11) 
+		break;
+	case 11:
 		pixel = texelFetch( tex_pixelmap11, ivec2(texPosX, texPosY), 0).rgb;
-	else if(layerIndex == 12) 
+		break;
+	case 12:
 		pixel = texelFetch( tex_pixelmap12, ivec2(texPosX, texPosY), 0).rgb;
+		break;
+	}
 
 	color = vec4(pixel, 0);
 }
