@@ -37,11 +37,10 @@ void main()
     z = (earthRadius + texelValue*10) * cos(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
 
 
-    float moduloX = mod(levelPosition.x + texOffset.x, n);
-    float moduloY = mod(levelPosition.y + texOffset.y, n - 1);
-
-    texCoordOut = vec2(moduloX, moduloY);
+    //float moduloX = mod(levelPosition.x + texOffset.x, n - 1);
+    //float moduloY = mod(levelPosition.y + texOffset.y, n - 1);
+    //texCoordOut = vec2(moduloX, moduloY);
+    
     levelPositionOut = levelPosition;
-
     gl_Position = modelView*vec4(x, y, z, 1.0);    
 }
