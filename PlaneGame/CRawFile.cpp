@@ -217,7 +217,7 @@ void CRawFile::fileSetPixelBlock(CRawPixel *buffer, int x, int y, int sx, int sy
 }
 
 
-void CRawFile::loadPixelDataToImage(QImage* image, int imageOffsetX, int imageOffsetY, QString name,
+void CRawFile::loadPixelDataToImageFull(QImage* image, int imageOffsetX, int imageOffsetY, QString name,
     int xToRead, int yToRead, int fileResolution, int skip, int positionHorizontalOffset, int positionVerticalOffset)
 {
     fstream filePixel;
@@ -226,47 +226,46 @@ void CRawFile::loadPixelDataToImage(QImage* image, int imageOffsetX, int imageOf
         
     long offset;
     int n = image->height() - 1;
+    int rowCheck = 0; //variable tracks next rows in raw file
   
+    //calculation offset for reading exact bites in raw files
     offset = (positionVerticalOffset * fileResolution + positionHorizontalOffset) * skip * 3;
 
     // load HGT file to memory
     filePixel.open(name.toUtf8(), fstream::in | fstream::binary);
 
-    bool opened = filePixel.is_open();
-
-    int z = 0;
     for (int y = imageOffsetY; y < imageOffsetY+yToRead; y++) {
         
-        filePixel.seekg(offset + 3 * skip * z * fileResolution);
-        long tmp = offset + 3 * skip * z * fileResolution;
+        //finding right input data
+        filePixel.seekg(offset + 3 * skip * rowCheck * fileResolution);
         
+        //finding right row of image (texture)
         bits = image->scanLine(n-y);
 
         for (int x = imageOffsetX; x < imageOffsetX+xToRead; x++) {
 
-            if (true) {
-
-            }
-
+            //reading next three bites (3bite format - rgb) from raw file 
             filePixel.read((char*)&pixel[0], 1);
             filePixel.read((char*)&pixel[1], 1);
             filePixel.read((char*)&pixel[2], 1);
           
+            //jumping to the next bites block depending on the layer resolution
             filePixel.seekg(skip*3-3, filePixel.cur);
 
+            //writing to the image
             *(bits + 3*x) =       pixel[0];
             *(bits + 3*x + 1) =   pixel[1];
             *(bits + 3*x + 2) =   pixel[2];
        
         }
 
-        z++;
+        rowCheck++;
     }
     
     filePixel.close();
 }
 
-void CRawFile::loadPixelDataToImage2(QImage* image, int imageOffsetX, int imageOffsetY, QString name,
+void CRawFile::loadPixelDataToImagePart(QImage* image, int imageOffsetX, int imageOffsetY, QString name,
                                      int xToRead, int yToRead, int fileResolution, int skip, 
                                      int filePositionHorizontalOffset, int filePositionVerticalOffset, 
                                      int textureBegginingX, int textureBegginingY)
@@ -275,30 +274,28 @@ void CRawFile::loadPixelDataToImage2(QImage* image, int imageOffsetX, int imageO
     quint8 pixel[3];
     uchar* bits;
 
+    long offset;
 
     int x, y;
     int yStopCondition, xStopCondition;
-    int z = 0;  //z variable tracks next rows in raw file
- 
+    int rowCheck = 0;  //variable tracks next rows in raw file
+    int n = image->height();
+
     y = imageOffsetY;
     x = imageOffsetX;
     yStopCondition = imageOffsetY + yToRead;
     xStopCondition = imageOffsetX + xToRead;
-
-    long offset;
-    int n = image->height();
 
     //calculation offset for reading exact bites in raw files
     offset = (filePositionVerticalOffset * fileResolution + filePositionHorizontalOffset) * skip * 3;
     
     // load HGT file to memory
     filePixel.open(name.toUtf8(), fstream::in | fstream::binary);
-    bool opened = filePixel.is_open();
 
     for (y = imageOffsetY; y < yStopCondition; y++) {
 
         //finding right input data
-        filePixel.seekg(offset + 3 * skip * z * fileResolution);
+        filePixel.seekg(offset + 3 * skip * rowCheck * fileResolution);
    
         //finding right row of image (texture)
         bits = image->scanLine((n - 1) - fmod(textureBegginingY + y, n));
@@ -321,8 +318,9 @@ void CRawFile::loadPixelDataToImage2(QImage* image, int imageOffsetX, int imageO
            
         }
       
-        z++;
+        rowCheck++;
     }
+
     filePixel.close();
 }
 
