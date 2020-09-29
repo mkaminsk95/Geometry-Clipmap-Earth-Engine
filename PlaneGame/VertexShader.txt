@@ -2,16 +2,18 @@
 #version 400 core
 layout (location = 0) in vec2 position;
 out vec2 texCoordOut;
+out vec2 levelPositionOut;
 
 uniform sampler2D tex_heightmap; 
 uniform sampler2D tex_pixelmap; 
-//uniform sampler2D tex_pixelmap; 
 
 uniform vec2 patchOrigin;
 uniform vec2 levelScaleFactor;
 uniform vec2 worldScaleFactor;
 uniform vec2 worldOffset;
 uniform mat4 modelView;
+uniform vec2 texOffset;
+uniform int n;
 
 int earthRadius;
 float CONST_PIDIV180;
@@ -34,6 +36,11 @@ void main()
     y = (earthRadius + texelValue*10) * sin(worldPosition.y * CONST_PIDIV180);
     z = (earthRadius + texelValue*10) * cos(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
 
-    texCoordOut = levelPosition;
-    gl_Position = modelView*vec4(x, y, z, 1.0);
+
+    //float moduloX = mod(levelPosition.x + texOffset.x, n - 1);
+    //float moduloY = mod(levelPosition.y + texOffset.y, n - 1);
+    //texCoordOut = vec2(moduloX, moduloY);
+    
+    levelPositionOut = levelPosition;
+    gl_Position = modelView*vec4(x, y, z, 1.0);    
 }
