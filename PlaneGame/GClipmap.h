@@ -54,8 +54,8 @@ public:
 	int howManyToRenderE;
 	int howManyToRenderF;
 
-	int HgtTextureLocation;
 	int pixelTextureLocation[13];
+	int heightTextureLocation[13];
 	int drawingMode;
 	int activeLevelOfDetail;
 	QVector<GLayer> layer;

@@ -2,16 +2,16 @@
 layout (location = 0) in vec2 position;
 
 out vec4 color;
-in vec2 texCoordOut;
+//in vec2 texCoordOut;
 in vec2 levelPositionOut;
 
 uniform int layerIndex;
 
 uniform vec2 patchOrigin;
-uniform vec2 texOffset;
+uniform vec2 rawTexOffset;
 uniform int n;
 
-uniform sampler2D tex_pixelmap; 
+uniform sampler2D tex_pixelmap0; 
 uniform sampler2D tex_pixelmap1;
 uniform sampler2D tex_pixelmap2;
 uniform sampler2D tex_pixelmap3;
@@ -29,12 +29,12 @@ void main()
 {
 	vec3 pixel;
 	
-	int texPosX = int(mod(levelPositionOut.x + texOffset.x, n - 1));
-	int texPosY = int(mod(levelPositionOut.y + texOffset.y, n - 1));
+	int texPosX = int(mod(levelPositionOut.x + rawTexOffset.x, n - 1));
+	int texPosY = int(mod(levelPositionOut.y + rawTexOffset.y, n - 1));
 
 	switch (layerIndex) {
 	case 0:
-		pixel = texelFetch( tex_pixelmap, ivec2(texPosX, texPosY), 0).rgb;
+		pixel = texelFetch( tex_pixelmap0, ivec2(texPosX, texPosY), 0).rgb;
 		break;
 	case 1:
 		pixel = texelFetch( tex_pixelmap1, ivec2(texPosX, texPosY), 0).rgb;

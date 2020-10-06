@@ -37,8 +37,21 @@ void GClipmap::draw() {
 
         //getting aPos uniform location to insert data
         positionInputLocation = program->attributeLocation("position");
-        HgtTextureLocation =    program->uniformLocation("tex_heightmap");
-        pixelTextureLocation[0] =  program->uniformLocation("tex_pixelmap");
+        heightTextureLocation[0] = program->uniformLocation("tex_heightmap0");
+        heightTextureLocation[1] = program->uniformLocation("tex_heightmap1");
+        heightTextureLocation[2] = program->uniformLocation("tex_heightmap2");
+        heightTextureLocation[3] = program->uniformLocation("tex_heightmap3");
+        heightTextureLocation[4] = program->uniformLocation("tex_heightmap4");
+        heightTextureLocation[5] = program->uniformLocation("tex_heightmap5");
+        heightTextureLocation[6] = program->uniformLocation("tex_heightmap6");
+        heightTextureLocation[7] = program->uniformLocation("tex_heightmap7");
+        heightTextureLocation[8] = program->uniformLocation("tex_heightmap8");
+        heightTextureLocation[9] = program->uniformLocation("tex_heightmap9");
+        heightTextureLocation[10] = program->uniformLocation("tex_heightmap10");
+        heightTextureLocation[11] = program->uniformLocation("tex_heightmap11");
+        heightTextureLocation[12] = program->uniformLocation("tex_heightmap12");
+
+        pixelTextureLocation[0] =  program->uniformLocation("tex_pixelmap0");
         pixelTextureLocation[1] =  program->uniformLocation("tex_pixelmap1");
         pixelTextureLocation[2] =  program->uniformLocation("tex_pixelmap2");
         pixelTextureLocation[3] =  program->uniformLocation("tex_pixelmap3");
@@ -69,17 +82,21 @@ void GClipmap::draw() {
         //building layers
        
                                       //degree   HgtfileDegree   scale  LOD  layerIndex  HgtSkipping   HgtRes   RawSkipping    RawRes
-        layer.push_back(GLayer(this, 0.0018311,      3.75,          1,   13,        0,          2,      4097,        1,         24576, n));
-        layer.push_back(GLayer(this, 0.0036621,      3.75,          2,   12,        1,          4,      4097,        2,         24576, n));
-        layer.push_back(GLayer(this, 0.0073242,      3.75,          4,   11,        2,          8,      4097,        1,          6144, n));
-        layer.push_back(GLayer(this, 0.0146484,      3.75,          8,   10,        3,         16,      4097,        2,          6144, n));
-        layer.push_back(GLayer(this, 0.0292969,     15.00,         16,    9,        4,          1,       512,        4,          6144, n));
-        layer.push_back(GLayer(this, 0.0585938,     15.00,         32,    8,        5,          2,       512,        1,           768, n));
-        layer.push_back(GLayer(this, 0.1171876,     15.00,         64,    7,        6,          4,       512,        2,           768, n));
-        layer.push_back(GLayer(this, 0.2343752,     15.00,        128,    6,        7,          8,       512,        4,           768, n));
-        layer.push_back(GLayer(this, 0.4687504,     15.00,        256,    5,        8,         16,       512,        1,            96, n));
+        layer.push_back(GLayer(this,  0.0018311,      3.75,          1,   13,        0,          2,      4097,        1,         24576, n));
+        layer.push_back(GLayer(this,  0.0036621,      3.75,          2,   12,        1,          4,      4097,        2,         24576, n));
+        layer.push_back(GLayer(this,  0.0073242,      3.75,          4,   11,        2,          8,      4097,        1,          6144, n));
+        layer.push_back(GLayer(this,  0.0146484,      3.75,          8,   10,        3,         16,      4097,        2,          6144, n));
+        layer.push_back(GLayer(this,  0.0292969,     15.00,         16,    9,        4,          1,       512,        4,          6144, n));
+        layer.push_back(GLayer(this,  0.0585938,     15.00,         32,    8,        5,          2,       512,        1,           768, n));
+        layer.push_back(GLayer(this,  0.1171876,     15.00,         64,    7,        6,          4,       512,        2,           768, n));
+        layer.push_back(GLayer(this,  0.2343752,     15.00,        128,    6,        7,          8,       512,        4,           768, n));
+        layer.push_back(GLayer(this,  0.4687504,     15.00,        256,    5,        8,         16,       512,        1,            96, n));
+        layer.push_back(GLayer(this,  0.9375008,     60.00,        512,    4,        9,          1,        64,        2,            96, n));
+        layer.push_back(GLayer(this,  1.8750016,     60.00,       1024,    3,       10,          2,        64,        4,            96, n));
+        layer.push_back(GLayer(this,  3.7500032,     60.00,       2048,    2,       11,          4,        64,        8,            96, n));
+        layer.push_back(GLayer(this,  7.5000064,     60.00,       4096,    1,       12,          8,        64,       16,            96, n));
+       
 
-        
         //defining vertex array object
 
         
@@ -152,10 +169,10 @@ void GClipmap::draw() {
     else
         activeLevelOfDetail = 8;
    
-    activeLevelOfDetail = 8;
-    for (int x = activeLevelOfDetail; x < 9; x++) 
+    activeLevelOfDetail = 3;
+    for (int x = activeLevelOfDetail; x < 4; x++) 
         layer[x].buildLayer(tlon, tlat);
-        
+    
     program->release();
 }
 

@@ -60,8 +60,8 @@ private:
 
 	bool firstGothrough;
 
-	point texBegHor, texBegVer;
-	int textureBegginingY, textureBegginingX;
+	point rTexBegHor, rTexBegVer, hTexBegHor, hTexBegVer;
+	int hgtTextureBegginingY, hgtTextureBegginingX, rawTextureBegginingY, rawTextureBegginingX;
 	int textureBegginingYtmp;
 
 	float oldLon, oldLat;
@@ -117,19 +117,30 @@ private:
 	void mapPixelDataIntoTexture(double tlon, double tlat);
 	void mapHeightDataIntoTexture(double tlon, double tlat);
 	
+	//full reading
+	void fullHgtTextureReading(double lonLeft, double lonRight, double latTop, double latDown);
 	void fullRawTextureReading(double lonLeft, double lonRight, double latTop, double latDown);
-	void verticalBlockRawTextureReading(int lonDifference, int latDifference, double lonLeft, double lonRight, double latTop, double latDown, point texBegHVer);
-	void horizontalBlockRawTextureReading(int lonDifference, int latDifference, double lonLeft, double lonRight, double latTop, double latDown, point texBegHor);
-	
-	void checkHowManyPixelsToReadFromRaw_X(int* howManyToReadX, int horizontalPosition, double lonLeftHor, double lonRightHor, float i);
-	void checkHowManyPixelsToReadFromRaw_Y(int* howManyToReadY, int verticalPosition, double latTopHor, double latDownHor, float j);
 
+	//vertical reading
+	void verticalBlockRawTextureReading(int lonDifference, int latDifference, 
+		double lonLeft, double lonRight, double latTop, double latDown, point texBegHVer);
+	void verticalBlockHgtTextureReading(int lonDifference, int latDifference, 
+		double lonLeft, double lonRight, double latTop, double latDown, point texBegHVer);
+
+	//horizontal reading
+	void horizontalBlockRawTextureReading(int lonDifference, int latDifference, 
+		double lonLeft, double lonRight, double latTop, double latDown, point texBegHor);
+	void horizontalBlockHgtTextureReading(int lonDifference, int latDifference,
+		double lonLeft, double lonRight, double latTop, double latDown, point texBegHor);
+	
+	void checkHowManyPixelsToReadFromRaw_X(int* howManyToReadX, int horizontalPosition, double lonLeftHor, double lonRightHor, float i, float fileDegree, bool rawReading);
+	void checkHowManyPixelsToReadFromRaw_Y(int* howManyToReadY, int verticalPosition, double latTopHor, double latDownHor, float j, float fileDegree, bool rawReading);
 	void checkRawFileOffset_X(int* filePositionHorizontalOffset, int horizontalPosition, double latTopHor, float maxTilesLat);
 	void checkRawFileOffset_Y(int* filePositionVerticalOffset, int verticalPosition, double latTopHor, float maxTilesLat);
 
-	void findingTopLeftFileToRead(float *maxTilesLon, float *maxTilesLat, double lonLeft, double latTop);
+	void findingTopLeftFileToRead(float *maxTilesLon, float *maxTilesLat, double lonLeft, double latTop, double degree);
 
-	void computeTextureOffsets(int latDifference, int lonDifference, point* texBegHor, point* texBegVer);
+	void computeTextureOffsets(int latDifference, int lonDifference, point* texBegHor, point* texBegVer, bool rawReading);
 	void computeNewLonAndLat(double tlon, double tlat, double *lonLeft, double *lonRight, double *latTop, double *latDown);
 
 

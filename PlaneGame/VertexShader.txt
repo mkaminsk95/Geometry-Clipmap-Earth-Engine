@@ -7,12 +7,27 @@ out vec2 levelPositionOut;
 uniform sampler2D tex_heightmap; 
 uniform sampler2D tex_pixelmap; 
 
+uniform int layerIndex;
+uniform sampler2D tex_heightmap0;
+uniform sampler2D tex_heightmap1;
+uniform sampler2D tex_heightmap2;
+uniform sampler2D tex_heightmap3;
+uniform sampler2D tex_heightmap4;
+uniform sampler2D tex_heightmap5;
+uniform sampler2D tex_heightmap6;
+uniform sampler2D tex_heightmap7;
+uniform sampler2D tex_heightmap8;
+uniform sampler2D tex_heightmap9;
+uniform sampler2D tex_heightmap10;
+uniform sampler2D tex_heightmap11;
+uniform sampler2D tex_heightmap12;
+
 uniform vec2 patchOrigin;
 uniform vec2 levelScaleFactor;
 uniform vec2 worldScaleFactor;
 uniform vec2 worldOffset;
 uniform mat4 modelView;
-uniform vec2 texOffset;
+uniform vec2 hgtTexOffset;
 uniform int n;
 
 int earthRadius;
@@ -23,18 +38,65 @@ float z;
 
 void main()
 {
+	float texelValue;
+	int positionX, positionY;
 
     vec2 levelPosition = position + patchOrigin;
 
+	positionX = int(mod(levelPosition.x + hgtTexOffset.x, n ));
+	positionY = int(mod(levelPosition.y + hgtTexOffset.y, n ));
+
+
     vec2 worldPosition = (levelPosition * levelScaleFactor * worldScaleFactor) + worldOffset;
 
-    float texelValue = texelFetch(tex_heightmap, ivec2(levelPosition.xy), 0).x;
-
+	
+    switch (layerIndex) {
+	case 0:
+		texelValue = texelFetch(tex_heightmap0, ivec2(positionX, positionY), 0).x;
+		break;
+	case 1:
+		texelValue = texelFetch(tex_heightmap1, ivec2(positionX, positionY), 0).x;
+		break;
+	case 2:
+		texelValue = texelFetch(tex_heightmap2, ivec2(positionX, positionY), 0).x;
+		break;
+	case 3:
+		texelValue = texelFetch(tex_heightmap3, ivec2(positionX, positionY), 0).x;
+		break;
+	case 4:
+		texelValue = texelFetch(tex_heightmap4, ivec2(positionX, positionY), 0).x;
+		break;									 
+	case 5:										 
+		texelValue = texelFetch(tex_heightmap5, ivec2(positionX, positionY),  0).x;
+		break;									 
+	case 6:										 
+		texelValue = texelFetch(tex_heightmap6, ivec2(positionX, positionY),  0).x;
+		break;									 
+	case 7:										 
+		texelValue = texelFetch(tex_heightmap7, ivec2(positionX, positionY),  0).x;
+		break;									 
+	case 8:										 
+		texelValue = texelFetch(tex_heightmap8, ivec2(positionX, positionY),  0).x;
+		break;									 
+	case 9:										 
+		texelValue = texelFetch(tex_heightmap9, ivec2(positionX, positionY),  0).x;
+		break;									 
+	case 10:									 
+		texelValue = texelFetch(tex_heightmap10, ivec2(positionX, positionY), 0).x;
+		break;									 
+	case 11:									 
+		texelValue = texelFetch(tex_heightmap11, ivec2(positionX, positionY), 0).x;
+		break;									 
+	case 12:									 
+		texelValue = texelFetch(tex_heightmap12, ivec2(positionX, positionY), 0).x;
+		break;
+	}
+    
     earthRadius = 6378100;
     CONST_PIDIV180 = 0.01745329251;
-    x = (earthRadius + texelValue*10) * sin(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
-    y = (earthRadius + texelValue*10) * sin(worldPosition.y * CONST_PIDIV180);
-    z = (earthRadius + texelValue*10) * cos(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
+    x = (earthRadius + texelValue) * sin(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
+    y = (earthRadius + texelValue) * sin(worldPosition.y * CONST_PIDIV180);
+    z = (earthRadius + texelValue) * cos(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
 
 
     //float moduloX = mod(levelPosition.x + texOffset.x, n - 1);
