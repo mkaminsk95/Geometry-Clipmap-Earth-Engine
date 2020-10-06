@@ -57,7 +57,7 @@ public:
 	int pixelTextureLocation[13];
 	int heightTextureLocation[13];
 	int drawingMode;
-	int activeLevelOfDetail;
+	int activeLvlOfDetail, highestLvlOfDetail;
 	QVector<GLayer> layer;
 	
 

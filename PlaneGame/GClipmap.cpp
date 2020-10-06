@@ -148,29 +148,52 @@ void GClipmap::draw() {
     layer[7].setPosition(1,1);
     layer[8].setPosition(0,1);
 
-    double treshold = 3000;
+    double treshold = 15000;
     
     if (distanceFromEarth < treshold)
-        activeLevelOfDetail = 0;
+        activeLvlOfDetail = 0;
     else if (distanceFromEarth < 2 * treshold)
-        activeLevelOfDetail = 1;
+        activeLvlOfDetail = 1;
     else if (distanceFromEarth < 4 * treshold)
-        activeLevelOfDetail = 2;
+        activeLvlOfDetail = 2;
     else if (distanceFromEarth < 8 * treshold)
-        activeLevelOfDetail = 3;
+        activeLvlOfDetail = 3;
     else if (distanceFromEarth < 16 * treshold)
-        activeLevelOfDetail = 4;
+        activeLvlOfDetail = 4;
     else if (distanceFromEarth < 32 * treshold)
-        activeLevelOfDetail = 5;
+        activeLvlOfDetail = 5;
     else if (distanceFromEarth < 64 * treshold)
-        activeLevelOfDetail = 6;
+        activeLvlOfDetail = 6;
     else if (distanceFromEarth < 128 * treshold)
-        activeLevelOfDetail = 7;
-    else
-        activeLevelOfDetail = 8;
+        activeLvlOfDetail = 7;
+    else if (distanceFromEarth < 256 * treshold)
+        activeLvlOfDetail = 8;
+    else 
+        activeLvlOfDetail = 9;
    
-    activeLevelOfDetail = 3;
-    for (int x = activeLevelOfDetail; x < 4; x++) 
+    if (distanceFromEarth       < 5000)
+        highestLvlOfDetail = 0;
+    else if (distanceFromEarth  < 10000)
+        highestLvlOfDetail = 2;
+    else if (distanceFromEarth  < 20000)
+        highestLvlOfDetail = 3;
+    else if (distanceFromEarth  < 40000)
+        highestLvlOfDetail = 4;
+    else if (distanceFromEarth  < 80000)
+        highestLvlOfDetail = 5;
+    else if (distanceFromEarth  < 160000)
+        highestLvlOfDetail = 6;
+    else if (distanceFromEarth  < 320000)
+        highestLvlOfDetail = 7;
+    else if (distanceFromEarth  < 640000)
+        highestLvlOfDetail = 8;
+    else
+        highestLvlOfDetail = 9;
+    
+   // CCommons::doubleIntoVSConsole(distanceFromEarth);
+
+    //activeLevelOfDetail = 3;
+    for (int x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
         layer[x].buildLayer(tlon, tlat);
     
     program->release();

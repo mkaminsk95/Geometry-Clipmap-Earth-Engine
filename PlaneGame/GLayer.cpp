@@ -249,7 +249,7 @@ void GLayer::buildLayer(double tlon, double tlat) {
     drawC(0.0,    2*m);
     drawA(0.0,    m);
 
-    if (clipmap->activeLevelOfDetail == layerIndex) {
+    if (clipmap->activeLvlOfDetail == layerIndex) {
         drawA(m,        m);
         drawB(2*m,      m);
         drawA(2*m+2,    m);
