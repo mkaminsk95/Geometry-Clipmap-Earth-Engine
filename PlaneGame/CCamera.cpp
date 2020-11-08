@@ -281,6 +281,13 @@ void CCamera::updateCameraWhenInGlobeLinkage()
         camPerspectiveLookAtX = camPerspectiveX + camGlobeFreeDirX*1000000.0;
         camPerspectiveLookAtY = camPerspectiveY + camGlobeFreeDirY*1000000.0;
         camPerspectiveLookAtZ = camPerspectiveZ + camGlobeFreeDirZ*1000000.0;
+        //camPerspectiveLookAtX = camPerspectiveX;
+        //camPerspectiveLookAtY = camPerspectiveY;
+        //camPerspectiveLookAtZ = camPerspectiveZ;
+        CCommons::doubleIntoVSConsole(camPerspectiveLookAtX);
+        CCommons::doubleIntoVSConsole(camPerspectiveLookAtY);
+        CCommons::doubleIntoVSConsole(camPerspectiveLookAtZ);
+        CCommons::stringIntoVSConsole("\n");
     }
 
     // get looking direction vector
@@ -903,9 +910,9 @@ void CCamera::checkInteractKeys()
 
 void CCamera::freeLookGlobalCameraForward(double dt)
 {
-    camGlobeX = camGlobeX + camGlobeFreeDirX*camVel*dt;
-    camGlobeY = camGlobeY + camGlobeFreeDirY*camVel*dt;
-    camGlobeZ = camGlobeZ + camGlobeFreeDirZ*camVel*dt;
+    camGlobeX = camGlobeX + camGlobeFreeDirX*camVel*dt*10;
+    camGlobeY = camGlobeY + camGlobeFreeDirY*camVel*dt*10;
+    camGlobeZ = camGlobeZ + camGlobeFreeDirZ*camVel*dt*10;
 }
 
 void CCamera::freeLookGlobalCameraBackward(double dt)
@@ -955,9 +962,9 @@ void CCamera::freeLookGlobalCameraLeft(double dt)
 
 void CCamera::freeLookTerrainCameraForward(double dt)
 {
-    camTerrainX = camTerrainX + camTerrainFreeDirX*camVel*dt;
-    camTerrainY = camTerrainY + camTerrainFreeDirY*camVel*dt;
-    camTerrainZ = camTerrainZ + camTerrainFreeDirZ*camVel*dt;
+    camTerrainX = camTerrainX + camTerrainFreeDirX*camVel*dt*1;
+    camTerrainY = camTerrainY + camTerrainFreeDirY*camVel*dt*1;
+    camTerrainZ = camTerrainZ + camTerrainFreeDirZ*camVel*dt*1;
 }
 
 void CCamera::freeLookTerrainCameraBackward(double dt)

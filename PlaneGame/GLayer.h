@@ -21,7 +21,7 @@ public:
 	GLayer() {
 
 	}
-	GLayer(GClipmap* clipmapPointer, float degree, float inHgtFiledegree, float inScale, int inLOD, int inLayerIndex, 
+	GLayer(GClipmap* clipmapPointer, float degree, float inHgtFiledegree, float inScale, int inLayerIndex, 
 			int inHgtSkipping, int inFileResolution, int inRawSkipping,int inRawFileResolution, int n);
 
 	struct point {
@@ -53,7 +53,8 @@ public:
 		
 
 	GClipmap* clipmap;
-	double horizontalOffset, verticalOffset;
+	float horizontalOffset, verticalOffset;
+	float allFinerHorizontalSum, allFinerVerticalSum;
 	bool isActive;
 
 private: 
@@ -77,9 +78,9 @@ private:
 	int rawFileResolution;		//How many point there are in one scanline in corresponding Raw file 
 
 	int* drawMode;		//Are we drawing lines or triangles
-	int LOD;			//Level Of Detail
 	int layerIndex;
 	int n;
+
 
 	int fillerPositionHorizontal;
 	int fillerPositionVertical;
@@ -114,8 +115,8 @@ private:
 	QOpenGLTexture* heightTexture;
 	QOpenGLTexture* pixelTexture;
 
-	void mapPixelDataIntoTexture(double tlon, double tlat);
-	void mapHeightDataIntoTexture(double tlon, double tlat);
+	void mapPixelDataIntoTexture(double tlon, double tlat, int lonDifference, int latDifference);
+	void mapHeightDataIntoTexture(double tlon, double tlat, int lonDifference, int latDifference);
 	
 	//full reading
 	void fullHgtTextureReading(double lonLeft, double lonRight, double latTop, double latDown);

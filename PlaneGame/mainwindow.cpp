@@ -66,7 +66,7 @@
 #define REAL_SIZEOF_CTERRAINDATA_CLASS   0.011909485
 #define REAL_SIZEOF_CTERRAIN_CLASS       0.011957169
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(  ), ui(new Ui::MainWindow)
 {
     double epLon, epLat, epAlt;
     double sunLon, sunLat, sunAzim, sunElev;

@@ -29,48 +29,48 @@ void main()
 {
 	vec3 pixel;
 	
-	int texPosX = int(mod(levelPositionOut.x + rawTexOffset.x, n - 1));
-	int texPosY = int(mod(levelPositionOut.y + rawTexOffset.y, n - 1));
+	float texPosX = float(mod(levelPositionOut.x + rawTexOffset.x, n - 1));
+	float texPosY = float(mod(levelPositionOut.y + rawTexOffset.y, n - 1));
 
 	switch (layerIndex) {
 	case 0:
-		pixel = texelFetch( tex_pixelmap0, ivec2(texPosX, texPosY), 0).rgb;
+		pixel = texture( tex_pixelmap0, vec2(texPosX/n, texPosY/n), 0).rgb;
 		break;
 	case 1:
-		pixel = texelFetch( tex_pixelmap1, ivec2(texPosX, texPosY), 0).rgb;
+		pixel = texture( tex_pixelmap1, vec2(texPosX/n, texPosY/n), 0).rgb;
 		break;
 	case 2:
-		pixel = texelFetch( tex_pixelmap2, ivec2(texPosX, texPosY), 0).rgb;
+		pixel = texture( tex_pixelmap2, vec2(texPosX/n, texPosY/n), 0).rgb;
 		break;
 	case 3:
-		pixel = texelFetch( tex_pixelmap3, ivec2(texPosX, texPosY), 0).rgb;
+		pixel = texture( tex_pixelmap3, vec2(texPosX/n, texPosY/n), 0).rgb;
 		break;
 	case 4:
-		pixel = texelFetch( tex_pixelmap4, ivec2(texPosX, texPosY), 0).rgb;
+		pixel = texture( tex_pixelmap4, vec2(texPosX/n, texPosY/n), 0).rgb;
 		break;
 	case 5:
-		pixel = texelFetch( tex_pixelmap5, ivec2(texPosX, texPosY), 0).rgb;
+		pixel = vec3(0,240,0);//texture( tex_pixelmap5, vec2(texPosX/n, texPosY/n), 0).rgb;
 		break;
 	case 6:
-		pixel = texelFetch( tex_pixelmap6, ivec2(texPosX, texPosY), 0).rgb;
+		pixel =vec3(240,0,0);//texture( tex_pixelmap6, vec2(texPosX/n, texPosY/n), 0).rgb;
 		break;
 	case 7:
-		pixel = texelFetch( tex_pixelmap7, ivec2(texPosX, texPosY), 0).rgb;
+		pixel = texture( tex_pixelmap7, vec2(texPosX/n, texPosY/n), 0).rgb;
 		break;
 	case 8:
-		pixel = texelFetch( tex_pixelmap8, ivec2(texPosX, texPosY), 0).rgb;
+		pixel = texture( tex_pixelmap8, vec2(texPosX/n, texPosY/n), 0).rgb;
 		break;
 	case 9:
-		pixel = texelFetch( tex_pixelmap9, ivec2(texPosX, texPosY), 0).rgb;
+		pixel = texture( tex_pixelmap9, vec2(texPosX/n, texPosY/n), 0).rgb;
 		break;
 	case 10:
-		pixel = texelFetch( tex_pixelmap10, ivec2(texPosX, texPosY), 0).rgb;
+		pixel = texture( tex_pixelmap10, vec2(texPosX/n, texPosY/n), 0).rgb;
 		break;
 	case 11:
-		pixel = texelFetch( tex_pixelmap11, ivec2(texPosX, texPosY), 0).rgb;
+		pixel = texture( tex_pixelmap11, vec2(texPosX/n, texPosY/n), 0).rgb;
 		break;
 	case 12:
-		pixel = texelFetch( tex_pixelmap12, ivec2(texPosX, texPosY), 0).rgb;
+		pixel = texture( tex_pixelmap12, vec2(texPosX/n, texPosY/n), 0).rgb;
 		break;
 	}
 

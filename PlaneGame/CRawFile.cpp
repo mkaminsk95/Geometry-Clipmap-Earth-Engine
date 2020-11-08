@@ -358,7 +358,7 @@ void CRawFile::loadPixelDataToImagePart(QImage* image, int imageOffsetX, int ima
     
     // load HGT file to memory
     filePixel.open(name.toUtf8(), fstream::in | fstream::binary);
-
+  
     for (y = imageOffsetY; y < yStopCondition; y++) {
 
         //finding right input data
@@ -387,7 +387,7 @@ void CRawFile::loadPixelDataToImagePart(QImage* image, int imageOffsetX, int ima
       
         rowCheck++;
     }
-
+    
     filePixel.close();
 }
 
@@ -468,17 +468,17 @@ void CRawFile::loadHeightDataToImagePart(QImage* image, int imageOffsetX, int im
     fileHeight.close();
 }
 
-void CRawFile::sphericalToRawFilePath(QString* filePath, float lon, float lat, int LOD) {
+void CRawFile::sphericalToRawFilePath(QString* filePath, float lon, float lat, int layerIndex) {
 
     QString filePathTmp;
 
-    if (LOD <= 5) {
+    if (layerIndex >= 8) {
         filePathTmp = "E:\\HgtReader_data\\Textures\\L00_L02";
     }
-    else if (LOD <= 8) {
+    else if (layerIndex >= 5) {
         filePathTmp = "E:\\HgtReader_data\\Textures\\L03_L05";
     }
-    else if (LOD <= 11) {
+    else if (layerIndex >= 2) {
         filePathTmp = "E:\\HgtReader_data\\Textures\\L06_L08";
     }
     else {
@@ -534,14 +534,14 @@ void CRawFile::sphericalToRawFilePath(QString* filePath, float lon, float lat, i
     *filePath = filePathTmp;
 }
 
-void CRawFile::sphericalToHeightFilePath(QString* filePath, float lon, float lat, int LOD) {
+void CRawFile::sphericalToHeightFilePath(QString* filePath, float lon, float lat, int layerIndex) {
 
     QString filePathTmp;
 
-    if (LOD <= 4) {
+    if (layerIndex >= 9) {
         filePathTmp = "E:\\HgtReader_data\\L00-L03";
     }
-    else if (LOD <= 9) {
+    else if (layerIndex >= 4) {
         filePathTmp = "E:\\HgtReader_data\\L04-L08";
     }
     else {

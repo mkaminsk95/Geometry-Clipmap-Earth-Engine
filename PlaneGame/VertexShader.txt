@@ -43,8 +43,8 @@ void main()
 
     vec2 levelPosition = position + patchOrigin;
 
-	positionX = int(mod(levelPosition.x + hgtTexOffset.x, n ));
-	positionY = int(mod(levelPosition.y + hgtTexOffset.y, n ));
+	positionX = int(mod(levelPosition.x + hgtTexOffset.x, n )) + 1;
+	positionY = int(mod(levelPosition.y + hgtTexOffset.y, n )) + 1;
 
 
     vec2 worldPosition = (levelPosition * levelScaleFactor * worldScaleFactor) + worldOffset;

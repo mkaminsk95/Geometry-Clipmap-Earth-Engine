@@ -12,14 +12,13 @@
 double RAW_FILE_DEGREE = 45;
 
 
-GLayer::GLayer(GClipmap* clipmapPointer, float inDegree, float inHgtFileDegree, float inScale, int inLOD, int inLayerIndex, 
+GLayer::GLayer(GClipmap* clipmapPointer, float inDegree, float inHgtFileDegree, float inScale, int inLayerIndex, 
                int inHgtSkipping, int inHgtFileResolution, int inRawSkipping, int inRawFileResolution, int inN) : clipmap(clipmapPointer){
 
     readDegree = inDegree;
     HgtFiledegree = inHgtFileDegree;
 
     scale = inScale;
-    LOD = inLOD;
     layerIndex = inLayerIndex;
     HgtSkipping = inHgtSkipping;
     HgtFileResolution = inHgtFileResolution;
@@ -64,9 +63,8 @@ GLayer::GLayer(GClipmap* clipmapPointer, float inDegree, float inHgtFileDegree, 
 }
 
 
-void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
+void GLayer::mapPixelDataIntoTexture(double tlon, double tlat, int lonDifference, int latDifference) {
     
-    double latDifference, lonDifference;
     double lonLeft, lonRight;
     double latTop, latDown;
 
@@ -84,11 +82,6 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
     }
 
 
-    //checking if there was a movement
-    lonDifference = (-1) * (oldLon - tlon - fmod(oldLon - tlon, readDegree)) / readDegree;
-    latDifference = (-1) * (oldLat - tlat - fmod(oldLat - tlat, readDegree)) / readDegree;
-
-
     if (firstGothrough == true || (abs(latDifference) > n - 1 || abs(lonDifference) > n - 1)) {
 
         computeNewLonAndLat(tlon, tlat, &lonLeft, &lonRight, &latTop, &latDown);
@@ -96,20 +89,18 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
         fullHgtTextureReading(lonLeft, lonRight, latTop, latDown);
         
 
-        //reseting old lon and lat
-        oldLon = tlon;
-        oldLonLeft = lonLeft;
-        oldLonRight = lonRight;
-        oldLat = tlat;
-        oldLatTop = latTop;
-        oldLatDown = latDown;
-
+        
         //reseting texture beggining coordinate
         hgtTextureBegginingX = 0;
         hgtTextureBegginingX = n;
         rawTextureBegginingX = 0;  //x
         rawTextureBegginingY = n - 1;  //y
             
+        oldLatTop = latTop;
+        oldLonRight = lonRight;
+        oldLonLeft = lonLeft;
+        oldLatDown = latDown;
+
         firstGothrough = false;
     }
     else if (lonDifference != 0 || latDifference != 0) {
@@ -137,7 +128,7 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
         heightTexture = new QOpenGLTexture(*heightMap, QOpenGLTexture::DontGenerateMipMaps);
 
         bool success = heightMap->save("hgtTextureLookup.png");
-        QColor kolor = heightMap->pixelColor(50,50);
+        //QColor kolor = heightMap->pixelColor(50,50);
 
         pixelTexture->bind(layerIndex);
         program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);
@@ -163,13 +154,11 @@ void GLayer::mapPixelDataIntoTexture(double tlon, double tlat) {
         }
 
         
-
-        oldLat = oldLat + latDifference * readDegree;
-        oldLon = oldLon + lonDifference * readDegree;
-        oldLatTop  = oldLatTop  + latDifference * readDegree;
+        oldLatTop = oldLatTop + latDifference * readDegree;
         oldLatDown = oldLatDown + latDifference * readDegree;
-        oldLonLeft  = oldLonLeft  + lonDifference * readDegree;
+        oldLonLeft = oldLonLeft + lonDifference * readDegree;
         oldLonRight = oldLonRight + lonDifference * readDegree;
+        
     }
 
 }
@@ -188,8 +177,8 @@ void GLayer::cumputeOffsets() {
 
         int m = (n + 1) / 4;
 
-        horizontalOffset = horOffHigherLayer / 2 + m - 1;
-        verticalOffset = verOffHigherLayer / 2 + m - 1;
+        horizontalOffset = (horOffHigherLayer / 2) + m - 1;
+        verticalOffset = (verOffHigherLayer / 2) + m - 1;
 
     }
 }
@@ -198,32 +187,65 @@ void GLayer::buildLayer(double tlon, double tlat) {
     
 
     QVector2D offsets;
+    double latDifference, lonDifference;
+    
+    
+    //checking if there was a movement
+    lonDifference = (-1) * (oldLon - tlon - fmod(oldLon - tlon, readDegree)) / readDegree;
+    latDifference = (-1) * (oldLat - tlat - fmod(oldLat - tlat, readDegree)) / readDegree;
 
+    //changing layer coordinates depending on movement
+    if (abs(latDifference) > n - 1 || abs(lonDifference) > n - 1) {
+        //reseting old lon and lat
+        oldLat = tlat;
+        oldLon = tlon;
+        
+    }
+    else if (lonDifference != 0 || latDifference != 0) {
+        oldLat = oldLat + latDifference * readDegree;
+        oldLon = oldLon + lonDifference * readDegree;
+        
+    }
+    
+    
+    allFinerHorizontalSum = 0; 
+    allFinerVerticalSum = 0;
 
     if (!layerIndex == 0) {
 
-        if (clipmap->layer[layerIndex - 1].positionHorizontal == 0)  //left side 
-            offsets.setX(tlon - horizontalOffset * readDegree);
-        else if (clipmap->layer[layerIndex - 1].positionHorizontal == 1) //right side
-            offsets.setX(tlon - (horizontalOffset+1) * readDegree);
-        
-        if (clipmap->layer[layerIndex - 1].positionVertical == 0) //down side    
-            offsets.setY(tlat - (verticalOffset) * readDegree);
-        else if (clipmap->layer[layerIndex - 1].positionVertical == 1) //top side    
-            offsets.setY(tlat - (verticalOffset+1) * readDegree);
+        if (clipmap->layer[layerIndex - 1].positionHorizontal == 0) { //left side
+            allFinerHorizontalSum = clipmap->layer[layerIndex - 1].allFinerHorizontalSum / 2;
+            offsets.setX(tlon - (horizontalOffset+allFinerHorizontalSum) * readDegree);
+        } 
+        else if (clipmap->layer[layerIndex - 1].positionHorizontal == 1) { //right side
+            allFinerHorizontalSum = clipmap->layer[layerIndex - 1].allFinerHorizontalSum/2 + 1;
+            offsets.setX(tlon - (horizontalOffset+ allFinerHorizontalSum) * readDegree);
+        }
+        if (clipmap->layer[layerIndex - 1].positionVertical == 0) { //down side    
+            allFinerVerticalSum = clipmap->layer[layerIndex - 1].allFinerVerticalSum / 2;
+            offsets.setY(tlat - (verticalOffset + allFinerVerticalSum) * readDegree);
+        }
+        else if (clipmap->layer[layerIndex - 1].positionVertical == 1) { //top side  
+            allFinerVerticalSum = clipmap->layer[layerIndex - 1].allFinerVerticalSum / 2 + 1;
+            offsets.setY(tlat - (verticalOffset + allFinerVerticalSum) * readDegree);
+        }
+            
     }
     else {
         offsets.setX(tlon - horizontalOffset * readDegree);
         offsets.setY(tlat - verticalOffset * readDegree);
     }
     
+    
+        
+        
     program->setUniformValue("worldOffset", offsets);
 
     program->setUniformValue("levelScaleFactor", QVector2D(scale, scale));
     program->setUniformValue("layerIndex", layerIndex);
 
-    //mapHeightDataIntoTexture(tlon, tlat);
-    mapPixelDataIntoTexture(tlon, tlat);
+    //mapHeightDataIntoTexture(tlon, tlat, lonDifference, latDifference);
+    mapPixelDataIntoTexture(tlon, tlat, lonDifference, latDifference);
 
     program->setUniformValue("n", n);
     program->setUniformValue("rawTexOffset", QVector2D(rawTextureBegginingX, rawTextureBegginingY));
@@ -413,7 +435,7 @@ void GLayer::fullHgtTextureReading(double lonLeft, double lonRight, double latTo
             checkRawFileOffset_Y(&fileVerticalOffset, verticalPosition, latTop, maxTilesLat);
 
         
-            CRawFile::sphericalToHeightFilePath(&filePath, i, j, LOD);
+            CRawFile::sphericalToHeightFilePath(&filePath, i, j, layerIndex);
             CRawFile::loadHeightDataToImageFull(heightMap, imageOffsetX, imageOffsetY,
                 filePath, howManyToReadX, howManyToReadY,
                 HgtFileResolution, HgtSkipping,
@@ -485,7 +507,7 @@ void GLayer::fullRawTextureReading(double lonLeft, double lonRight, double latTo
             checkHowManyPixelsToReadFromRaw_Y(&howManyToReadY, verticalPosition, latTop, latDown, j, RAW_FILE_DEGREE, true);
             checkRawFileOffset_Y(&fileVerticalOffset, verticalPosition, latTop, maxTilesLat);
 
-            CRawFile::sphericalToRawFilePath(&filePath, i, j, LOD);
+            CRawFile::sphericalToRawFilePath(&filePath, i, j, layerIndex);
             CRawFile::loadPixelDataToImageFull(pixelMap, imageOffsetX, imageOffsetY,
                 filePath, howManyToReadX, howManyToReadY,
                 rawFileResolution, rawSkipping,
@@ -580,7 +602,7 @@ void GLayer::horizontalBlockHgtTextureReading(int lonDifference, int latDifferen
             checkRawFileOffset_Y(&fileVerticalOffset, verticalPosition, latTopHor, maxTilesLat);
 
 
-            CRawFile::sphericalToHeightFilePath(&filePath, i, j, LOD);
+            CRawFile::sphericalToHeightFilePath(&filePath, i, j, layerIndex);
 
             CRawFile::loadHeightDataToImagePart(heightMap, imageOffsetX, imageOffsetY,
                 filePath, howManyToReadX, howManyToReadY, HgtFileResolution, HgtSkipping,
@@ -676,7 +698,7 @@ void GLayer::horizontalBlockRawTextureReading(int lonDifference, int latDifferen
             checkRawFileOffset_Y(&fileVerticalOffset, verticalPosition, latTopHor, maxTilesLat);
        
 
-            CRawFile::sphericalToRawFilePath(&filePath, i, j, LOD);
+            CRawFile::sphericalToRawFilePath(&filePath, i, j, layerIndex);
 
             CRawFile::loadPixelDataToImagePart(pixelMap, imageOffsetX, imageOffsetY,
                 filePath, howManyToReadX, howManyToReadY, rawFileResolution, rawSkipping,
@@ -779,7 +801,7 @@ void GLayer::verticalBlockHgtTextureReading(int lonDifference, int latDifference
             checkRawFileOffset_Y(&fileVerticalOffset, verticalPosition, latTopVer, maxTilesLat);
 
 
-            CRawFile::sphericalToHeightFilePath(&filePath, i, j, LOD);
+            CRawFile::sphericalToHeightFilePath(&filePath, i, j, layerIndex);
 
             CRawFile::loadPixelDataToImagePart(heightMap, imageOffsetX, imageOffsetY,
                 filePath, howManyToReadX, howManyToReadY, HgtFileResolution, HgtSkipping,
@@ -883,7 +905,7 @@ void GLayer::verticalBlockRawTextureReading(int lonDifference, int latDifference
             checkRawFileOffset_Y(&fileVerticalOffset, verticalPosition, latTopVer, maxTilesLat);
 
           
-            CRawFile::sphericalToRawFilePath(&filePath, i, j, LOD);
+            CRawFile::sphericalToRawFilePath(&filePath, i, j, layerIndex);
                 
             CRawFile::loadPixelDataToImagePart(pixelMap, imageOffsetX, imageOffsetY,
                     filePath, howManyToReadX, howManyToReadY, rawFileResolution, rawSkipping,
