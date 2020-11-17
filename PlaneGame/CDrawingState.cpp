@@ -72,6 +72,9 @@ CDrawingState::CDrawingState()
     dontUseCache = false;
     dontUseDiskHgt = false;
     dontUseDiskRaw = false;
+
+    activeLvlOfDetail = 3;
+    highestLvlOfDetail = 4;
 }
 
 void CDrawingState::getDrawingStateSnapshot(CDrawingStateSnapshot *dss)
@@ -129,6 +132,9 @@ void CDrawingState::getDrawingStateSnapshot(CDrawingStateSnapshot *dss)
     dss->dontUseCache = dontUseCache;
     dss->dontUseDiskHgt = dontUseDiskHgt;
     dss->dontUseDiskRaw = dontUseDiskRaw;
+
+    dss->activeLvlOfDetail = activeLvlOfDetail;
+    dss->highestLvlOfDetail = highestLvlOfDetail;
 }
 
 void CDrawingState::setDrawingStateMutex(QMutex *m)

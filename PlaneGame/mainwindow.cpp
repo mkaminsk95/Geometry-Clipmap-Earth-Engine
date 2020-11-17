@@ -89,12 +89,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(  ), ui(new Ui::MainWindow
     // load earth point to select
     SLOTreloadEarthPointsSelect(0);
 
-    QObject::connect(ui->cacheClearButton, SIGNAL(clicked()), openGl->terrainLoaderThread, SLOT(SLOTclearCache()));
-    QObject::connect(openGl->terrainLoaderThread, SIGNAL(SIGNALupdateCacheInfo(int,int,int,int,unsigned int)), this, SLOT(SLOTupdateCacheInfo(int,int,int,int,unsigned int)));
-    QObject::connect(ui->benchmarkButton, SIGNAL(clicked()), openGl->animationThread, SLOT(SLOTstartBenchmark()));
+    //QObject::connect(ui->cacheClearButton, SIGNAL(clicked()), openGl->terrainLoaderThread, SLOT(SLOTclearCache()));
+    //QObject::connect(openGl->terrainLoaderThread, SIGNAL(SIGNALupdateCacheInfo(int,int,int,int,unsigned int)), this, SLOT(SLOTupdateCacheInfo(int,int,int,int,unsigned int)));
+   // QObject::connect(ui->benchmarkButton, SIGNAL(clicked()), openGl->animationThread, SLOT(SLOTstartBenchmark()));
 
-    QObject::connect(camera, SIGNAL(SIGNALanimateToEarthPoint(double,double,double,double,double,double)), openGl->animationThread,
-                             SLOT(SLOTanimateToEarthPoint(double,double,double,double,double,double)));
+    //QObject::connect(camera, SIGNAL(SIGNALanimateToEarthPoint(double,double,double,double,double,double)), openGl->animationThread,
+    //                         SLOT(SLOTanimateToEarthPoint(double,double,double,double,double,double)));
     QObject::connect(camera, SIGNAL(SIGNALupdateCameraInfo(double,double,double,double)), this, SLOT(SLOTupdateCameraInfo(double, double, double, double)));
     QObject::connect(camera, SIGNAL(SIGNALupdateSunInfo(double,double,double,double)), this, SLOT(SLOTupdateSunInfo(double,double,double,double)));
     QObject::connect(camera, SIGNAL(SIGNALupdateFovAndCamVel(double,double)), this, SLOT(SLOTupdateFovAndCamVelInfo(double,double)));

@@ -381,6 +381,219 @@ void CHgtFile::fileSetHeightBlock(quint16 *buffer, int x, int y, int sx, int sy,
         }
 }
 
+void CHgtFile::loadHeightDataToImageFull(QImage* image, int imageOffsetX, int imageOffsetY, QString name,
+    int xToRead, int yToRead, int fileResolution, int skip, int positionHorizontalOffset, int positionVerticalOffset)
+{
+    fstream fileHeight;
+    quint8 height[2];
+    uchar* bits;
+
+    long offset;
+    int n = image->height() - 1;
+    int rowCheck = 0; //variable tracks next rows in raw file
+
+    //calculation offset for reading exact bites in raw files
+    offset = (positionVerticalOffset * fileResolution + positionHorizontalOffset) * skip * 2;
+
+    // load HGT file to memory
+    fileHeight.open(name.toUtf8(), fstream::in | fstream::binary);
+    bool ifOpened = fileHeight.is_open();
+
+    if (ifOpened) {
+        for (int y = imageOffsetY; y < imageOffsetY + yToRead; y++) {
+
+            //finding right input data
+            fileHeight.seekg(offset + 2 * skip * rowCheck * fileResolution);
+
+            //finding right row of image (texture)
+            bits = image->scanLine(n - y);
+
+            for (int x = imageOffsetX; x < imageOffsetX + xToRead; x++) {
+
+                //reading next two bites (2bite format - height 0 - 65536) from hgt file 
+                fileHeight.read((char*)&height[0], 1);
+                fileHeight.read((char*)&height[1], 1);
+
+                //jumping to the next bites block depending on the layer resolution
+                fileHeight.seekg(skip * 2 - 2, fileHeight.cur);
+
+                //writing to the image
+                *(bits + 2 * x) = height[1];
+                *(bits + 2 * x + 1) = height[0];
+
+            }
+
+            rowCheck++;
+        }
+    }
+    else {
+        for (int y = imageOffsetY; y < imageOffsetY + yToRead; y++) {
+
+            //finding right row of image (texture)
+            bits = image->scanLine(n - y);
+
+            for (int x = imageOffsetX; x < imageOffsetX + xToRead; x++) {
+
+                //writing to the image
+                *(bits + 2 * x) = 0x00;
+                *(bits + 2 * x + 1) = 0x00;
+
+            }
+
+            rowCheck++;
+        }
+    }
+
+
+
+    fileHeight.close();
+}
+
+void CHgtFile::loadHeightDataToImagePart(QImage* image, int imageOffsetX, int imageOffsetY, QString name,
+    int xToRead, int yToRead, int fileResolution, int skip,
+    int filePositionHorizontalOffset, int filePositionVerticalOffset,
+    int textureBegginingX, int textureBegginingY)
+{
+    fstream fileHeight;
+    quint8 height[2];
+    uchar* bits;
+
+    long offset;
+
+    int x, y;
+    int yStopCondition, xStopCondition;
+    int rowCheck = 0;  //variable tracks next rows in raw file
+    int n = image->height();
+
+    y = imageOffsetY;
+    x = imageOffsetX;
+    yStopCondition = imageOffsetY + yToRead;
+    xStopCondition = imageOffsetX + xToRead;
+
+    //calculation offset for reading exact bites in raw files
+    offset = (filePositionVerticalOffset * fileResolution + filePositionHorizontalOffset) * skip * 2;
+
+    // load HGT file to memory
+    fileHeight.open(name.toUtf8(), fstream::in | fstream::binary);
+    bool ifOpened = fileHeight.is_open();
+
+    if (ifOpened) {
+        for (y = imageOffsetY; y < yStopCondition; y++) {
+
+            //finding right input data
+            fileHeight.seekg(offset + 2 * skip * rowCheck * fileResolution);
+
+            //finding right row of image (texture)
+            bits = image->scanLine((n - 1) - fmod(textureBegginingY + y, n));
+
+            for (x = imageOffsetX; x < xStopCondition; x++) {
+
+
+                //reading next three bites (3bite format - rgb) from raw file 
+                fileHeight.read((char*)&height[0], 1);
+                fileHeight.read((char*)&height[1], 1);
+
+                //jumping to the next bites block depending on the layer resolution
+                fileHeight.seekg(skip * 2 - 2, fileHeight.cur);
+
+                //writing to the image
+                *(bits + 2 * ((textureBegginingX + x) % (n))) = height[1];
+                *(bits + 2 * ((textureBegginingX + x) % (n)) + 1) = height[0];
+
+            }
+
+            rowCheck++;
+        }
+    }
+    else {
+        for (y = imageOffsetY; y < yStopCondition; y++) {
+
+            //finding right row of image (texture)
+            bits = image->scanLine((n - 1) - fmod(textureBegginingY + y, n));
+
+            for (x = imageOffsetX; x < xStopCondition; x++) {
+
+                //writing to the image
+                *(bits + 2 * ((textureBegginingX + x) % (n))) = 0;
+                *(bits + 2 * ((textureBegginingX + x) % (n)) + 1) = 0;
+
+            }
+
+        }
+    }
+
+
+    fileHeight.close();
+}
+
+void CHgtFile::sphericalToHeightFilePath(QString* filePath, float lon, float lat, int layerIndex) {
+
+    QString filePathTmp;
+
+    if (layerIndex >= 9) {
+        filePathTmp = "E:\\HgtReader_data\\L00-L03";
+    }
+    else if (layerIndex >= 4) {
+        filePathTmp = "E:\\HgtReader_data\\L04-L08";
+    }
+    else {
+        filePathTmp = "E:\\HgtReader_data\\L09-L13";
+    }
+
+    if (lon > 0 && lon < 180)  //0-180
+        lon = lon;
+    else if (lon > 180)  //180-360
+        lon = lon - 360;
+    else if (lon < 0)     //-180-0
+        lon = lon;
+    else if (lon == 180)
+        lon = -180;
+
+
+    char latString[6] = "00,00";
+    char lonString[7] = "000,00";
+    if (abs(lat) < 10) {
+        sprintf(&latString[1], "%g", abs(lat));
+    }
+    else {
+        sprintf(latString, "%g", abs(lat));
+    }
+
+    if (latString[3] == '5')
+        latString[4] = '0';
+
+    if (abs(lon) < 10) {
+        sprintf(&lonString[2], "%g", abs(lon));
+    }
+    else if (abs(lon) < 100) {
+        sprintf(&lonString[1], "%g", abs(lon));
+    }
+    else {
+        sprintf(lonString, "%g", abs(lon));
+    }
+
+    if (lonString[4] == '5')
+        lonString[5] = '0';
+
+    latString[2] = ',';
+    lonString[3] = ',';
+
+    if (lat < 0) {
+        filePathTmp = filePathTmp + "\\S" + latString;
+    }
+    else {
+        filePathTmp = filePathTmp + "\\N" + latString;
+    }
+
+    if (lon < 0) {
+        filePathTmp = filePathTmp + "_W" + lonString + ".hgt";
+    }
+    else {
+        filePathTmp = filePathTmp + "_E" + lonString + ".hgt";
+    }
+
+    *filePath = filePathTmp;
+}
 
 void CHgtFile::sphericalToFilePath(QString *filePath, float lon, float lat, int LOD) {
 

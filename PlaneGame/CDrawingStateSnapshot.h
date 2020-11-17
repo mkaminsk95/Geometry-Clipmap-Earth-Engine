@@ -95,6 +95,8 @@ public:
     bool dontUseDiskHgt;
     bool dontUseDiskRaw;
     bool dontUseCache;
+
+    int activeLvlOfDetail, highestLvlOfDetail;
 };
 
 #endif // CDRAWINGSTATESNAPSHOT_H

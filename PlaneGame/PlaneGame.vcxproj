@@ -38,6 +38,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>E:\planeGame\PlaneGame\PlaneGame;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>E:\planeGame\PlaneGame\PlaneGame;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
@@ -86,7 +92,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Bmp.cpp" />
     <ClCompile Include="CAnimationThread.cpp" />
     <ClCompile Include="CAvability.cpp" />
     <ClCompile Include="CCachedTerrainData.cpp" />
@@ -98,24 +103,22 @@
     <ClCompile Include="CDrawingStateSnapshot.cpp" />
     <ClCompile Include="CEarth.cpp" />
     <ClCompile Include="CEarthPointsList.cpp" />
+    <ClCompile Include="GHeight.cpp" />
     <ClCompile Include="CHgtFile.cpp" />
     <ClCompile Include="CObjects.cpp" />
     <ClCompile Include="COpenGl.cpp" />
     <ClCompile Include="COpenGlThread.cpp" />
     <ClCompile Include="CPerformance.cpp" />
+    <ClCompile Include="GPixel.cpp" />
     <ClCompile Include="CRawFile.cpp" />
     <ClCompile Include="CTerrain.cpp" />
     <ClCompile Include="CTerrainData.cpp" />
     <ClCompile Include="CTerrainLoaderThread.cpp" />
     <ClCompile Include="GClipmap.cpp" />
     <ClCompile Include="GClipmapThread.cpp" />
-    <ClCompile Include="glew.cpp" />
     <ClCompile Include="GLayer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mainwindow.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="PlaneGame.h" />
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="mainwindow.ui" />
@@ -125,7 +128,6 @@
     <QtRcc Include="PlaneGame.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Bmp.h" />
     <ClInclude Include="CAvability.h" />
     <ClInclude Include="CCachedTerrainData.h" />
     <ClInclude Include="CCachedTerrainDataGroup.h" />
@@ -134,13 +136,14 @@
     <ClInclude Include="CDrawingStateSnapshot.h" />
     <ClInclude Include="CEarth.h" />
     <ClInclude Include="CEarthPointsList.h" />
+    <ClInclude Include="GHeight.h" />
     <ClInclude Include="CHgtFile.h" />
-    <ClInclude Include="core.h" />
+    <ClInclude Include="GPixel.h" />
     <ClInclude Include="GClipmapThread.h" />
     <ClInclude Include="CObjects.h" />
     <ClInclude Include="GLayer.h" />
     <ClInclude Include="GClipmap.h" />
-    <ClInclude Include="glsl.h" />
+    <ClInclude Include="GStructures.h" />
     <ClInclude Include="mathlib\bbox.h" />
     <ClInclude Include="mathlib\envelopecurve.h" />
     <ClInclude Include="mathlib\euler.h" />
@@ -171,7 +174,6 @@
     <ClInclude Include="mathlib\_vector3_sse.h" />
     <ClInclude Include="mathlib\_vector4.h" />
     <ClInclude Include="mathlib\_vector4_sse.h" />
-    <ClInclude Include="ogl.h" />
     <QtMoc Include="CPerformance.h" />
     <QtMoc Include="COpenGlThread.h" />
     <QtMoc Include="COpenGl.h" />

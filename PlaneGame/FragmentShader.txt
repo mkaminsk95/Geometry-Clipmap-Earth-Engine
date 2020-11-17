@@ -49,10 +49,10 @@ void main()
 		pixel = texture( tex_pixelmap4, vec2(texPosX/n, texPosY/n), 0).rgb;
 		break;
 	case 5:
-		pixel = vec3(0,240,0);//texture( tex_pixelmap5, vec2(texPosX/n, texPosY/n), 0).rgb;
+		pixel = texture( tex_pixelmap5, vec2(texPosX/n, texPosY/n), 0).rgb;
 		break;
 	case 6:
-		pixel =vec3(240,0,0);//texture( tex_pixelmap6, vec2(texPosX/n, texPosY/n), 0).rgb;
+		pixel = texture( tex_pixelmap6, vec2(texPosX/n, texPosY/n), 0).rgb;
 		break;
 	case 7:
 		pixel = texture( tex_pixelmap7, vec2(texPosX/n, texPosY/n), 0).rgb;

@@ -103,20 +103,17 @@
     <ClCompile Include="GClipmap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Bmp.cpp">
+    <ClCompile Include="GLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="glew.cpp">
+    <ClCompile Include="GPixel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Layer.cpp">
+    <ClCompile Include="GHeight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="PlaneGame.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="mainwindow.h">
       <Filter>Source Files</Filter>
     </QtMoc>
@@ -203,15 +200,6 @@
     </ClInclude>
     <ClInclude Include="GClipmap.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Bmp.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="core.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="glsl.h">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="mathlib\vector3envelopecurve.h">
       <Filter>matlib</Filter>
@@ -303,7 +291,13 @@
     <ClInclude Include="mathlib\bbox.h">
       <Filter>matlib</Filter>
     </ClInclude>
-    <ClInclude Include="ogl.h">
+    <ClInclude Include="GPixel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GHeight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GStructures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -55,6 +55,9 @@ COpenGlThread::COpenGlThread(COpenGl *openGlPointer) : QThread(openGlPointer), o
     doTerminate = false;
     doResize = false;
 
+    //////////////////////////////
+    quadtree = false;
+
     // set earth pointer to earth "A"
     earth = openGl->earthBufferA;
     clipmap = openGl->clipmap;
@@ -128,32 +131,38 @@ void COpenGlThread::run()
         openGl->drawingState.getDrawingStateSnapshot(&dss);  // get current scene state
       
 
-        // check if new earth was loaded from disk in parraler thread
-        openGl->earthBufferMutex.lock();
-        if (openGl->earthBufferReadyToExchange) {
-            // exchange earths :]
-            tmp = earth;
-            earth = openGl->terrainLoaderThread->earth;
-            openGl->terrainLoaderThread->earth = tmp;
+        if (quadtree) {
 
-            earth->setDrawingStateSnapshot(&dss);       // set drawing state used in >this< thread
 
-            openGl->earthBufferReadyToExchange = false;
-            openGl->earthBufferExchange.wakeOne();      // wake terrain loading thread
+            // check if new earth was loaded from disk in parraler thread
+            openGl->earthBufferMutex.lock();
+            if (openGl->earthBufferReadyToExchange) {
+                // exchange earths :]
+                tmp = earth;
+                earth = openGl->terrainLoaderThread->earth;
+                openGl->terrainLoaderThread->earth = tmp;
+
+                earth->setDrawingStateSnapshot(&dss);       // set drawing state used in >this< thread
+
+                openGl->earthBufferReadyToExchange = false;
+                openGl->earthBufferExchange.wakeOne();      // wake terrain loading thread
+            }
+            openGl->earthBufferMutex.unlock();
+
+            // remove from VRAM textures assigned to terrainData that was deleted from cache in TerrainLoaderThread
+            for (i=0; i<earth->textureIDListToRemoveFromVRAM.size(); i++) {
+                texID = earth->textureIDListToRemoveFromVRAM.at(i);
+                glDeleteTextures(1, &texID);
+            }
+            earth->textureIDListToRemoveFromVRAM.clear();
+
+            // update performance info
+            msleep(1);
+            openGl->performance.setFrameRenderingTime(time.elapsed());
+            openGl->performance.updateFrameRenderingInfo();
+
         }
-        openGl->earthBufferMutex.unlock();
 
-        // remove from VRAM textures assigned to terrainData that was deleted from cache in TerrainLoaderThread
-        for (i=0; i<earth->textureIDListToRemoveFromVRAM.size(); i++) {
-            texID = earth->textureIDListToRemoveFromVRAM.at(i);
-            glDeleteTextures(1, &texID);
-        }
-        earth->textureIDListToRemoveFromVRAM.clear();
-
-        // update performance info
-        msleep(1);
-        openGl->performance.setFrameRenderingTime(time.elapsed());
-        openGl->performance.updateFrameRenderingInfo();
     }
 }
 
@@ -223,12 +232,17 @@ void COpenGlThread::drawScene()
     glClear(GL_DEPTH_BUFFER_BIT);
 
     if (dss.sunEnabled)        enableSunLight(); else disableSunLight();
-   // if (dss.drawGrid)          objects.drawGrid(dss.sunEnabled);
+    if (dss.drawGrid)          objects.drawGrid(dss.sunEnabled);
     if (dss.drawEarthPoint)    objects.drawEarthPoint(dss.earthPointX, dss.earthPointY, dss.earthPointZ, dss.camDistanceToEarthPoint, dss.sunEnabled);
    
-    //earth->draw();
-    clipmap->setDrawingStateSnapshot(& dss);
-    clipmap->draw();
+    if (quadtree) {
+        earth->draw();
+    }
+    else if (!quadtree) {
+        clipmap->setDrawingStateSnapshot(& dss);
+        clipmap->setLvlsOfDetail(dss.activeLvlOfDetail, dss.highestLvlOfDetail);
+        clipmap->draw();
+    }
 
     glPopMatrix();
     if (dss.drawAxes)    objects.drawAxes(dss.sunEnabled);

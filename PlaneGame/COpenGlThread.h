@@ -70,6 +70,10 @@ protected:
     void run();
 
 private:
+
+    bool quadtree;
+
+
     COpenGl *openGl;
     CObjects objects;
     QTime time;

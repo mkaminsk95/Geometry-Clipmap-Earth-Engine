@@ -936,9 +936,9 @@ void CCamera::freeLookGlobalCameraRight(double dt)
     rightVec = QVector3D::crossProduct(camDirVec, upVec);
     rightVec.normalize();
 
-    camGlobeX = camGlobeX + rightVec.x()*camVel*dt;
-    camGlobeY = camGlobeY + rightVec.y()*camVel*dt;
-    camGlobeZ = camGlobeZ + rightVec.z()*camVel*dt;
+    camGlobeX = camGlobeX + rightVec.x()*camVel*dt*10;
+    camGlobeY = camGlobeY + rightVec.y()*camVel*dt*10;
+    camGlobeZ = camGlobeZ + rightVec.z()*camVel*dt*10;
 }
 
 void CCamera::freeLookGlobalCameraLeft(double dt)

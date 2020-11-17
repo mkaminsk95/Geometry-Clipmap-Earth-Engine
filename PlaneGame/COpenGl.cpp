@@ -75,8 +75,8 @@ COpenGl::COpenGl(QGLFormat glFormat, QWidget *parent) : QGLWidget(glFormat, pare
     openGlThread->start();
 
     // start terrain loading thread
-    terrainLoaderThread = new CTerrainLoaderThread(this);
-    terrainLoaderThread->start();
+   // terrainLoaderThread = new CTerrainLoaderThread(this);
+   // terrainLoaderThread->start();
 
     // start animation thread
     animationThread = new CAnimationThread(this);
@@ -148,6 +148,26 @@ void COpenGl::keyPressEvent(QKeyEvent *event)
 {
     if (!drawingState.getCamera()->keyPressEventHandler(event))
         QWidget::keyPressEvent(event);
+    else if (event->key() == Qt::Key_V) {
+        drawingStateMutex.lock();
+        drawingState.increaseActiveLvlOfDetail();
+        drawingStateMutex.unlock();
+    }
+    else if (event->key() == Qt::Key_C) {
+        drawingStateMutex.lock();
+        drawingState.decreaseActiveLvlOfDetail();
+        drawingStateMutex.unlock();
+    }
+    else if (event->key() == Qt::Key_Z) {
+        drawingStateMutex.lock();
+        drawingState.increaseHighestLvlOfDetail();
+        drawingStateMutex.unlock();
+    }
+    else if (event->key() == Qt::Key_X) {
+        drawingStateMutex.lock();
+        drawingState.decreaseHighestLvlOfDetail();
+        drawingStateMutex.unlock();
+    }
 }
 
 void COpenGl::keyReleaseEvent(QKeyEvent *event)

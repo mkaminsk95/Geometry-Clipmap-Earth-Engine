@@ -7,6 +7,7 @@
 #include <QOpenGLTexture>
 #include <QImage>
 #include <QVector>
+#include <QKeyEvent>
 
 #include "CDrawingStateSnapshot.h"
 #include "COpenGl.h"
@@ -57,12 +58,18 @@ public:
 	int pixelTextureLocation[13];
 	int heightTextureLocation[13];
 	int drawingMode;
+
 	int activeLvlOfDetail, highestLvlOfDetail;
 	QVector<GLayer> layer;
 	
 
 	//public methods
 	void draw();
+
+	void setLvlsOfDetail(int inActiveLvlOfDetail, int inHighestLvlOfDetail) {
+		activeLvlOfDetail = inActiveLvlOfDetail;
+		highestLvlOfDetail = inHighestLvlOfDetail;
+	}
 
 	void setDrawingStateSnapshot(CDrawingStateSnapshot* dss) {
 		drawingStateSnapshot = dss;
@@ -81,7 +88,7 @@ private:
 	QVector3D* cameraPosition;
 	QVector3D* grid;
 	
-
+	QKeyEvent* xKey;
 	
 	bool initialized;
 	CDrawingStateSnapshot* drawingStateSnapshot;
@@ -103,14 +110,14 @@ private:
 	//methods
 	void findPosition();
 
+	void initialize();
+
 	void initializeA_Buffer();
 	void initializeB_Buffer();
 	void initializeC_Buffer();
 	void initializeD_Buffer();
 	void initializeE_Buffer();
 	void initializeF_Buffer();
-
-	//void buildLayer();
 
 	QMatrix4x4 generateModelViewMatrix();
 

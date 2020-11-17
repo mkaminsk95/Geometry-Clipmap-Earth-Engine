@@ -90,6 +90,18 @@ public slots:
     void SLOTdontUseDiskHgtChanged(int state);                      // thread safe (drawingStateMutex)
     void SLOTdontUseDiskRawChanged(int state);                      // thread safe (drawingStateMutex)
     void SLOTdontUseCacheChanged(int state);                        // thread safe (drawingStateMutex)
+    void decreaseActiveLvlOfDetail() {
+        activeLvlOfDetail--;
+    }
+    void increaseActiveLvlOfDetail() {
+        activeLvlOfDetail++;
+    }
+    void decreaseHighestLvlOfDetail() {
+        highestLvlOfDetail--;
+    }
+    void increaseHighestLvlOfDetail() {
+        highestLvlOfDetail++;
+    }
 
 private:
     CCamera camera;
@@ -118,6 +130,8 @@ private:
     bool dontUseDiskHgt;
     bool dontUseDiskRaw;
     bool dontUseCache;
+
+    int activeLvlOfDetail, highestLvlOfDetail;
 };
 
 #endif // CDRAWINGSTATE_H

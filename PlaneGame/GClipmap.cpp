@@ -4,13 +4,13 @@
 #include "CHgtFile.h"
 #include "GLayer.h"
 
-int n = 15;          //7, 15, 31, 63, 127, 255, 511, 1023
+int n = 255;          //7, 15, 31, 63, 127, 255, 511, 1023
 int m = (n + 1) / 4; //2,  4,  8, 16
 
 GClipmap::GClipmap(COpenGl* openGlPointer) : openGl(openGlPointer)
 {
     camera = openGl->drawingState.getCamera();
-    
+
     program = new QOpenGLShaderProgram();
     vaoA = new QOpenGLVertexArrayObject;
     vaoB = new QOpenGLVertexArrayObject;
@@ -18,15 +18,17 @@ GClipmap::GClipmap(COpenGl* openGlPointer) : openGl(openGlPointer)
     vaoD = new QOpenGLVertexArrayObject;
     vaoE = new QOpenGLVertexArrayObject;
     vaoF = new QOpenGLVertexArrayObject;
-
+    
     initialized = false;     
 }
 
 void GClipmap::draw() {
+    
 
 
     if (!initialized) {
-        
+        xKey = new QKeyEvent(QEvent::KeyPress, Qt::Key_F, Qt::NoModifier, 0, 0, 0, "f", false, 1);
+
         bool result;
 
         //program shader
@@ -75,25 +77,25 @@ void GClipmap::draw() {
         initializeF_Buffer();
 
         //setting drawing mode
-        drawingMode = GL_LINE_STRIP;
-        //drawingMode = GL_TRIANGLE_STRIP;
+        //drawingMode = GL_LINE_STRIP;
+        drawingMode = GL_TRIANGLE_STRIP;
 
 
         //building layers
 
-        layer.push_back(GLayer(this,  0.0018311,      3.75,          1,   0,          2,      4097,        1,         24576, n));
-        layer.push_back(GLayer(this,  0.0036621,      3.75,          2,   1,          4,      4097,        2,         24576, n));
-        layer.push_back(GLayer(this,  0.0073242,      3.75,          4,   2,          8,      4097,        1,          6144, n));
-        layer.push_back(GLayer(this,  0.0146484,      3.75,          8,   3,         16,      4097,        2,          6144, n));
-        layer.push_back(GLayer(this,  0.0292969,     15.00,         16,   4,          1,       512,        4,          6144, n));
-        layer.push_back(GLayer(this,  0.0585938,     15.00,         32,   5,          2,       512,        1,           768, n));
-        layer.push_back(GLayer(this,  0.1171876,     15.00,         64,   6,          4,       512,        2,           768, n));
-        layer.push_back(GLayer(this,  0.2343752,     15.00,        128,   7,          8,       512,        4,           768, n));
-        layer.push_back(GLayer(this,  0.4687504,     15.00,        256,   8,         16,       512,        1,            96, n));
-        layer.push_back(GLayer(this,  0.9375008,     60.00,        512,   9,          1,        64,        2,            96, n));
-        layer.push_back(GLayer(this,  1.8750016,     60.00,       1024,  10,          2,        64,        4,            96, n));
-        layer.push_back(GLayer(this,  3.7500032,     60.00,       2048,  11,          4,        64,        8,            96, n));
-        layer.push_back(GLayer(this,  7.5000064,     60.00,       4096,  12,          8,        64,       16,            96, n));
+        layer.push_back(GLayer(this,  0.0018311,      3.75,          1,   0,          2,      4097,        1,         24576, n));  //0
+        layer.push_back(GLayer(this,  0.0036621,      3.75,          2,   1,          4,      4097,        2,         24576, n));  //1
+        layer.push_back(GLayer(this,  0.0073242,      3.75,          4,   2,          8,      4097,        1,          6144, n));  //2
+        layer.push_back(GLayer(this,  0.0146484,      3.75,          8,   3,         16,      4097,        2,          6144, n));  //3
+        layer.push_back(GLayer(this,  0.0292969,     15.00,         16,   4,          1,       512,        4,          6144, n));  //4
+        layer.push_back(GLayer(this,  0.0585938,     15.00,         32,   5,          2,       512,        1,           768, n));  //5
+        layer.push_back(GLayer(this,  0.1171876,     15.00,         64,   6,          4,       512,        2,           768, n));  //6
+        layer.push_back(GLayer(this,  0.2343752,     15.00,        128,   7,          8,       512,        4,           768, n));  //7
+        layer.push_back(GLayer(this,  0.4687504,     15.00,        256,   8,         16,       512,        1,            96, n));  //8
+        layer.push_back(GLayer(this,  0.9375008,     60.00,        512,   9,          1,        64,        2,            96, n));  //9
+        layer.push_back(GLayer(this,  1.8750016,     60.00,       1024,  10,          2,        64,        4,            96, n));  //10
+        layer.push_back(GLayer(this,  3.7500032,     60.00,       2048,  11,          4,        64,        8,            96, n));  //11
+        layer.push_back(GLayer(this,  7.5000064,     60.00,       4096,  12,          8,        64,       16,            96, n));  //12
        
 
         //defining vertex array object
@@ -114,9 +116,11 @@ void GClipmap::draw() {
         program->setUniformValue("worldScaleFactor", worldScaleFactor);
         program->setUniformValue("worldOffset", QVector2D(0.0, 0.0));
         program->setUniformValue("color", color);
-        
+        program->setUniformValue("n", n);
         
         initialized = true; 
+
+        
     }
 
     program->bind();
@@ -197,13 +201,12 @@ void GClipmap::draw() {
     
    // CCommons::doubleIntoVSConsole(distanceFromEarth);
 
-    QString filename = "E:\\HgtReader_data\\Textures\\L03_L05\\N00,00_E135,00.raw";
-    QImage pixelMap(filename, nullptr);
+   /* QString filename = "E:\\HgtReader_data\\Textures\\L03_L05\\N00,00_E135,00.raw";
+    QImage pixelMap(filename, nullptr);*/
 
-   activeLvlOfDetail = 5;
-   highestLvlOfDetail = 6;
+    activeLvlOfDetail =  6;
+    highestLvlOfDetail = 8;
 
-    //activeLevelOfDetail = 3;
     for (int x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
         layer[x].buildLayer(tlon, tlat);
     
@@ -226,6 +229,10 @@ void GClipmap::findPosition() {
     //finding right tile
     CCommons::getSphericalFromCartesian(camX, camY, camZ, &lon, &lat, &rad);
     CCommons::findTopLeftCorner(lon, lat, 0.0018311, &tlon, &tlat);
+
+}
+
+void GClipmap::initialize() {
 
 }
 
