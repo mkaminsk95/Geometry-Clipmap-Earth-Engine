@@ -35,11 +35,6 @@ void GHeight::fullHgtTextureReading(double lonLeft, double lonRight, double latD
     //Finding top left tile 
     findingTopLeftFileToRead(&maxTilesLon, &maxTilesLat, lonLeft, latTop, hgtFileDegree);
 
-//    fstream file;
-//    CRawFile::sphericalToHeightFilePath(&filePath, maxTilesLon, maxTilesLat, LOD);
-//    file.open(filePath.toUtf8(), fstream::in | fstream::binary);
-
-
     if ((maxTilesLon + hgtFileDegree) - lonLeft > lonRight - lonLeft)
         horizontalPosition = 3; //left and right wall at once 
     else
@@ -92,10 +87,10 @@ void GHeight::fullHgtTextureReading(double lonLeft, double lonRight, double latD
     }
 
   
-    heightTexture = new QOpenGLTexture(*heightMap, QOpenGLTexture::DontGenerateMipMaps);
+    /*heightTexture = new QOpenGLTexture(*heightMap, QOpenGLTexture::DontGenerateMipMaps);
     heightTexture->bind(layerIndex+13, QOpenGLTexture::DontResetTextureUnit);
-    
-    program->setUniformValue(clipmap->heightTextureLocation[layerIndex], layerIndex+13);
+
+    program->setUniformValue(clipmap->heightTextureLocation[layerIndex], layerIndex+13);*/
 }
 
 void GHeight::horizontalBlockHgtTextureReading(int lonDifference, int latDifference,
@@ -191,10 +186,7 @@ void GHeight::horizontalBlockHgtTextureReading(int lonDifference, int latDiffere
 
     }
 
-    heightTexture = new QOpenGLTexture(*heightMap, QOpenGLTexture::DontGenerateMipMaps);
-    heightTexture->bind(layerIndex + 13, QOpenGLTexture::DontResetTextureUnit);
-
-    program->setUniformValue(clipmap->heightTextureLocation[layerIndex], layerIndex + 13);
+    
 }
 
 void GHeight::verticalBlockHgtTextureReading(int lonDifference, int latDifference,
@@ -298,10 +290,7 @@ void GHeight::verticalBlockHgtTextureReading(int lonDifference, int latDifferenc
 
     }
 
-    heightTexture = new QOpenGLTexture(*heightMap, QOpenGLTexture::DontGenerateMipMaps);
-    heightTexture->bind(layerIndex + 13, QOpenGLTexture::DontResetTextureUnit);
-
-    program->setUniformValue(clipmap->heightTextureLocation[layerIndex], layerIndex + 13);
+    
 }
 
 void GHeight::findingTopLeftFileToRead(double* maxTilesLon, double* maxTilesLat, double lonLeft, double latTop, double degree) {

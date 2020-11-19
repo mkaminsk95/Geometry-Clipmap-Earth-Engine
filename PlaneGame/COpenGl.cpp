@@ -75,17 +75,16 @@ COpenGl::COpenGl(QGLFormat glFormat, QWidget *parent) : QGLWidget(glFormat, pare
     openGlThread->start();
 
     // start terrain loading thread
-   // terrainLoaderThread = new CTerrainLoaderThread(this);
-   // terrainLoaderThread->start();
+   //terrainLoaderThread = new CTerrainLoaderThread(this);
+   //terrainLoaderThread->start();
 
     // start animation thread
     animationThread = new CAnimationThread(this);
     animationThread->start();
 
     // start clipmap thread 
-    //clipmapThread = new GClipmapThread(this);
-    //clipmapThread->start();
-
+    clipmapThread = new GClipmapThread(this);
+    
 }
 
 COpenGl::~COpenGl()

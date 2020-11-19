@@ -9,6 +9,7 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
 #include <QOpenGLTexture>
+#include <QMutex>
 
 
 //#include "GClipmap.h"
@@ -28,7 +29,7 @@ public:
 
 	
 
-	void buildLayer(double tlon, double tlat);
+	void buildLayer();
 	
 	void setFillerPosition(int inFillerPositionHorizontal, int inFillerPositionVertical) {
 		
@@ -68,12 +69,18 @@ public:
 	double readDegree;
 	bool firstGothrough;
 
+	void updateLayer(double tlon, double tlat);
+	void computeLayerPosition(double tlon, double tlat);
+	void updateTextures();
+	int tmp;
+
 
 private: 
 
 
 	point rTexBegHor, rTexBegVer, hTexBegHor, hTexBegVer;
 	int hgtTextureBegginingY, hgtTextureBegginingX, rawTextureBegginingY, rawTextureBegginingX;
+	int hgtTextureBegginingY2, hgtTextureBegginingX2, rawTextureBegginingY2, rawTextureBegginingX2;
 
 
 	int scale;				
@@ -85,7 +92,7 @@ private:
 	int layerIndex;
 	
 
-
+	QVector2D offsets;
 	int fillerPositionHorizontal;
 	int fillerPositionVertical;
 	int positionHorizontal;
@@ -113,15 +120,18 @@ private:
 	QOpenGLBuffer* vertexE_Buffer;
 	QOpenGLBuffer* vertexF_Buffer;
 
-	QImage* heightMap;
-	QImage* pixelMap;
-	QOpenGLTexture* heightTexture;
-	QOpenGLTexture* pixelTexture;
+	//QImage* heightMap;
+	//QImage* pixelMap;
+	//QOpenGLTexture* heightTexture;
+	//QOpenGLTexture* pixelTexture;
 
-	void mapDataIntoTextures(double tlon, double tlat, int lonDifference, int latDifference);
+
+	void mapDataIntoImages(double tlon, double tlat, int lonDifference, int latDifference);
 	
 	void computeTextureOffsets(int latDifference, int lonDifference, point* texBegHor, point* texBegVer, bool rawReading);
 	void computeNewLonAndLat(double tlon, double tlat, double *lonLeft, double *lonRight, double *latTop, double *latDown);
+
+
 
 	void cumputeOffsets();
 	void drawA(float originX, float originY);
@@ -130,6 +140,7 @@ private:
 	void drawD(float originX, float originY);
 	void drawE(float originX, float originY);
 	void drawF(float originX, float originY);
+
 
 
 

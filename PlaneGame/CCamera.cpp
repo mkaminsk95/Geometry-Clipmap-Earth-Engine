@@ -284,10 +284,7 @@ void CCamera::updateCameraWhenInGlobeLinkage()
         //camPerspectiveLookAtX = camPerspectiveX;
         //camPerspectiveLookAtY = camPerspectiveY;
         //camPerspectiveLookAtZ = camPerspectiveZ;
-        CCommons::doubleIntoVSConsole(camPerspectiveLookAtX);
-        CCommons::doubleIntoVSConsole(camPerspectiveLookAtY);
-        CCommons::doubleIntoVSConsole(camPerspectiveLookAtZ);
-        CCommons::stringIntoVSConsole("\n");
+        
     }
 
     // get looking direction vector

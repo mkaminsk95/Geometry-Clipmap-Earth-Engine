@@ -10,6 +10,7 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLTexture>
 #include <math.h>
+#include <chrono>
 
 
 GLayer::GLayer(GClipmap* clipmapPointer, float inDegree, float inHgtFileDegree, float inScale, int inLayerIndex, 
@@ -53,75 +54,28 @@ GLayer::GLayer(GClipmap* clipmapPointer, float inDegree, float inHgtFileDegree, 
     heightManager = new GHeight(this, inLayerIndex, inDegree, inHgtSkipping, inHgtFileResolution, inHgtFileDegree);
 
     cumputeOffsets();
+    
 }
 
-void GLayer::buildLayer(double tlon, double tlat) {
-    
-
-    QVector2D offsets;
-    double latDifference, lonDifference;
+void GLayer::buildLayer() {
     
     
-    //checking if there was a movement
-    lonDifference = (-1) * (oldLon - tlon - fmod(oldLon - tlon, readDegree)) / readDegree;
-    latDifference = (-1) * (oldLat - tlat - fmod(oldLat - tlat, readDegree)) / readDegree;
 
-    //adjusting layers in right place in relation to each other     
-    allFinerHorizontalSum = 0;
-    allFinerVerticalSum = 0;
-        
-    if (!layerIndex == 0) {
 
-        if (clipmap->layer[layerIndex - 1].positionHorizontal == 0)         //left side
-            allFinerHorizontalSum = clipmap->layer[layerIndex - 1].allFinerHorizontalSum / 2;
-        else if (clipmap->layer[layerIndex - 1].positionHorizontal == 1)    //right side
-            allFinerHorizontalSum = clipmap->layer[layerIndex - 1].allFinerHorizontalSum/2 + 1;
-
-        if (clipmap->layer[layerIndex - 1].positionVertical == 0)           //down side    
-            allFinerVerticalSum = clipmap->layer[layerIndex - 1].allFinerVerticalSum / 2;
-        else if (clipmap->layer[layerIndex - 1].positionVertical == 1)      //top side  
-            allFinerVerticalSum = clipmap->layer[layerIndex - 1].allFinerVerticalSum / 2 + 1;
-           
-        offsets.setX(tlon - (horizontalOffset+allFinerHorizontalSum) * readDegree);
-        offsets.setX(tlon - (horizontalOffset+ allFinerHorizontalSum) * readDegree);
-        offsets.setY(tlat - (verticalOffset + allFinerVerticalSum) * readDegree);
-        offsets.setY(tlat - (verticalOffset + allFinerVerticalSum) * readDegree);
-
-    }
-    else {
-        offsets.setX(tlon - horizontalOffset * readDegree);
-        offsets.setY(tlat - verticalOffset * readDegree);
-    }
     
-    
+   
     //setting shader variables
     program->setUniformValue("worldOffset", offsets);                      //placing layer in world coordinates
+    
+    
     program->setUniformValue("levelScaleFactor", QVector2D(scale, scale)); //setting right scale 
     program->setUniformValue("layerIndex", layerIndex);                    //setting right index
 
-    //mapping data
-    mapDataIntoTextures(tlon, tlat, lonDifference, latDifference);
-
     
-    program->setUniformValue("rawTexOffset", QVector2D(rawTextureBegginingX, rawTextureBegginingY));
-    program->setUniformValue("hgtTexOffset", QVector2D(hgtTextureBegginingX, hgtTextureBegginingY));
+    program->setUniformValue("rawTexOffset", QVector2D(rawTextureBegginingX2, rawTextureBegginingY2));
+    program->setUniformValue("hgtTexOffset", QVector2D(hgtTextureBegginingX2, hgtTextureBegginingY2));
 
-
-    //changing layer coordinates depending on movement
-    if (firstGothrough == true || abs(latDifference) > n - 1 || abs(lonDifference) > n - 1) {
-        //totally reseting old lon and lat
-        oldLat = tlat;
-        oldLon = tlon;
-
-        firstGothrough = false;
-    }
-    else if (lonDifference != 0 || latDifference != 0) {
-        //moving old lon and lat by difference
-        oldLat = oldLat + latDifference * readDegree;
-        oldLon = oldLon + lonDifference * readDegree;
-    }
-
-
+     
     int m = (n + 1) / 4 - 1;
 
     drawA(0.0,    0.0);
@@ -182,7 +136,64 @@ void GLayer::buildLayer(double tlon, double tlat) {
 
 }
 
-void GLayer::mapDataIntoTextures(double tlon, double tlat, int lonDifference, int latDifference) {
+
+
+
+void GLayer::updateLayer(double tlon, double tlat) {
+
+    
+    double latDifference, lonDifference;
+
+
+    //checking if there was a movement
+    lonDifference = (-1) * (oldLon - tlon - fmod(oldLon - tlon, readDegree)) / readDegree;
+    latDifference = (-1) * (oldLat - tlat - fmod(oldLat - tlat, readDegree)) / readDegree;
+
+    //mapping data
+    mapDataIntoImages(tlon, tlat, lonDifference, latDifference);
+
+
+    //changing layer coordinates depending on movement
+    if (firstGothrough == true || abs(latDifference) > n - 1 || abs(lonDifference) > n - 1) {
+        //totally reseting old lon and lat
+        oldLat = tlat;
+        oldLon = tlon;
+
+        firstGothrough = false;
+    }
+    else if (lonDifference != 0 || latDifference != 0) {
+        //moving old lon and lat by difference
+        oldLat = oldLat + latDifference * readDegree;
+        oldLon = oldLon + lonDifference * readDegree;
+    }
+}
+
+
+void GLayer::updateTextures() {
+
+    //updating texture using new picture 
+    pixelManager->pixelTexture = new QOpenGLTexture(*pixelManager->pixelMap, QOpenGLTexture::DontGenerateMipMaps);
+    pixelManager->pixelTexture->bind(layerIndex, QOpenGLTexture::DontResetTextureUnit);
+
+    heightManager->heightTexture = new QOpenGLTexture(*heightManager->heightMap, QOpenGLTexture::DontGenerateMipMaps);
+    
+    /*QColor tmp;
+    for (int i = 0; i < 254; i++) {
+        tmp = heightManager->heightMap->pixelColor(i,i);
+        if (tmp.green() > 100) {
+            int fak = 12;
+        }
+    }*/
+    
+    heightManager->heightTexture->bind(layerIndex+13, QOpenGLTexture::DontResetTextureUnit);
+
+
+    program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);
+    program->setUniformValue(clipmap->heightTextureLocation[layerIndex], layerIndex+13);
+}
+
+
+void GLayer::mapDataIntoImages(double tlon, double tlat, int lonDifference, int latDifference) {
     
     double lonLeft, lonRight;
     double latTop, latDown;
@@ -203,9 +214,12 @@ void GLayer::mapDataIntoTextures(double tlon, double tlat, int lonDifference, in
 
     if (firstGothrough == true || (abs(latDifference) > n - 1 || abs(lonDifference) > n - 1)) {
 
+        //computing coordinates of corners of new moved clipmap 
         computeNewLonAndLat(tlon, tlat, &lonLeft, &lonRight, &latTop, &latDown);
+
+        //updating pictures
         pixelManager->fullRawTextureReading(lonLeft, lonRight, latDown, latTop);
-        heightManager->fullHgtTextureReading(lonLeft, lonRight, latTop, latDown);
+        heightManager->fullHgtTextureReading(lonLeft, lonRight, latDown, latTop);
            
         //reseting texture beggining coordinate
         hgtTextureBegginingX = 0;
@@ -271,6 +285,44 @@ void GLayer::mapDataIntoTextures(double tlon, double tlat, int lonDifference, in
 }
 
 
+
+void GLayer::computeLayerPosition(double tlon, double tlat) {
+
+
+    //adjusting layers in right place in relation to each other     
+    allFinerHorizontalSum = 0;
+    allFinerVerticalSum = 0;
+
+
+    if (!layerIndex == 0) {
+
+
+        if (clipmap->layer[layerIndex - 1].positionHorizontal == 0)         //left side
+            allFinerHorizontalSum = clipmap->layer[layerIndex - 1].allFinerHorizontalSum / 2;
+        else if (clipmap->layer[layerIndex - 1].positionHorizontal == 1)    //right side
+            allFinerHorizontalSum = clipmap->layer[layerIndex - 1].allFinerHorizontalSum / 2 + 1;
+
+        if (clipmap->layer[layerIndex - 1].positionVertical == 0)           //down side    
+            allFinerVerticalSum = clipmap->layer[layerIndex - 1].allFinerVerticalSum / 2;
+        else if (clipmap->layer[layerIndex - 1].positionVertical == 1)      //top side  
+            allFinerVerticalSum = clipmap->layer[layerIndex - 1].allFinerVerticalSum / 2 + 1;
+
+        offsets.setX(tlon - (horizontalOffset + allFinerHorizontalSum) * readDegree);
+        offsets.setY(tlat - (verticalOffset + allFinerVerticalSum) * readDegree);
+
+    }
+    else {
+        offsets.setX(tlon - horizontalOffset * readDegree);
+        offsets.setY(tlat - verticalOffset * readDegree);
+    }
+
+    rawTextureBegginingX2 = rawTextureBegginingX;
+    rawTextureBegginingY2 = rawTextureBegginingY;
+    hgtTextureBegginingX2 = hgtTextureBegginingX;
+    hgtTextureBegginingY2 = hgtTextureBegginingY;
+    
+}
+
 void GLayer::cumputeOffsets() {
 
     if (layerIndex == 0) {
@@ -289,7 +341,6 @@ void GLayer::cumputeOffsets() {
 
     }
 }
-
 
 void GLayer::computeTextureOffsets(int latDifference, int lonDifference, point *texBegHor, point *texBegVer, bool rawReading) {
 
@@ -404,6 +455,9 @@ void GLayer::computeNewLonAndLat(double tlon, double tlat, double *lonLeft, doub
     *latTop = tlat + verticalOffset * readDegree;   //Top Down
     *latDown = *latTop - (n - 1) * readDegree;
 }
+
+
+
 
 
 void GLayer::drawA(float originX, float originY) {

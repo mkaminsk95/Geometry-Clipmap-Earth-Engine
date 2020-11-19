@@ -29,8 +29,10 @@ void main()
 {
 	vec3 pixel;
 	
-	float texPosX = float(mod(levelPositionOut.x + rawTexOffset.x, n - 1));
 	float texPosY = float(mod(levelPositionOut.y + rawTexOffset.y, n - 1));
+	float texPosX = float(mod(levelPositionOut.x + rawTexOffset.x, n - 1));
+
+	
 
 	switch (layerIndex) {
 	case 0:

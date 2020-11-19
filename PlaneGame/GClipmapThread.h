@@ -24,8 +24,18 @@ public:
     GClipmap* clipmap;
     //void stop();
 
+    int activeLvlOfDetail, highestLvlOfDetail;
+    double distanceFromEarth;
+    double tlon, tlat;
+    
+    float layersOffsets[13];
+    double layersDegree[13];
+    int n;
+
 protected:
     void run();
+
+	void computeDistanceFromLayerEdge();
 
     GLayer layer;
 

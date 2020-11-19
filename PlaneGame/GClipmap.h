@@ -59,6 +59,7 @@ public:
 	int heightTextureLocation[13];
 	int drawingMode;
 
+	bool clipmapReady;
 	int activeLvlOfDetail, highestLvlOfDetail;
 	QVector<GLayer> layer;
 	

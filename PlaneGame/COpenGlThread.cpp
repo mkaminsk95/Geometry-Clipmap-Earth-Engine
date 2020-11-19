@@ -240,7 +240,7 @@ void COpenGlThread::drawScene()
     }
     else if (!quadtree) {
         clipmap->setDrawingStateSnapshot(& dss);
-        clipmap->setLvlsOfDetail(dss.activeLvlOfDetail, dss.highestLvlOfDetail);
+        //clipmap->setLvlsOfDetail(dss.activeLvlOfDetail, dss.highestLvlOfDetail);
         clipmap->draw();
     }
 

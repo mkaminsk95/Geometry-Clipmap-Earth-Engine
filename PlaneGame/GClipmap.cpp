@@ -20,6 +20,10 @@ GClipmap::GClipmap(COpenGl* openGlPointer) : openGl(openGlPointer)
     vaoF = new QOpenGLVertexArrayObject;
     
     initialized = false;     
+    clipmapReady = false;
+
+    activeLvlOfDetail = 8;
+    highestLvlOfDetail = 8;
 }
 
 void GClipmap::draw() {
@@ -27,8 +31,7 @@ void GClipmap::draw() {
 
 
     if (!initialized) {
-        xKey = new QKeyEvent(QEvent::KeyPress, Qt::Key_F, Qt::NoModifier, 0, 0, 0, "f", false, 1);
-
+    
         bool result;
 
         //program shader
@@ -91,7 +94,7 @@ void GClipmap::draw() {
         layer.push_back(GLayer(this,  0.0585938,     15.00,         32,   5,          2,       512,        1,           768, n));  //5
         layer.push_back(GLayer(this,  0.1171876,     15.00,         64,   6,          4,       512,        2,           768, n));  //6
         layer.push_back(GLayer(this,  0.2343752,     15.00,        128,   7,          8,       512,        4,           768, n));  //7
-        layer.push_back(GLayer(this,  0.4687504,     15.00,        256,   8,         16,       512,        1,            96, n));  //8
+        layer.push_back(GLayer(this,  0.4687504,     15.00,        256,   8,         16,       512,        1,            96, n));  //8 
         layer.push_back(GLayer(this,  0.9375008,     60.00,        512,   9,          1,        64,        2,            96, n));  //9
         layer.push_back(GLayer(this,  1.8750016,     60.00,       1024,  10,          2,        64,        4,            96, n));  //10
         layer.push_back(GLayer(this,  3.7500032,     60.00,       2048,  11,          4,        64,        8,            96, n));  //11
@@ -120,6 +123,7 @@ void GClipmap::draw() {
         
         initialized = true; 
 
+        openGl->clipmapThread->start();
         
     }
 
@@ -157,63 +161,37 @@ void GClipmap::draw() {
     layer[11].setPosition(1,1);
 
 
-    double treshold = 15000;
-    
-    if (distanceFromEarth < treshold)
-        activeLvlOfDetail = 0;
-    else if (distanceFromEarth < 2 * treshold)
-        activeLvlOfDetail = 1;
-    else if (distanceFromEarth < 4 * treshold)
-        activeLvlOfDetail = 2;
-    else if (distanceFromEarth < 8 * treshold)
-        activeLvlOfDetail = 3;
-    else if (distanceFromEarth < 16 * treshold)
-        activeLvlOfDetail = 4;
-    else if (distanceFromEarth < 32 * treshold)
-        activeLvlOfDetail = 5;
-    else if (distanceFromEarth < 64 * treshold)
-        activeLvlOfDetail = 6;
-    else if (distanceFromEarth < 128 * treshold)
-        activeLvlOfDetail = 7;
-    else if (distanceFromEarth < 256 * treshold)
-        activeLvlOfDetail = 8;
-    else 
-        activeLvlOfDetail = 9;
-   
-    if (distanceFromEarth       < 5000)
-        highestLvlOfDetail = 0;
-    else if (distanceFromEarth  < 10000)
-        highestLvlOfDetail = 2;
-    else if (distanceFromEarth  < 20000)
-        highestLvlOfDetail = 3;
-    else if (distanceFromEarth  < 40000)
-        highestLvlOfDetail = 4;
-    else if (distanceFromEarth  < 80000)
-        highestLvlOfDetail = 5;
-    else if (distanceFromEarth  < 160000)
-        highestLvlOfDetail = 6;
-    else if (distanceFromEarth  < 320000)
-        highestLvlOfDetail = 7;
-    else if (distanceFromEarth  < 640000)
-        highestLvlOfDetail = 8;
-    else
-        highestLvlOfDetail = 9;
+  
     
    // CCommons::doubleIntoVSConsole(distanceFromEarth);
 
    /* QString filename = "E:\\HgtReader_data\\Textures\\L03_L05\\N00,00_E135,00.raw";
     QImage pixelMap(filename, nullptr);*/
 
-    activeLvlOfDetail =  6;
-    highestLvlOfDetail = 8;
+    int x = 6;//openGl->clipmapThread->aactiveLvlOfDetail;
+    int y = 6;//openGl->clipmapThread->hhighestLvlOfDetail;
+    //activeLvlOfDetail = 6;
+    //highestLvlOfDetail = 8;
+    if(clipmapReady) {
+        for (x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
+            layer[x].updateTextures();
 
-    for (int x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
-        layer[x].buildLayer(tlon, tlat);
+        activeLvlOfDetail = openGl->clipmapThread->activeLvlOfDetail;
+        highestLvlOfDetail = openGl->clipmapThread->highestLvlOfDetail;
+        clipmapReady = false;
+    }
+    for (x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
+        layer[x].buildLayer();
     
+    //activeLvlOfDetail = 6;
+    //highestLvlOfDetail = 8;
+
+
     program->release();
 }
 
 void GClipmap::findPosition() {
+
 
     double camX, camY, camZ;
     double lon, lat, rad;

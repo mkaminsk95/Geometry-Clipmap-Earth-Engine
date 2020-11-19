@@ -87,10 +87,10 @@ void GPixel::fullRawTextureReading(double lonLeft, double lonRight, double latDo
     }
     pixelMap->save("mapa.png");
 
-    pixelTexture = new QOpenGLTexture(*pixelMap, QOpenGLTexture::DontGenerateMipMaps);
+    /*pixelTexture = new QOpenGLTexture(*pixelMap, QOpenGLTexture::DontGenerateMipMaps);
     pixelTexture->bind(layerIndex, QOpenGLTexture::DontResetTextureUnit);
    
-    program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);
+    program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);*/
 }
 
 
@@ -195,10 +195,11 @@ void GPixel::horizontalBlockRawTextureReading(int lonDifference, int latDifferen
     }
     pixelMap->save("mapa.png");
 
-    pixelTexture = new QOpenGLTexture(*pixelMap, QOpenGLTexture::DontGenerateMipMaps);
+
+    /*pixelTexture = new QOpenGLTexture(*pixelMap, QOpenGLTexture::DontGenerateMipMaps);
     pixelTexture->bind(layerIndex, QOpenGLTexture::DontResetTextureUnit);
 
-    program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);
+    program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);*/
 }
 
 
@@ -313,10 +314,10 @@ void GPixel::verticalBlockRawTextureReading(int lonDifference, int latDifference
     }
     pixelMap->save("mapa.png");
 
-    pixelTexture = new QOpenGLTexture(*pixelMap, QOpenGLTexture::DontGenerateMipMaps);
+    /*pixelTexture = new QOpenGLTexture(*pixelMap, QOpenGLTexture::DontGenerateMipMaps);
     pixelTexture->bind(layerIndex, QOpenGLTexture::DontResetTextureUnit);
 
-    program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);
+    program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);*/
 }
 
 void GPixel::findingTopLeftFileToRead(double* maxTilesLon, double* maxTilesLat, double lonLeft, double latTop, double degree) {
