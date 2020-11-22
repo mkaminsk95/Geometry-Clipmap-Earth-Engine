@@ -25,6 +25,21 @@ uniform sampler2D tex_pixelmap10;
 uniform sampler2D tex_pixelmap11;
 uniform sampler2D tex_pixelmap12;
 
+uniform sampler2D tex_heightmap0;
+uniform sampler2D tex_heightmap1;
+uniform sampler2D tex_heightmap2;
+uniform sampler2D tex_heightmap3;
+uniform sampler2D tex_heightmap4;
+uniform sampler2D tex_heightmap5;
+uniform sampler2D tex_heightmap6;
+uniform sampler2D tex_heightmap7;
+uniform sampler2D tex_heightmap8;
+uniform sampler2D tex_heightmap9;
+uniform sampler2D tex_heightmap10;
+uniform sampler2D tex_heightmap11;
+uniform sampler2D tex_heightmap12;
+
+uniform vec2 hgtTexOffset;
 void main()
 {
 	vec3 pixel;
@@ -32,7 +47,6 @@ void main()
 	float texPosY = float(mod(levelPositionOut.y + rawTexOffset.y, n - 1));
 	float texPosX = float(mod(levelPositionOut.x + rawTexOffset.x, n - 1));
 
-	
 
 	switch (layerIndex) {
 	case 0:
@@ -75,6 +89,8 @@ void main()
 		pixel = texture( tex_pixelmap12, vec2(texPosX/n, texPosY/n), 0).rgb;
 		break;
 	}
+
+
 
 	color = vec4(pixel, 0);
 }

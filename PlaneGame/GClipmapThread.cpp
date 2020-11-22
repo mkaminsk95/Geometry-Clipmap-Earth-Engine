@@ -10,7 +10,6 @@ GClipmapThread::GClipmapThread(COpenGl* openGlPointer) : QThread(openGlPointer),
 }
 
 void GClipmapThread::run() {
-    //clipmap.findPosition();
     
     openGl->drawingState.getDrawingStateSnapshot(&dss);      // get current scene state
     
@@ -29,10 +28,9 @@ void GClipmapThread::run() {
 
 
             findPosition();
-            
-            computeDistanceFromLayerEdge();
+            computeHighestLvlOfDetail();
 
-            int treshold = 20000;
+            treshold = 20000;
 
             if (distanceFromEarth < treshold)
                 activeLvlOfDetail = 0;
@@ -55,27 +53,8 @@ void GClipmapThread::run() {
             else
                 activeLvlOfDetail = 9;
 
-            /*if (distanceFromEarth < 5000)
-                highestLvlOfDetail = 0;
-            else if (distanceFromEarth < 10000)
-                highestLvlOfDetail = 2;
-            else if (distanceFromEarth < 20000)
-                highestLvlOfDetail = 3;
-            else if (distanceFromEarth < 40000)
-                highestLvlOfDetail = 4;
-            else if (distanceFromEarth < 80000)
-                highestLvlOfDetail = 5;
-            else if (distanceFromEarth < 160000)
-                highestLvlOfDetail = 6;
-            else if (distanceFromEarth < 320000)
-                highestLvlOfDetail = 7;
-            else if (distanceFromEarth < 640000)
-                highestLvlOfDetail = 8;
-            else
-                highestLvlOfDetail = 9;*/
+           
 
-            //activeLvlOfDetail = 7;
-            //highestLvlOfDetail = 8;
 
             for (int x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
                 clipmap->layer[x].updateLayer(tlon, tlat);
@@ -95,7 +74,7 @@ void GClipmapThread::run() {
     
 };
 
-void GClipmapThread::computeDistanceFromLayerEdge() {
+void GClipmapThread::computeHighestLvlOfDetail() {
 
 
     double camX, camY, camZ;

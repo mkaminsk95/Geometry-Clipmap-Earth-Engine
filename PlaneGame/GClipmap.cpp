@@ -90,19 +90,15 @@ void GClipmap::draw() {
         layer.push_back(GLayer(this,  0.0036621,      3.75,          2,   1,          4,      4097,        2,         24576, n));  //1
         layer.push_back(GLayer(this,  0.0073242,      3.75,          4,   2,          8,      4097,        1,          6144, n));  //2
         layer.push_back(GLayer(this,  0.0146484,      3.75,          8,   3,         16,      4097,        2,          6144, n));  //3
-        layer.push_back(GLayer(this,  0.0292969,     15.00,         16,   4,          1,       512,        4,          6144, n));  //4
-        layer.push_back(GLayer(this,  0.0585938,     15.00,         32,   5,          2,       512,        1,           768, n));  //5
-        layer.push_back(GLayer(this,  0.1171876,     15.00,         64,   6,          4,       512,        2,           768, n));  //6
-        layer.push_back(GLayer(this,  0.2343752,     15.00,        128,   7,          8,       512,        4,           768, n));  //7
-        layer.push_back(GLayer(this,  0.4687504,     15.00,        256,   8,         16,       512,        1,            96, n));  //8 
-        layer.push_back(GLayer(this,  0.9375008,     60.00,        512,   9,          1,        64,        2,            96, n));  //9
-        layer.push_back(GLayer(this,  1.8750016,     60.00,       1024,  10,          2,        64,        4,            96, n));  //10
-        layer.push_back(GLayer(this,  3.7500032,     60.00,       2048,  11,          4,        64,        8,            96, n));  //11
-        layer.push_back(GLayer(this,  7.5000064,     60.00,       4096,  12,          8,        64,       16,            96, n));  //12
-       
-
-        //defining vertex array object
-
+        layer.push_back(GLayer(this,  0.0292969,     15.00,         16,   4,          1,       513,        4,          6144, n));  //4
+        layer.push_back(GLayer(this,  0.0585938,     15.00,         32,   5,          2,       513,        1,           768, n));  //5
+        layer.push_back(GLayer(this,  0.1171876,     15.00,         64,   6,          4,       513,        2,           768, n));  //6
+        layer.push_back(GLayer(this,  0.2343752,     15.00,        128,   7,          8,       513,        4,           768, n));  //7
+        layer.push_back(GLayer(this,  0.4687504,     15.00,        256,   8,         16,       513,        1,            96, n));  //8 
+        layer.push_back(GLayer(this,  0.9375008,     60.00,        512,   9,          1,        65,        2,            96, n));  //9
+        layer.push_back(GLayer(this,  1.8750016,     60.00,       1024,  10,          2,        65,        4,            96, n));  //10
+        layer.push_back(GLayer(this,  3.7500032,     60.00,       2048,  11,          4,        65,        8,            96, n));  //11
+        layer.push_back(GLayer(this,  7.5000064,     60.00,       4096,  12,          8,        65,       16,            96, n));  //12
         
         //defining uniforms
         QVector2D worldScaleFactor;
@@ -130,9 +126,6 @@ void GClipmap::draw() {
     program->bind();
     program->setUniformValue("modelView", generateModelViewMatrix());
     
-
-    //finding position
-    findPosition();
 
     layer[0].setFillerPosition(0,0); //inner
     layer[1].setFillerPosition(0,0); //middle
@@ -162,57 +155,22 @@ void GClipmap::draw() {
 
 
   
-    
-   // CCommons::doubleIntoVSConsole(distanceFromEarth);
-
-   /* QString filename = "E:\\HgtReader_data\\Textures\\L03_L05\\N00,00_E135,00.raw";
-    QImage pixelMap(filename, nullptr);*/
-
-    int x = 6;//openGl->clipmapThread->aactiveLvlOfDetail;
-    int y = 6;//openGl->clipmapThread->hhighestLvlOfDetail;
-    //activeLvlOfDetail = 6;
-    //highestLvlOfDetail = 8;
     if(clipmapReady) {
-        for (x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
+        for (int x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
             layer[x].updateTextures();
 
         activeLvlOfDetail = openGl->clipmapThread->activeLvlOfDetail;
         highestLvlOfDetail = openGl->clipmapThread->highestLvlOfDetail;
         clipmapReady = false;
     }
-    for (x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
+
+    for (int x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
         layer[x].buildLayer();
     
-    //activeLvlOfDetail = 6;
-    //highestLvlOfDetail = 8;
-
 
     program->release();
 }
 
-void GClipmap::findPosition() {
-
-
-    double camX, camY, camZ;
-    double lon, lat, rad;
-    
-
-    double earthRadius = CONST_EARTH_RADIUS;
-
-    //finding current cameraToEarth point
-    camera->getCamPosition(&camX, &camY, &camZ);
-
-    distanceFromEarth = sqrt(camX * camX + camY * camY + camZ * camZ) - 6378100;
-
-    //finding right tile
-    CCommons::getSphericalFromCartesian(camX, camY, camZ, &lon, &lat, &rad);
-    CCommons::findTopLeftCorner(lon, lat, 0.0018311, &tlon, &tlat);
-
-}
-
-void GClipmap::initialize() {
-
-}
 
 void GClipmap::initializeA_Buffer() {
     //biding vertex array object

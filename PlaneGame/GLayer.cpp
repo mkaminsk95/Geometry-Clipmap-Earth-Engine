@@ -53,25 +53,19 @@ GLayer::GLayer(GClipmap* clipmapPointer, float inDegree, float inHgtFileDegree, 
     pixelManager = new GPixel(this, inLayerIndex, inDegree, inRawSkipping, inRawFileResolution);
     heightManager = new GHeight(this, inLayerIndex, inDegree, inHgtSkipping, inHgtFileResolution, inHgtFileDegree);
 
+    
     cumputeOffsets();
     
 }
 
 void GLayer::buildLayer() {
     
-    
-
-
-    
    
     //setting shader variables
-    program->setUniformValue("worldOffset", offsets);                      //placing layer in world coordinates
-    
-    
+    program->setUniformValue("worldOffset", offsets);                      //placing layer in world coordinates   
     program->setUniformValue("levelScaleFactor", QVector2D(scale, scale)); //setting right scale 
     program->setUniformValue("layerIndex", layerIndex);                    //setting right index
-
-    
+  
     program->setUniformValue("rawTexOffset", QVector2D(rawTextureBegginingX2, rawTextureBegginingY2));
     program->setUniformValue("hgtTexOffset", QVector2D(hgtTextureBegginingX2, hgtTextureBegginingY2));
 
@@ -140,56 +134,31 @@ void GLayer::buildLayer() {
 
 
 void GLayer::updateLayer(double tlon, double tlat) {
-
     
     double latDifference, lonDifference;
 
-
     //checking if there was a movement
     lonDifference = (-1) * (oldLon - tlon - fmod(oldLon - tlon, readDegree)) / readDegree;
-    latDifference = (-1) * (oldLat - tlat - fmod(oldLat - tlat, readDegree)) / readDegree;
+    latDifference = (-1) * (oldLat - tlat -fmod(oldLat - tlat, readDegree)) / readDegree;
 
     //mapping data
     mapDataIntoImages(tlon, tlat, lonDifference, latDifference);
 
-
-    //changing layer coordinates depending on movement
-    if (firstGothrough == true || abs(latDifference) > n - 1 || abs(lonDifference) > n - 1) {
-        //totally reseting old lon and lat
-        oldLat = tlat;
-        oldLon = tlon;
-
-        firstGothrough = false;
-    }
-    else if (lonDifference != 0 || latDifference != 0) {
-        //moving old lon and lat by difference
-        oldLat = oldLat + latDifference * readDegree;
-        oldLon = oldLon + lonDifference * readDegree;
-    }
 }
 
 
 void GLayer::updateTextures() {
-
+    
     //updating texture using new picture 
-    pixelManager->pixelTexture = new QOpenGLTexture(*pixelManager->pixelMap, QOpenGLTexture::DontGenerateMipMaps);
-    pixelManager->pixelTexture->bind(layerIndex, QOpenGLTexture::DontResetTextureUnit);
+    pixelTexture = new QOpenGLTexture(*pixelManager->pixelMap, QOpenGLTexture::DontGenerateMipMaps);
+    pixelTexture->bind(layerIndex, QOpenGLTexture::DontResetTextureUnit);
 
-    heightManager->heightTexture = new QOpenGLTexture(*heightManager->heightMap, QOpenGLTexture::DontGenerateMipMaps);
-    
-    /*QColor tmp;
-    for (int i = 0; i < 254; i++) {
-        tmp = heightManager->heightMap->pixelColor(i,i);
-        if (tmp.green() > 100) {
-            int fak = 12;
-        }
-    }*/
-    
-    heightManager->heightTexture->bind(layerIndex+13, QOpenGLTexture::DontResetTextureUnit);
-
+    heightTexture = new QOpenGLTexture(*heightManager->heightMap, QOpenGLTexture::DontGenerateMipMaps);
+    heightTexture->bind(layerIndex+13);
 
     program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);
     program->setUniformValue(clipmap->heightTextureLocation[layerIndex], layerIndex+13);
+
 }
 
 
@@ -200,15 +169,16 @@ void GLayer::mapDataIntoImages(double tlon, double tlat, int lonDifference, int 
 
 
     if (firstGothrough == true) {
+
         computeNewLonAndLat(tlon, tlat, &lonLeft, &lonRight, &latTop, &latDown);
         
         oldLon = tlon;
+        oldLat = tlat;
         oldLonLeft = lonLeft;
         oldLonRight = lonRight;
-
-        oldLat = tlat;
-        oldLatTop = latTop;
         oldLatDown = latDown;
+        oldLatTop = latTop;
+
     }
 
 
@@ -223,15 +193,19 @@ void GLayer::mapDataIntoImages(double tlon, double tlat, int lonDifference, int 
            
         //reseting texture beggining coordinate
         hgtTextureBegginingX = 0;
-        hgtTextureBegginingX = n;
+        hgtTextureBegginingY = n;
         rawTextureBegginingX = 0;  //x
         rawTextureBegginingY = n - 1;  //y
             
+        //updating old coordinates
+        oldLat = tlat;
+        oldLon = tlon;
         oldLatTop = latTop;
         oldLonRight = lonRight;
         oldLonLeft = lonLeft;
         oldLatDown = latDown;
 
+        firstGothrough = false;    
 
     }
     else if (lonDifference != 0 || latDifference != 0) {
@@ -274,7 +248,8 @@ void GLayer::mapDataIntoImages(double tlon, double tlat, int lonDifference, int 
             hgtTextureBegginingX = (int)(hgtTextureBegginingX + lonDifference + n) % (n);
         }
 
-        
+        oldLat = oldLat + latDifference * readDegree;
+        oldLon = oldLon + lonDifference * readDegree;
         oldLatTop = oldLatTop + latDifference * readDegree;
         oldLatDown = oldLatDown + latDifference * readDegree;
         oldLonLeft = oldLonLeft + lonDifference * readDegree;

@@ -14,15 +14,12 @@ class COpenGl;
 
 class GClipmapThread : public QThread
 {
-    //Q_OBJECT
-
-
 public:
+
     GClipmapThread(COpenGl* openGl);
 
     COpenGl* openGl;
     GClipmap* clipmap;
-    //void stop();
 
     int activeLvlOfDetail, highestLvlOfDetail;
     double distanceFromEarth;
@@ -32,20 +29,22 @@ public:
     double layersDegree[13];
     int n;
 
-protected:
-    void run();
-
-	void computeDistanceFromLayerEdge();
 
     GLayer layer;
 
 private:
-	CDrawingStateSnapshot dss;
+
+    int treshold;
+
     CCamera *camera;
+	CDrawingStateSnapshot dss;
     QVector3D* cameraPosition;
 
 	//methods
+    void run();
     void findPosition();
+	void computeHighestLvlOfDetail();
+
 };
 
 #endif

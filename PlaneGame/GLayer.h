@@ -122,8 +122,8 @@ private:
 
 	//QImage* heightMap;
 	//QImage* pixelMap;
-	//QOpenGLTexture* heightTexture;
-	//QOpenGLTexture* pixelTexture;
+	QOpenGLTexture* heightTexture;
+	QOpenGLTexture* pixelTexture;
 
 
 	void mapDataIntoImages(double tlon, double tlat, int lonDifference, int latDifference);

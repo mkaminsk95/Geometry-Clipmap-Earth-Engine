@@ -55,26 +55,22 @@ public:
 	int howManyToRenderE;
 	int howManyToRenderF;
 
+	int positionInputLocation;
 	int pixelTextureLocation[13];
 	int heightTextureLocation[13];
 	int drawingMode;
 
 	bool clipmapReady;
 	int activeLvlOfDetail, highestLvlOfDetail;
-	QVector<GLayer> layer;
-	
+	QVector<GLayer> layer;	
 
 	//public methods
 	void draw();
 
-	void setLvlsOfDetail(int inActiveLvlOfDetail, int inHighestLvlOfDetail) {
-		activeLvlOfDetail = inActiveLvlOfDetail;
-		highestLvlOfDetail = inHighestLvlOfDetail;
-	}
-
 	void setDrawingStateSnapshot(CDrawingStateSnapshot* dss) {
 		drawingStateSnapshot = dss;
 	}
+
 	void setCamInfo(double windowAspectRatio, double zNear, double zFar) {
 		this->windowAspectRatio = windowAspectRatio;
 		this->zNear = zNear;
@@ -83,19 +79,13 @@ public:
 
 private:
 
+	bool initialized;
+
 	//private variables
+	CDrawingStateSnapshot* drawingStateSnapshot;
 	COpenGl*	openGl;
 	CCamera*	camera;
-	QVector3D* cameraPosition;
-	QVector3D* grid;
 	
-	QKeyEvent* xKey;
-	
-	bool initialized;
-	CDrawingStateSnapshot* drawingStateSnapshot;
-
-	int positionInputLocation;
-
 	//data for MVP matrix
 	double xCenter;
 	double yCenter;
@@ -104,15 +94,8 @@ private:
 	double zNear;
 	double zFar;
 
-	//
-	double distanceFromEarth;
-	double tlon, tlat;
-
 	//methods
-	void findPosition();
-
-	void initialize();
-
+	QMatrix4x4 generateModelViewMatrix();
 	void initializeA_Buffer();
 	void initializeB_Buffer();
 	void initializeC_Buffer();
@@ -120,7 +103,6 @@ private:
 	void initializeE_Buffer();
 	void initializeF_Buffer();
 
-	QMatrix4x4 generateModelViewMatrix();
 
 };
 

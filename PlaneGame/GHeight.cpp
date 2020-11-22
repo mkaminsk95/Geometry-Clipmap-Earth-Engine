@@ -3,7 +3,7 @@
 #include "GClipmap.h"
 #include "CHgtFile.h"
 
-GHeight::GHeight(GLayer* layerPointer, int inLayerIndex, double inReadDegree, int inHgtSkipping, int inHgtFileResolution, int inHgtFileDegree) : layer(layerPointer) {
+GHeight::GHeight(GLayer* layerPointer, int inLayerIndex, double inReadDegree, int inHgtSkipping, int inHgtFileResolution, double inHgtFileDegree) : layer(layerPointer) {
 		
 	clipmap = layerPointer->clipmap;
 	program = layerPointer->program;
@@ -16,7 +16,7 @@ GHeight::GHeight(GLayer* layerPointer, int inLayerIndex, double inReadDegree, in
     hgtFileDegree = inHgtFileDegree;
 
     n = layer->n;
-    heightMap = new QImage(n, n, QImage::Format_Grayscale16);
+    heightMap = new QImage(n, n, QImage::Format_RGB888);
 }
 
 
@@ -86,11 +86,6 @@ void GHeight::fullHgtTextureReading(double lonLeft, double lonRight, double latD
         imageOffsetX += howManyToReadX;
     }
 
-  
-    /*heightTexture = new QOpenGLTexture(*heightMap, QOpenGLTexture::DontGenerateMipMaps);
-    heightTexture->bind(layerIndex+13, QOpenGLTexture::DontResetTextureUnit);
-
-    program->setUniformValue(clipmap->heightTextureLocation[layerIndex], layerIndex+13);*/
 }
 
 void GHeight::horizontalBlockHgtTextureReading(int lonDifference, int latDifference,
@@ -266,6 +261,7 @@ void GHeight::verticalBlockHgtTextureReading(int lonDifference, int latDifferenc
 
 
             CHgtFile::sphericalToHeightFilePath(&filePath, i, j, layerIndex);
+            
             CHgtFile::loadHeightDataToImagePart(heightMap, imageOffsetX, imageOffsetY,
                 filePath, howManyToReadX, howManyToReadY, hgtFileResolution, hgtSkipping,
                 fileHorizontalOffset, fileVerticalOffset,
@@ -294,25 +290,53 @@ void GHeight::verticalBlockHgtTextureReading(int lonDifference, int latDifferenc
 }
 
 void GHeight::findingTopLeftFileToRead(double* maxTilesLon, double* maxTilesLat, double lonLeft, double latTop, double degree) {
+    
+    if (layerIndex <= 8) {
 
-    if (lonLeft < 0) {
-        if (fmod(lonLeft, degree) != 0)
-            *maxTilesLon = lonLeft - fmod(lonLeft, degree) - degree;
-        else
-            *maxTilesLon = lonLeft;
+        if (lonLeft < 0) {
+            if (fmod(lonLeft, degree) != 0)
+                *maxTilesLon = lonLeft - fmod(lonLeft, degree) - degree;
+            else
+                *maxTilesLon = lonLeft;
+        }
+        else {
+            *maxTilesLon = lonLeft - fmod(lonLeft, degree);
+        }
+
+        if (latTop < 0) {
+            *maxTilesLat = latTop - fmod(latTop, degree);
+        }
+        else {
+            if (fmod(latTop * 2, degree) != 0)
+                *maxTilesLat = latTop - fmod(latTop, degree) + degree;
+            else
+                *maxTilesLat = latTop;
+        }
+    
     }
     else {
-        *maxTilesLon = lonLeft - fmod(lonLeft, degree);
-    }
+    
+        if (lonLeft < 0) {
+            if (fmod(lonLeft, degree) != 0)
+                *maxTilesLon = lonLeft - fmod(lonLeft, degree) - degree;
+            else
+                *maxTilesLon = lonLeft;
+        }
+        else {
+            *maxTilesLon = lonLeft - fmod(lonLeft, degree);
+        }
 
-    if (latTop < 0) {
-        *maxTilesLat = latTop - fmod(latTop, degree);
-    }
-    else {
-        if (fmod(latTop * 2, degree) != 0)
-            *maxTilesLat = latTop - fmod(latTop, degree) + degree;
-        else
-            *maxTilesLat = latTop;
+        if (latTop < 0) {
+            *maxTilesLat = latTop - fmod(latTop, degree) + 30;
+        }
+        else {
+            if (fmod(latTop * 2, degree) != 0)
+                *maxTilesLat = latTop - fmod(latTop, degree) + degree + 30;
+            else
+                *maxTilesLat = latTop + 30;
+        }
+
+
     }
 }
 

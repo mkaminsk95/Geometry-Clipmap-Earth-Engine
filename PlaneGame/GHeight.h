@@ -15,7 +15,7 @@ class GHeight
 {
 public: 
 
-	GHeight(GLayer* layerPointer, int inLayerIndex, double inReadDegree, int inHgtSkipping, int inHgtFileResolution, int inHgtFileDegree);
+	GHeight(GLayer* layerPointer, int inLayerIndex, double inReadDegree, int inHgtSkipping, int inHgtFileResolution, double inHgtFileDegree);
 
 	GLayer* layer;
 	GClipmap* clipmap;
@@ -30,7 +30,7 @@ public:
 	double readDegree;		//How big is angle between two neighbours points in layer
 	int hgtSkipping;		//We read every n-th point in rawFile
 	int hgtFileResolution;	//How many point there are in one scanline in corresponding Raw file 
-	int hgtFileDegree;
+	double hgtFileDegree;
 
 	void fullHgtTextureReading(double lonLeft, double lonRight, double latDown, double latTop);
 	void horizontalBlockHgtTextureReading(int lonDifference, int latDifference, double lonLeft, double lonRight, double latDown, double latTop,
