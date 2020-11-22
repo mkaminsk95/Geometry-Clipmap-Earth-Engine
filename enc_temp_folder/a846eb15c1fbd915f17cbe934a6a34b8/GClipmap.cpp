@@ -80,11 +80,12 @@ void GClipmap::draw() {
         initializeF_Buffer();
 
         //setting drawing mode
-        //drawingMode = GL_LINE_STRIP;
-        drawingMode = GL_TRIANGLE_STRIP;
+        drawingMode = GL_LINE_STRIP;
+        //drawingMode = GL_TRIANGLE_STRIP;
 
 
         //building layers
+
         layer.push_back(GLayer(this,  0.0018311,      3.75,          1,   0,          2,      4097,        1,         24576, n));  //0
         layer.push_back(GLayer(this,  0.0036621,      3.75,          2,   1,          4,      4097,        2,         24576, n));  //1
         layer.push_back(GLayer(this,  0.0073242,      3.75,          4,   2,          8,      4097,        1,          6144, n));  //2

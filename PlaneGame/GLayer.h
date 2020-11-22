@@ -12,8 +12,6 @@
 #include <QMutex>
 
 
-//#include "GClipmap.h"
-
 class GPixel;
 class GHeight;
 class GClipmap;
@@ -21,36 +19,11 @@ class GClipmap;
 class GLayer {
 public:
 
-	GLayer() {
-
-	}
+	GLayer() {}
 	GLayer(GClipmap* clipmapPointer, float degree, float inHgtFiledegree, float inScale, int inLayerIndex, 
 			int inHgtSkipping, int inFileResolution, int inRawSkipping,int inRawFileResolution, int n);
 
 	
-
-	void buildLayer();
-	
-	void setFillerPosition(int inFillerPositionHorizontal, int inFillerPositionVertical) {
-		
-		fillerPositionHorizontal = inFillerPositionHorizontal;
-		fillerPositionVertical = inFillerPositionVertical;
-	}
-
-	void setPosition(int inPositionHorizontal, int inPositionVertical) {
-
-		positionHorizontal = inPositionHorizontal;
-		positionVertical = inPositionVertical;
-	}
-
-	void setActive() {
-		isActive = true;
-	}
-
-	void setInactive() {
-		isActive = false;
-	}
-		
 
 	GClipmap* clipmap;
 	GPixel* pixelManager;
@@ -69,36 +42,35 @@ public:
 	double readDegree;
 	bool firstGothrough;
 
-	void updateLayer(double tlon, double tlat);
+	void buildLayer();
 	void computeLayerPosition(double tlon, double tlat);
+	void updateLayer(double tlon, double tlat);
 	void updateTextures();
-	int tmp;
+	
+	void setPosition(int inPositionHorizontal, int inPositionVertical) {
+		positionHorizontal = inPositionHorizontal;
+		positionVertical = inPositionVertical;
+	}
 
 
 private: 
 
 
 	point rTexBegHor, rTexBegVer, hTexBegHor, hTexBegVer;
+	int hgtTextureBegginingYBuff, hgtTextureBegginingXBuff, rawTextureBegginingYBuff, rawTextureBegginingXBuff;
 	int hgtTextureBegginingY, hgtTextureBegginingX, rawTextureBegginingY, rawTextureBegginingX;
-	int hgtTextureBegginingY2, hgtTextureBegginingX2, rawTextureBegginingY2, rawTextureBegginingX2;
 
 
-	int scale;				
-	float HgtFiledegree;    //How big is the angle that file covers
-
-	int	HgtSkipping;			//We read every n-th point in HgtFile
-	int HgtFileResolution;		//How many point there are in one scanline in corresponding Hgt file 
+	int scale;			//How big is the clipmap
 	int* drawMode;		//Are we drawing lines or triangles
-	int layerIndex;
+	int layerIndex;		//Index of the layer
 	
-
 	QVector2D offsets;
 	int fillerPositionHorizontal;
 	int fillerPositionVertical;
 	int positionHorizontal;
 	int positionVertical;
 
-	
 	QOpenGLVertexArrayObject* vaoA;
 	QOpenGLVertexArrayObject* vaoB;
 	QOpenGLVertexArrayObject* vaoC;
@@ -120,8 +92,6 @@ private:
 	QOpenGLBuffer* vertexE_Buffer;
 	QOpenGLBuffer* vertexF_Buffer;
 
-	//QImage* heightMap;
-	//QImage* pixelMap;
 	QOpenGLTexture* heightTexture;
 	QOpenGLTexture* pixelTexture;
 
@@ -131,8 +101,6 @@ private:
 	void computeTextureOffsets(int latDifference, int lonDifference, point* texBegHor, point* texBegVer, bool rawReading);
 	void computeNewLonAndLat(double tlon, double tlat, double *lonLeft, double *lonRight, double *latTop, double *latDown);
 
-
-
 	void cumputeOffsets();
 	void drawA(float originX, float originY);
 	void drawB(float originX, float originY);
@@ -140,9 +108,6 @@ private:
 	void drawD(float originX, float originY);
 	void drawE(float originX, float originY);
 	void drawF(float originX, float originY);
-
-
-
 
 };
 

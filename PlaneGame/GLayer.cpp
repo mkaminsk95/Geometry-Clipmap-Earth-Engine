@@ -24,11 +24,11 @@ GLayer::GLayer(GClipmap* clipmapPointer, float inDegree, float inHgtFileDegree, 
     firstGothrough = true;
     
 
-    hgtTextureBegginingX = 0;  //x
-    hgtTextureBegginingY = n;  //y
+    hgtTextureBegginingXBuff = 0;  //x
+    hgtTextureBegginingYBuff = n;  //y
 
-    rawTextureBegginingX = 0;  //x
-    rawTextureBegginingY = n - 1;  //y
+    rawTextureBegginingXBuff = 0;  //x
+    rawTextureBegginingYBuff = n - 1;  //y
 
     allFinerHorizontalSum = 0;
     allFinerVerticalSum = 0;
@@ -66,8 +66,8 @@ void GLayer::buildLayer() {
     program->setUniformValue("levelScaleFactor", QVector2D(scale, scale)); //setting right scale 
     program->setUniformValue("layerIndex", layerIndex);                    //setting right index
   
-    program->setUniformValue("rawTexOffset", QVector2D(rawTextureBegginingX2, rawTextureBegginingY2));
-    program->setUniformValue("hgtTexOffset", QVector2D(hgtTextureBegginingX2, hgtTextureBegginingY2));
+    program->setUniformValue("rawTexOffset", QVector2D(rawTextureBegginingX, rawTextureBegginingY));
+    program->setUniformValue("hgtTexOffset", QVector2D(hgtTextureBegginingX, hgtTextureBegginingY));
 
      
     int m = (n + 1) / 4 - 1;
@@ -104,25 +104,25 @@ void GLayer::buildLayer() {
 
         if (clipmap->layer[layerIndex - 1].positionVertical == 0) { //down wall
             
-            drawD(m, m);
+            drawD(m, 3*m+1);
 
-            if (fillerPositionHorizontal == 0) { //left wall
-                drawE(m, m+1);
-            }
-            else if (fillerPositionHorizontal == 1) { //right wall
+            if (clipmap->layer[layerIndex - 1].positionHorizontal == 0) { //left wall
                 drawE(3*m+1, m+1);
+            }
+            else if (clipmap->layer[layerIndex - 1].positionHorizontal == 1) { //right wall
+                drawE(m, m+1);
             }
 
         }
         else if (clipmap->layer[layerIndex - 1].positionVertical == 1) { //top wall
 
-            drawD(m, 3*m+1);
+            drawD(m, m);
             
-            if (fillerPositionHorizontal == 0) { //left wall
-                drawE(m, m);
-            }
-            else if (fillerPositionHorizontal == 1) { //right wall
+            if (clipmap->layer[layerIndex - 1].positionHorizontal == 0) { //left wall
                 drawE(3*m+1, m);
+            }
+            else if (clipmap->layer[layerIndex - 1].positionHorizontal == 1) { //right wall
+                drawE(m, m);
             }
         }
 
@@ -192,10 +192,10 @@ void GLayer::mapDataIntoImages(double tlon, double tlat, int lonDifference, int 
         heightManager->fullHgtTextureReading(lonLeft, lonRight, latDown, latTop);
            
         //reseting texture beggining coordinate
-        hgtTextureBegginingX = 0;
-        hgtTextureBegginingY = n;
-        rawTextureBegginingX = 0;  //x
-        rawTextureBegginingY = n - 1;  //y
+        hgtTextureBegginingXBuff = 0;
+        hgtTextureBegginingYBuff = n;
+        rawTextureBegginingXBuff = 0;  //x
+        rawTextureBegginingYBuff = n - 1;  //y
             
         //updating old coordinates
         oldLat = tlat;
@@ -232,20 +232,20 @@ void GLayer::mapDataIntoImages(double tlon, double tlat, int lonDifference, int 
 
 
         if (latDifference > 0) {
-            rawTextureBegginingY = (int)(rawTextureBegginingY + latDifference) % (n - 1);
-            hgtTextureBegginingY = (int)(hgtTextureBegginingY + latDifference) % (n);
+            rawTextureBegginingYBuff = (int)(rawTextureBegginingYBuff + latDifference) % (n - 1);
+            hgtTextureBegginingYBuff = (int)(hgtTextureBegginingYBuff + latDifference) % (n);
         }
         if (latDifference < 0) {
-            rawTextureBegginingY = (int)(rawTextureBegginingY + latDifference + n - 1) % (n - 1);
-            hgtTextureBegginingY = (int)(hgtTextureBegginingY + latDifference + n) % (n);
+            rawTextureBegginingYBuff = (int)(rawTextureBegginingYBuff + latDifference + n - 1) % (n - 1);
+            hgtTextureBegginingYBuff = (int)(hgtTextureBegginingYBuff + latDifference + n) % (n);
         }
         if (lonDifference > 0) {
-            rawTextureBegginingX = (int)(rawTextureBegginingX + lonDifference) % (n - 1);
-            hgtTextureBegginingX = (int)(hgtTextureBegginingX + lonDifference) % (n);
+            rawTextureBegginingXBuff = (int)(rawTextureBegginingXBuff + lonDifference) % (n - 1);
+            hgtTextureBegginingXBuff = (int)(hgtTextureBegginingXBuff + lonDifference) % (n);
         }
         if (lonDifference < 0) {
-            rawTextureBegginingX = (int)(rawTextureBegginingX + lonDifference + n - 1) % (n - 1);
-            hgtTextureBegginingX = (int)(hgtTextureBegginingX + lonDifference + n) % (n);
+            rawTextureBegginingXBuff = (int)(rawTextureBegginingXBuff + lonDifference + n - 1) % (n - 1);
+            hgtTextureBegginingXBuff = (int)(hgtTextureBegginingXBuff + lonDifference + n) % (n);
         }
 
         oldLat = oldLat + latDifference * readDegree;
@@ -291,10 +291,10 @@ void GLayer::computeLayerPosition(double tlon, double tlat) {
         offsets.setY(tlat - verticalOffset * readDegree);
     }
 
-    rawTextureBegginingX2 = rawTextureBegginingX;
-    rawTextureBegginingY2 = rawTextureBegginingY;
-    hgtTextureBegginingX2 = hgtTextureBegginingX;
-    hgtTextureBegginingY2 = hgtTextureBegginingY;
+    rawTextureBegginingX = rawTextureBegginingXBuff;
+    rawTextureBegginingY = rawTextureBegginingYBuff;
+    hgtTextureBegginingX = hgtTextureBegginingXBuff;
+    hgtTextureBegginingY = hgtTextureBegginingYBuff;
     
 }
 
@@ -323,50 +323,50 @@ void GLayer::computeTextureOffsets(int latDifference, int lonDifference, point *
         if (latDifference > 0) {
 
             if (lonDifference > 0) {
-                texBegHor->x = (rawTextureBegginingX + lonDifference) % (n - 1);
-                texBegHor->y = (rawTextureBegginingY + latDifference) % (n - 1);
-                texBegVer->x = rawTextureBegginingX;
-                texBegVer->y = rawTextureBegginingY;
+                texBegHor->x = (rawTextureBegginingXBuff + lonDifference) % (n - 1);
+                texBegHor->y = (rawTextureBegginingYBuff + latDifference) % (n - 1);
+                texBegVer->x = rawTextureBegginingXBuff;
+                texBegVer->y = rawTextureBegginingYBuff;
             }
             else if (lonDifference == 0) {
-                texBegHor->x = rawTextureBegginingX;
-                texBegHor->y = (rawTextureBegginingY + latDifference) % (n - 1);
+                texBegHor->x = rawTextureBegginingXBuff;
+                texBegHor->y = (rawTextureBegginingYBuff + latDifference) % (n - 1);
             }
             else if (lonDifference < 0) {
-                texBegHor->x = (rawTextureBegginingX + lonDifference + n - 1) % (n - 1);
-                texBegHor->y = (rawTextureBegginingY + latDifference) % (n - 1);
-                texBegVer->x = (rawTextureBegginingX + lonDifference + n - 1) % (n - 1);
-                texBegVer->y = rawTextureBegginingY;
+                texBegHor->x = (rawTextureBegginingXBuff + lonDifference + n - 1) % (n - 1);
+                texBegHor->y = (rawTextureBegginingYBuff + latDifference) % (n - 1);
+                texBegVer->x = (rawTextureBegginingXBuff + lonDifference + n - 1) % (n - 1);
+                texBegVer->y = rawTextureBegginingYBuff;
             }
         }
         else if (latDifference == 0) {
 
             if (lonDifference > 0) {
-                texBegVer->x = rawTextureBegginingX;
-                texBegVer->y = rawTextureBegginingY;
+                texBegVer->x = rawTextureBegginingXBuff;
+                texBegVer->y = rawTextureBegginingYBuff;
             }
             else if (lonDifference < 0) {
-                texBegVer->x = (rawTextureBegginingX + lonDifference + n - 1) % (n - 1);
-                texBegVer->y = rawTextureBegginingY;
+                texBegVer->x = (rawTextureBegginingXBuff + lonDifference + n - 1) % (n - 1);
+                texBegVer->y = rawTextureBegginingYBuff;
             }
         }
         else if (latDifference < 0) {
 
             if (lonDifference > 0) {
-                texBegHor->x = (rawTextureBegginingX + lonDifference) % (n - 1);
-                texBegHor->y = rawTextureBegginingY;
-                texBegVer->x = rawTextureBegginingX;
-                texBegVer->y = (rawTextureBegginingY + latDifference + n - 1) % (n - 1);
+                texBegHor->x = (rawTextureBegginingXBuff + lonDifference) % (n - 1);
+                texBegHor->y = rawTextureBegginingYBuff;
+                texBegVer->x = rawTextureBegginingXBuff;
+                texBegVer->y = (rawTextureBegginingYBuff + latDifference + n - 1) % (n - 1);
             }
             else if (lonDifference == 0) {
-                texBegHor->x = rawTextureBegginingX;
-                texBegHor->y = rawTextureBegginingY;
+                texBegHor->x = rawTextureBegginingXBuff;
+                texBegHor->y = rawTextureBegginingYBuff;
             }
             else if (lonDifference < 0) {
-                texBegHor->x = (rawTextureBegginingX + lonDifference + n - 1) % (n - 1);
-                texBegHor->y = rawTextureBegginingY;
-                texBegVer->x = (rawTextureBegginingX + lonDifference + n - 1) % (n - 1);
-                texBegVer->y = (rawTextureBegginingY + latDifference + n - 1) % (n - 1);
+                texBegHor->x = (rawTextureBegginingXBuff + lonDifference + n - 1) % (n - 1);
+                texBegHor->y = rawTextureBegginingYBuff;
+                texBegVer->x = (rawTextureBegginingXBuff + lonDifference + n - 1) % (n - 1);
+                texBegVer->y = (rawTextureBegginingYBuff + latDifference + n - 1) % (n - 1);
             }
         }
     }
@@ -374,50 +374,50 @@ void GLayer::computeTextureOffsets(int latDifference, int lonDifference, point *
         if (latDifference > 0) {
 
             if (lonDifference > 0) {
-                texBegHor->x = (hgtTextureBegginingX + lonDifference) % (n);
-                texBegHor->y = (hgtTextureBegginingY + latDifference) % (n);
-                texBegVer->x = hgtTextureBegginingX;
-                texBegVer->y = hgtTextureBegginingY;
+                texBegHor->x = (hgtTextureBegginingXBuff + lonDifference) % (n);
+                texBegHor->y = (hgtTextureBegginingYBuff + latDifference) % (n);
+                texBegVer->x = hgtTextureBegginingXBuff;
+                texBegVer->y = hgtTextureBegginingYBuff;
             }
             else if (lonDifference == 0) {
-                texBegHor->x = hgtTextureBegginingX;
-                texBegHor->y = (hgtTextureBegginingY + latDifference) % (n);
+                texBegHor->x = hgtTextureBegginingXBuff;
+                texBegHor->y = (hgtTextureBegginingYBuff + latDifference) % (n);
             }
             else if (lonDifference < 0) {
-                texBegHor->x = (hgtTextureBegginingX + lonDifference + n) % (n);
-                texBegHor->y = (hgtTextureBegginingY + latDifference) % (n);
-                texBegVer->x = (hgtTextureBegginingX + lonDifference + n) % (n);
-                texBegVer->y = hgtTextureBegginingY;
+                texBegHor->x = (hgtTextureBegginingXBuff + lonDifference + n) % (n);
+                texBegHor->y = (hgtTextureBegginingYBuff + latDifference) % (n);
+                texBegVer->x = (hgtTextureBegginingXBuff + lonDifference + n) % (n);
+                texBegVer->y = hgtTextureBegginingYBuff;
             }
         }
         else if (latDifference == 0) {
 
             if (lonDifference > 0) {
-                texBegVer->x = hgtTextureBegginingX;
-                texBegVer->y = hgtTextureBegginingY;
+                texBegVer->x = hgtTextureBegginingXBuff;
+                texBegVer->y = hgtTextureBegginingYBuff;
             }
             else if (lonDifference < 0) {
-                texBegVer->x = (hgtTextureBegginingX + lonDifference + n) % (n);
-                texBegVer->y = hgtTextureBegginingY;
+                texBegVer->x = (hgtTextureBegginingXBuff + lonDifference + n) % (n);
+                texBegVer->y = hgtTextureBegginingYBuff;
             }
         }
         else if (latDifference < 0) {
 
             if (lonDifference > 0) {
-                texBegHor->x = (hgtTextureBegginingX + lonDifference) % (n);
-                texBegHor->y = hgtTextureBegginingY;
-                texBegVer->x = hgtTextureBegginingX;
-                texBegVer->y = (hgtTextureBegginingY + latDifference + n) % (n);
+                texBegHor->x = (hgtTextureBegginingXBuff + lonDifference) % (n);
+                texBegHor->y = hgtTextureBegginingYBuff;
+                texBegVer->x = hgtTextureBegginingXBuff;
+                texBegVer->y = (hgtTextureBegginingYBuff + latDifference + n) % (n);
             }
             else if (lonDifference == 0) {
-                texBegHor->x = hgtTextureBegginingX;
-                texBegHor->y = hgtTextureBegginingY;
+                texBegHor->x = hgtTextureBegginingXBuff;
+                texBegHor->y = hgtTextureBegginingYBuff;
             }
             else if (lonDifference < 0) {
-                texBegHor->x = (hgtTextureBegginingX + lonDifference + n) % (n);
-                texBegHor->y = hgtTextureBegginingY;
-                texBegVer->x = (hgtTextureBegginingX + lonDifference + n) % (n);
-                texBegVer->y = (hgtTextureBegginingY + latDifference + n) % (n);
+                texBegHor->x = (hgtTextureBegginingXBuff + lonDifference + n) % (n);
+                texBegHor->y = hgtTextureBegginingYBuff;
+                texBegVer->x = (hgtTextureBegginingXBuff + lonDifference + n) % (n);
+                texBegVer->y = (hgtTextureBegginingYBuff + latDifference + n) % (n);
             }
         }
     }
