@@ -2,13 +2,14 @@
 layout (location = 0) in vec2 position;
 
 out vec4 color;
-//in vec2 texCoordOut;
 in vec2 levelPositionOut;
+in vec2 levelPositionFinerOut;
 
 uniform int layerIndex;
 
 uniform vec2 patchOrigin;
 uniform vec2 rawTexOffset;
+uniform vec2 rawTexOffsetFiner;
 uniform int n;
 
 uniform sampler2D tex_pixelmap0; 
@@ -25,29 +26,22 @@ uniform sampler2D tex_pixelmap10;
 uniform sampler2D tex_pixelmap11;
 uniform sampler2D tex_pixelmap12;
 
-uniform sampler2D tex_heightmap0;
-uniform sampler2D tex_heightmap1;
-uniform sampler2D tex_heightmap2;
-uniform sampler2D tex_heightmap3;
-uniform sampler2D tex_heightmap4;
-uniform sampler2D tex_heightmap5;
-uniform sampler2D tex_heightmap6;
-uniform sampler2D tex_heightmap7;
-uniform sampler2D tex_heightmap8;
-uniform sampler2D tex_heightmap9;
-uniform sampler2D tex_heightmap10;
-uniform sampler2D tex_heightmap11;
-uniform sampler2D tex_heightmap12;
+//uniforms for blending
+uniform vec2 coarserInFinerOffset;
+uniform float w;
+uniform float distanceToBlendingArea;
+uniform vec2 cameraPosition;
+uniform int highestLvlOfDetail;
 
-uniform vec2 hgtTexOffset;
 void main()
 {
-	vec3 pixel;
+	vec3 pixel, pixelFnr, pixelOut;
+	float blendingParam, blendingParamX, blendingParamY;
 	
-	float texPosY = float(mod(levelPositionOut.y + rawTexOffset.y, n - 1));
-	float texPosX = float(mod(levelPositionOut.x + rawTexOffset.x, n - 1));
+	float texPosX, texPosY;
 
-
+	texPosY = float(mod(levelPositionOut.y + rawTexOffset.y, n ));
+	texPosX = float(mod(levelPositionOut.x + rawTexOffset.x, n ));
 	switch (layerIndex) {
 	case 0:
 		pixel = texture( tex_pixelmap0, vec2(texPosX/n, texPosY/n), 0).rgb;
@@ -91,6 +85,64 @@ void main()
 	}
 
 
+	if(highestLvlOfDetail > layerIndex){
+	
+		
+		texPosY = float(mod(levelPositionFinerOut.y + rawTexOffsetFiner.y, n ));
+		texPosX = float(mod(levelPositionFinerOut.x + rawTexOffsetFiner.x, n ));
+		switch (layerIndex + 1) {
+		case 0:
+			pixelFnr = texture(tex_pixelmap0, vec2(texPosX/n, texPosY/n), 0).rgb;
+			break;
+		case 1:
+			pixelFnr = texture(tex_pixelmap1, vec2(texPosX/n, texPosY/n), 0).rgb;
+			break;
+		case 2:
+			pixelFnr = texture(tex_pixelmap2, vec2(texPosX/n, texPosY/n), 0).rgb;
+			break;
+		case 3:
+			pixelFnr = texture(tex_pixelmap3, vec2(texPosX/n, texPosY/n), 0).rgb;
+			break;
+		case 4:
+			pixelFnr = texture(tex_pixelmap4, vec2(texPosX/n, texPosY/n), 0).rgb;
+			break;									 
+		case 5:										 
+			pixelFnr = texture(tex_pixelmap5, vec2(texPosX/n, texPosY/n),  0).rgb;
+			break;									 
+		case 6:										 
+			pixelFnr = texture(tex_pixelmap6, vec2(texPosX/n, texPosY/n),  0).rgb;
+			break;									 
+		case 7:										 
+			pixelFnr = texture(tex_pixelmap7, vec2(texPosX/n, texPosY/n),  0).rgb;
+			break;									 
+		case 8:										 
+			pixelFnr = texture(tex_pixelmap8, vec2(texPosX/n, texPosY/n),  0).rgb;
+			break;									 
+		case 9:										 
+			pixelFnr = texture(tex_pixelmap9, vec2(texPosX/n, texPosY/n),  0).rgb;
+			break;									 
+		case 10:									 
+			pixelFnr = texture(tex_pixelmap10, vec2(texPosX/n, texPosY/n), 0).rgb;
+			break;									 
+		case 11:									 
+			pixelFnr = texture(tex_pixelmap11, vec2(texPosX/n, texPosY/n), 0).rgb;
+			break;									 
+		case 12:									 
+			pixelFnr = texture(tex_pixelmap12, vec2(texPosX/n, texPosY/n), 0).rgb;
+			break;
+		} 
 
-	color = vec4(pixel, 0);
+		//calculating blending parameter
+		blendingParamX = clamp( ( abs(levelPositionOut.x-cameraPosition.x) - distanceToBlendingArea )/w ,0,1);
+		blendingParamY = clamp( ( abs(levelPositionOut.y-cameraPosition.y) - distanceToBlendingArea )/w ,0,1);
+		blendingParam = max( blendingParamX, blendingParamY);
+
+		pixelOut = mix( pixel, pixelFnr, blendingParam);
+	}
+	else {
+		pixelOut = pixel;
+	}
+
+
+	color = vec4(pixelOut, 0);
 }

@@ -17,14 +17,12 @@ void GClipmapThread::run() {
         layersOffsets[i] = clipmap->layer[i].horizontalOffset;
         layersDegree[i] = clipmap->layer[i].readDegree;
     }
-    highestLvlOfDetail = 9;
+    highestLvlOfDetail = 8;
    
     while (true) {
         
 
         if (!clipmap->clipmapReady) {
-
-            
 
 
             findPosition();
@@ -48,13 +46,11 @@ void GClipmapThread::run() {
                 activeLvlOfDetail = 6;
             else if (distanceFromEarth < 128 * treshold)
                 activeLvlOfDetail = 7;
-            else if (distanceFromEarth < 256 * treshold)
+            else 
                 activeLvlOfDetail = 8;
-            else
-                activeLvlOfDetail = 9;
-
            
 
+            //activeLvlOfDetail = 8;
 
             for (int x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
                 clipmap->layer[x].updateLayer(tlon, tlat);
@@ -96,13 +92,13 @@ void GClipmapThread::computeHighestLvlOfDetail() {
     CCommons::getCartesianFromSpherical(edgeLon, tlat, 6378100, &posX, &posY, &posZ);
     distanceToPreviousEdge = sqrt(pow(camX - posX, 2) + pow(camY - posY, 2) + pow(camZ - posZ, 2));
 
-    CCommons::doubleIntoVSConsole(activeLvlOfDetail);
-    CCommons::stringIntoVSConsole("    ");
-    CCommons::doubleIntoVSConsole(highestLvlOfDetail);
-    CCommons::stringIntoVSConsole("\n");
+    //CCommons::doubleIntoVSConsole(activeLvlOfDetail);
+    //CCommons::stringIntoVSConsole("    ");
+    //CCommons::doubleIntoVSConsole(highestLvlOfDetail);
+    //CCommons::stringIntoVSConsole("\n");
 
     //if horizon is more far away than layer edge, change highest edge
-    if (distanceToHorizon > distanceToNextEdge && activeLvlOfDetail != highestLvlOfDetail && highestLvlOfDetail < 9)
+    if (distanceToHorizon > distanceToNextEdge && activeLvlOfDetail != highestLvlOfDetail && highestLvlOfDetail < 8)
         highestLvlOfDetail = highestLvlOfDetail + 1;
     else if (distanceToHorizon < distanceToPreviousEdge && activeLvlOfDetail != highestLvlOfDetail)
         highestLvlOfDetail = highestLvlOfDetail - 1;

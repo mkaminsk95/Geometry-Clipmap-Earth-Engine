@@ -60,6 +60,7 @@ GLayer::GLayer(GClipmap* clipmapPointer, float inDegree, float inHgtFileDegree, 
 
 void GLayer::buildLayer() {
     
+    int m = (n + 1) / 4 - 1;
    
     //setting shader variables
     program->setUniformValue("worldOffset", offsets);                      //placing layer in world coordinates   
@@ -69,8 +70,28 @@ void GLayer::buildLayer() {
     program->setUniformValue("rawTexOffset", QVector2D(rawTextureBegginingX, rawTextureBegginingY));
     program->setUniformValue("hgtTexOffset", QVector2D(hgtTextureBegginingX, hgtTextureBegginingY));
 
+    if (clipmap->highestLvlOfDetail > layerIndex) {
+
+
+        program->setUniformValue("rawTexOffsetFiner", QVector2D(clipmap->layer[layerIndex + 1].rawTextureBegginingX, clipmap->layer[layerIndex + 1].rawTextureBegginingY));
+        program->setUniformValue("hgtTexOffsetFiner", QVector2D(clipmap->layer[layerIndex + 1].hgtTextureBegginingX, clipmap->layer[layerIndex + 1].hgtTextureBegginingY));
+        program->setUniformValue("cameraPosition", QVector2D( (horizontalOffset + allFinerHorizontalSum), (verticalOffset + allFinerVerticalSum)));
+        program->setUniformValue("highestLvlOfDetail", clipmap->highestLvlOfDetail);
+
+        if (clipmap->layer[layerIndex + 1].positionVertical == 0) { 
+            if (clipmap->layer[layerIndex + 1].positionHorizontal == 0) 
+                program->setUniformValue("coarserInFinerOffset", QVector2D(m, m));
+            else if (clipmap->layer[layerIndex + 1].positionHorizontal == 1)
+                program->setUniformValue("coarserInFinerOffset", QVector2D(m+1,m));
+        }
+        else if (clipmap->layer[layerIndex + 1].positionVertical == 1) {
+            if (clipmap->layer[layerIndex + 1].positionHorizontal == 0) 
+                program->setUniformValue("coarserInFinerOffset", QVector2D(m,m+1));
+            else if (clipmap->layer[layerIndex + 1].positionHorizontal == 1) 
+                program->setUniformValue("coarserInFinerOffset", QVector2D(m+1,m+1));
+        }
+    }
      
-    int m = (n + 1) / 4 - 1;
 
     drawA(0.0,    0.0);
     drawA(m,      0.0);
@@ -207,6 +228,7 @@ void GLayer::mapDataIntoImages(double tlon, double tlat, int lonDifference, int 
 
         firstGothrough = false;    
 
+
     }
     else if (lonDifference != 0 || latDifference != 0) {
 
@@ -254,6 +276,8 @@ void GLayer::mapDataIntoImages(double tlon, double tlat, int lonDifference, int 
         oldLatDown = oldLatDown + latDifference * readDegree;
         oldLonLeft = oldLonLeft + lonDifference * readDegree;
         oldLonRight = oldLonRight + lonDifference * readDegree;
+        
+        pixelManager->pixelMap->save("fotka.png");
         
     }
 

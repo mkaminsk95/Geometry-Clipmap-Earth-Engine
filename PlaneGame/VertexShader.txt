@@ -3,6 +3,7 @@
 layout (location = 0) in vec2 position;
 out vec2 texCoordOut;
 out vec2 levelPositionOut;
+out vec2 levelPositionFinerOut;
 
 uniform sampler2D tex_heightmap; 
 uniform sampler2D tex_pixelmap; 
@@ -27,28 +28,37 @@ uniform vec2 levelScaleFactor;
 uniform vec2 worldScaleFactor;
 uniform vec2 worldOffset;
 uniform mat4 modelView;
-uniform vec2 hgtTexOffset;
 uniform int n;
 
+uniform vec2 hgtTexOffset;
+uniform vec2 hgtTexOffsetFiner;
+
+//uniforms for blending
+uniform vec2 coarserInFinerOffset;
+uniform float w;
+uniform float distanceToBlendingArea;
+uniform vec2 cameraPosition;
+uniform int highestLvlOfDetail;
 
 void main()
 {
     float CONST_PIDIV180 = 0.01745329251;
     int earthRadius = 6378100;
 	float x, y, z;
-	vec2 texelValue;
+	float terrainHeight;
+	vec2 texelValue, texelValueFnr;
 	float positionX, positionY;
-
-
-
+	float positionXCoarser, positionYCoarser;
+	float blendingParam, blendingParamX, blendingParamY;
+	
+	//checking level position of both layers
+	vec2 levelPositionFiner = 0.5 * (position + patchOrigin) + coarserInFinerOffset;
     vec2 levelPosition = position + patchOrigin;
 
-	positionX = int(mod(levelPosition.x + hgtTexOffset.x, n - 1));// + 1;
-	positionY = int(mod(levelPosition.y + hgtTexOffset.y, n - 1));// + 1;
-
-    vec2 worldPosition = (levelPosition * levelScaleFactor * worldScaleFactor) + worldOffset;
 
 
+	positionX = mod(levelPosition.x + hgtTexOffset.x, n);
+	positionY = mod(levelPosition.y + hgtTexOffset.y, n);
     switch (layerIndex) {
 	case 0:
 		texelValue = texture(tex_heightmap0, vec2(positionX/n, positionY/n), 0).xy;
@@ -90,16 +100,75 @@ void main()
 		texelValue = texture(tex_heightmap12, vec2(positionX/n, positionY/n), 0).xy;
 		break;
 	} 
-    
 
+	if(highestLvlOfDetail > layerIndex){
 	
-	int terrainHeight = int(texelValue.x*256+texelValue.y*65535);
-	
-    x = (earthRadius + terrainHeight) * sin(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
-    y = (earthRadius + terrainHeight) * sin(worldPosition.y * CONST_PIDIV180);
-    z = (earthRadius + terrainHeight) * cos(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
+		
+		positionX = mod(levelPositionFiner.x + hgtTexOffsetFiner.x, n);
+		positionY = mod(levelPositionFiner.y + hgtTexOffsetFiner.y, n);
+		switch (layerIndex + 1) {
+		case 0:
+			texelValueFnr = texture(tex_heightmap0, vec2(positionX/n, positionY/n), 0).xy;
+			break;
+		case 1:
+			texelValueFnr = texture(tex_heightmap1, vec2(positionX/n, positionY/n), 0).xy;
+			break;
+		case 2:
+			texelValueFnr = texture(tex_heightmap2, vec2(positionX/n, positionY/n), 0).xy;
+			break;
+		case 3:
+			texelValueFnr = texture(tex_heightmap3, vec2(positionX/n, positionY/n), 0).xy;
+			break;
+		case 4:
+			texelValueFnr = texture(tex_heightmap4, vec2(positionX/n, positionY/n), 0).xy;
+			break;									 
+		case 5:										 
+			texelValueFnr = texture(tex_heightmap5, vec2(positionX/n, positionY/n),  0).xy;
+			break;									 
+		case 6:										 
+			texelValueFnr = texture(tex_heightmap6, vec2(positionX/n, positionY/n),  0).xy;
+			break;									 
+		case 7:										 
+			texelValueFnr = texture(tex_heightmap7, vec2(positionX/n, positionY/n),  0).xy;
+			break;									 
+		case 8:										 
+			texelValueFnr = texture(tex_heightmap8, vec2(positionX/n, positionY/n),  0).xy;
+			break;									 
+		case 9:										 
+			texelValueFnr = texture(tex_heightmap9, vec2(positionX/n, positionY/n),  0).xy;
+			break;									 
+		case 10:									 
+			texelValueFnr = texture(tex_heightmap10, vec2(positionX/n, positionY/n), 0).xy;
+			break;									 
+		case 11:									 
+			texelValueFnr = texture(tex_heightmap11, vec2(positionX/n, positionY/n), 0).xy;
+			break;									 
+		case 12:									 
+			texelValueFnr = texture(tex_heightmap12, vec2(positionX/n, positionY/n), 0).xy;
+			break;
+		} 
+
+		//calculating blending parameter
+		blendingParamX = clamp( ( abs(levelPosition.x-cameraPosition.x) - distanceToBlendingArea )/w ,0,1);
+		blendingParamY = clamp( ( abs(levelPosition.y-cameraPosition.y) - distanceToBlendingArea )/w ,0,1);
+		blendingParam = max( blendingParamX, blendingParamY);
+
+		terrainHeight = mix( (texelValue.x*256+texelValue.y*65535), (texelValueFnr.x*256+texelValueFnr.y*65535), blendingParam);
+	}
+	else {
+		terrainHeight = (texelValue.x*256+texelValue.y*65535);
+	}
 
 
+
+	//calculating layer position in cartesian coordinates
+    vec2 worldPosition = (levelPosition * levelScaleFactor * worldScaleFactor) + worldOffset;
+
+    x = (earthRadius + terrainHeight*4) * sin(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
+    y = (earthRadius + terrainHeight*4) * sin(worldPosition.y * CONST_PIDIV180);
+    z = (earthRadius + terrainHeight*4) * cos(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
+
+	levelPositionFinerOut = levelPositionFiner;
     levelPositionOut = levelPosition;
     gl_Position = modelView*vec4(x, y, z, 1.0);    
 }

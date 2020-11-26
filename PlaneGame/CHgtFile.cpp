@@ -44,6 +44,7 @@
 #include <iostream>
 #include <vector>
 #include "CHgtFile.h"
+#include "CCommons.h"
 
 using namespace std;
 
@@ -387,7 +388,7 @@ void CHgtFile::loadHeightDataToImageFull(QImage* image, int imageOffsetX, int im
     fstream fileHeight;
     quint8 height[2];
     quint8 heightNew[2];
-
+    quint8 heightOld[2];
 
     uchar* bits;
 
@@ -416,22 +417,23 @@ void CHgtFile::loadHeightDataToImageFull(QImage* image, int imageOffsetX, int im
 
             for (int x = imageOffsetX; x < imageOffsetX + xToRead; x++) {
 
+                
                 //reading next two bites (2bite format - height 0 - 65536) from hgt file 
                 fileHeight.read((char*)&height[0], 1);
                 fileHeight.read((char*)&height[1], 1);
 
-                if (height[0] == 255 && height[1] == 255 && skip == 1) {
+                if (height[0] > heightOld[0]+6 && skip == 1) {
                     
 
-                    fileHeight.seekg(-4, fileHeight.cur);
-                    fileHeight.read((char*)&heightNew[0], 1);
-                    fileHeight.read((char*)&heightNew[1], 1);
-                    fileHeight.seekp(-2, fileHeight.cur);
-
-                    fileHeight.write((char*)&heightNew[0], 1);
-                    fileHeight.write((char*)&heightNew[1], 1);
-                    fileHeight.write((char*)&heightNew[0], 1);
-                    fileHeight.write((char*)&heightNew[1], 1);
+                    //fileHeight.seekg(-4, fileHeight.cur);
+                    //fileHeight.read((char*)&heightNew[0], 1);
+                    //fileHeight.read((char*)&heightNew[1], 1);
+                    //fileHeight.seekp(-2, fileHeight.cur);
+                    //
+                    //fileHeight.write((char*)&heightNew[0], 1);
+                    //fileHeight.write((char*)&heightNew[1], 1);
+                    //fileHeight.write((char*)&heightNew[0], 1);
+                    //fileHeight.write((char*)&heightNew[1], 1);
                 }
 
                 //jumping to the next bites block depending on the layer resolution
@@ -441,7 +443,8 @@ void CHgtFile::loadHeightDataToImageFull(QImage* image, int imageOffsetX, int im
                 *(bits + 3 * x) = height[1];
                 *(bits + 3 * x + 1) = height[0];
 
-                
+                heightOld[0] = height[0];
+                heightOld[1] = height[1];
             }
 
            
@@ -481,6 +484,11 @@ void CHgtFile::loadHeightDataToImagePart(QImage* image, int imageOffsetX, int im
     fstream fileHeight;
     quint8 height[2];
     quint8 heightNew[2];
+    quint8 heightOld[2];
+    quint8 heightRecord[2];
+    heightRecord[0] = 0;
+    streampos position;
+
     uchar* bits;
 
     long offset;
@@ -496,11 +504,11 @@ void CHgtFile::loadHeightDataToImagePart(QImage* image, int imageOffsetX, int im
     xStopCondition = imageOffsetX + xToRead;
 
     //calculation offset for reading exact bites in hgt files
-
     offset = (filePositionVerticalOffset * fileResolution + filePositionHorizontalOffset) * skip * 2;
 
-    // load HGT file to memory
+    //load HGT file to memory
     fileHeight.open(name.toUtf8(), fstream::in | fstream::out | fstream::binary);
+    //fileHeight.open("test.hgt");
     bool ifOpened = fileHeight.is_open();
 
     if (ifOpened) {
@@ -508,6 +516,7 @@ void CHgtFile::loadHeightDataToImagePart(QImage* image, int imageOffsetX, int im
 
             //finding right input data
             fileHeight.seekg(offset + 2 * skip * rowCheck * fileResolution);
+    
 
             //finding right row of image (texture)
             bits = image->scanLine((n - 1) - fmod(textureBegginingY + y, n));
@@ -519,29 +528,49 @@ void CHgtFile::loadHeightDataToImagePart(QImage* image, int imageOffsetX, int im
                 fileHeight.read((char*)&height[0], 1);
                 fileHeight.read((char*)&height[1], 1);
 
-                if (height[0] > 24 && skip == 1) {
-
-
+                
+                if (height[0] > 40) {
+                    CCommons::stringIntoVSConsole("Jeb! ");
+                    CCommons::doubleIntoVSConsole(height[0]);
+                    
                     fileHeight.seekg(-4, fileHeight.cur);
                     fileHeight.read((char*)&heightNew[0], 1);
                     fileHeight.read((char*)&heightNew[1], 1);
-                    fileHeight.seekp(-2, fileHeight.cur);
 
-                    fileHeight.write((char*)&heightNew[0], 1);
-                    fileHeight.write((char*)&heightNew[1], 1);
-                    fileHeight.write((char*)&heightNew[0], 1);
-                    fileHeight.write((char*)&heightNew[1], 1);
+                    if (heightNew[0] > 40) { //new height is also corrupted
+                        CCommons::stringIntoVSConsole(" wtopa!!");
 
-                    
+                        fileHeight.seekg(2, fileHeight.cur);
+                    } 
+                    else {  //new height is ok
+                        
+                        fileHeight.seekp(2, fileHeight.cur);
+                        fileHeight.seekp(-2, fileHeight.cur);
+
+                        fileHeight.write((char*)&heightNew[0], 1);
+                        fileHeight.write((char*)&heightNew[1], 1);
+                        
+                        fileHeight.flush();
+                    }
+
+                    CCommons::stringIntoVSConsole("\n");
                 }
 
 
                 //jumping to the next bites block depending on the layer resolution
                 fileHeight.seekg(skip * 2 - 2, fileHeight.cur);
 
-                //writing to the image
-                *(bits + 3 * ((textureBegginingX + x) % (n))) = height[1];
-                *(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = height[0];
+                if (height[0] > 40) {
+                    //writing to the image
+                    *(bits + 3 * ((textureBegginingX + x) % (n))) = heightNew[1];
+                    *(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = heightNew[0];
+                }
+                else {
+                    //writing to the image
+                    *(bits + 3 * ((textureBegginingX + x) % (n))) = height[1];
+                    *(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = height[0];
+                }
+
 
             }
 
@@ -564,6 +593,7 @@ void CHgtFile::loadHeightDataToImagePart(QImage* image, int imageOffsetX, int im
 
         }
     }
+
 
 
     fileHeight.close();

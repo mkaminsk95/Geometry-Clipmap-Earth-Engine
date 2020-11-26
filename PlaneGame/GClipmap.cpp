@@ -4,7 +4,7 @@
 #include "CHgtFile.h"
 #include "GLayer.h"
 
-int n = 255;          //7, 15, 31, 63, 127, 255, 511, 1023
+int n = 127;          //7, 15, 31, 63, 127, 255, 511, 1023
 int m = (n + 1) / 4; //2,  4,  8, 16
 
 GClipmap::GClipmap(COpenGl* openGlPointer) : openGl(openGlPointer)
@@ -99,18 +99,18 @@ void GClipmap::draw() {
         layer.push_back(GLayer(this,  3.7500032,     60.00,       2048,  11,          4,        65,        8,            96, n));  //11
         layer.push_back(GLayer(this,  7.5000064,     60.00,       4096,  12,          8,        65,       16,            96, n));  //12
 
-        layer[0].setPosition(1, 0);
-        layer[1].setPosition(1, 0);
-        layer[2].setPosition(1, 0);
-        layer[3].setPosition(1, 0);
-        layer[4].setPosition(1, 0);
-        layer[5].setPosition(1, 0);
-        layer[6].setPosition(1, 0);
-        layer[7].setPosition(1, 0);
-        layer[8].setPosition(1, 0);
-        layer[9].setPosition(1, 0);
-        layer[10].setPosition(1, 0);
-        layer[11].setPosition(1, 0);
+        layer[0].setPosition(1, 1);
+        layer[1].setPosition(1, 1);
+        layer[2].setPosition(1, 1);
+        layer[3].setPosition(1, 1);
+        layer[4].setPosition(1, 1);
+        layer[5].setPosition(1, 1);
+        layer[6].setPosition(1, 1);
+        layer[7].setPosition(1, 1);
+        layer[8].setPosition(1, 1);
+        layer[9].setPosition(1, 1);
+        layer[10].setPosition(1, 1);
+        layer[11].setPosition(1, 1);
 
         //defining uniforms
         QVector2D worldScaleFactor;
@@ -128,7 +128,12 @@ void GClipmap::draw() {
         program->setUniformValue("worldOffset", QVector2D(0.0, 0.0));
         program->setUniformValue("color", color);
         program->setUniformValue("n", n);
-        
+
+        float w = n / 10;
+        program->setUniformValue("w", w);
+        program->setUniformValue("distanceToBlendingArea", ((n-1)/2) - w - 1 );
+
+
         initialized = true; 
 
         openGl->clipmapThread->start();
