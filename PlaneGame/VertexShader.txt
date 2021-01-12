@@ -3,12 +3,12 @@
 layout (location = 0) in vec2 position;
 out vec2 texCoordOut;
 out vec2 levelPositionOut;
-out vec2 levelPositionFinerOut;
+out vec2 levelPositionFnrOut;
 
 uniform sampler2D tex_heightmap; 
 uniform sampler2D tex_pixelmap; 
 
-uniform int layerIndex;
+uniform int levelIndex;
 uniform sampler2D tex_heightmap0;
 uniform sampler2D tex_heightmap1;
 uniform sampler2D tex_heightmap2;
@@ -31,7 +31,7 @@ uniform mat4 modelView;
 uniform int n;
 
 uniform vec2 hgtTexOffset;
-uniform vec2 hgtTexOffsetFiner;
+uniform vec2 hgtTexOffsetFnr;
 
 //uniforms for blending
 uniform vec2 coarserInFinerOffset;
@@ -40,113 +40,89 @@ uniform float distanceToBlendingArea;
 uniform vec2 cameraPosition;
 uniform int highestLvlOfDetail;
 
-void main()
-{
-    float CONST_PIDIV180 = 0.01745329251;
-    int earthRadius = 6378100;
-	float x, y, z;
-	float terrainHeight;
-	vec2 texelValue, texelValueFnr;
-	float positionX, positionY;
-	float positionXCoarser, positionYCoarser;
-	float blendingParam, blendingParamX, blendingParamY;
+float CONST_PIDIV180 = 0.01745329251;
+int earthRadius = 6378100;
+
+vec2 getTexelValue(int index, vec2 position) {
 	
-	//checking level position of both layers
-	vec2 levelPositionFiner = 0.5 * (position + patchOrigin) + coarserInFinerOffset;
-    vec2 levelPosition = position + patchOrigin;
+	vec2 texelValue;
 
-
-
-	positionX = mod(levelPosition.x + hgtTexOffset.x, n);
-	positionY = mod(levelPosition.y + hgtTexOffset.y, n);
-    switch (layerIndex) {
+	switch (index) {
 	case 0:
-		texelValue = texture(tex_heightmap0, vec2(positionX/n, positionY/n), 0).xy;
+		texelValue = texture(tex_heightmap0, vec2(position.x/n, position.y/n), 0).xy;
 		break;
 	case 1:
-		texelValue = texture(tex_heightmap1, vec2(positionX/n, positionY/n), 0).xy;
+		texelValue = texture(tex_heightmap1, vec2(position.x/n, position.y/n), 0).xy;
 		break;
 	case 2:
-		texelValue = texture(tex_heightmap2, vec2(positionX/n, positionY/n), 0).xy;
+		texelValue = texture(tex_heightmap2, vec2(position.x/n, position.y/n), 0).xy;
 		break;
 	case 3:
-		texelValue = texture(tex_heightmap3, vec2(positionX/n, positionY/n), 0).xy;
+		texelValue = texture(tex_heightmap3, vec2(position.x/n, position.y/n), 0).xy;
 		break;
 	case 4:
-		texelValue = texture(tex_heightmap4, vec2(positionX/n, positionY/n), 0).xy;
+		texelValue = texture(tex_heightmap4, vec2(position.x/n, position.y/n), 0).xy;
 		break;									 
 	case 5:										 
-		texelValue = texture(tex_heightmap5, vec2(positionX/n, positionY/n),  0).xy;
+		texelValue = texture(tex_heightmap5, vec2(position.x/n, position.y/n),  0).xy;
 		break;									 
 	case 6:										 
-		texelValue = texture(tex_heightmap6, vec2(positionX/n, positionY/n),  0).xy;
+		texelValue = texture(tex_heightmap6, vec2(position.x/n, position.y/n),  0).xy;
 		break;									 
 	case 7:										 
-		texelValue = texture(tex_heightmap7, vec2(positionX/n, positionY/n),  0).xy;
+		texelValue = texture(tex_heightmap7, vec2(position.x/n, position.y/n),  0).xy;
 		break;									 
 	case 8:										 
-		texelValue = texture(tex_heightmap8, vec2(positionX/n, positionY/n),  0).xy;
+		texelValue = texture(tex_heightmap8, vec2(position.x/n, position.y/n),  0).xy;
 		break;									 
 	case 9:										 
-		texelValue = texture(tex_heightmap9, vec2(positionX/n, positionY/n),  0).xy;
+		texelValue = texture(tex_heightmap9, vec2(position.x/n, position.y/n),  0).xy;
 		break;									 
 	case 10:									 
-		texelValue = texture(tex_heightmap10, vec2(positionX/n, positionY/n), 0).xy;
+		texelValue = texture(tex_heightmap10, vec2(position.x/n, position.y/n), 0).xy;
 		break;									 
 	case 11:									 
-		texelValue = texture(tex_heightmap11, vec2(positionX/n, positionY/n), 0).xy;
+		texelValue = texture(tex_heightmap11, vec2(position.x/n, position.y/n), 0).xy;
 		break;									 
 	case 12:									 
-		texelValue = texture(tex_heightmap12, vec2(positionX/n, positionY/n), 0).xy;
+		texelValue = texture(tex_heightmap12, vec2(position.x/n, position.y/n), 0).xy;
 		break;
-	} 
+	}
 
-	if(highestLvlOfDetail > layerIndex){
+	return texelValue;
+}
+
+void main()
+{
+	vec2 levelPosition, levelPositionFnr, texPosition, worldPosition;
+	vec2 texelValue, texelValueFnr;
+    
+	float terrainHeight;
+	float x, y, z;
+
+	float blendingParam, blendingParamX, blendingParamY;
 	
+	
+	//checking level position of coarser level
+    levelPosition = position + patchOrigin;
+
+
+	texPosition.x = mod(levelPosition.x + hgtTexOffset.x, n);
+	texPosition.y = mod(levelPosition.y + hgtTexOffset.y, n);
+
+	texelValue = getTexelValue(levelIndex, texPosition);
+
+
+	if(highestLvlOfDetail > levelIndex){
 		
-		positionX = mod(levelPositionFiner.x + hgtTexOffsetFiner.x, n);
-		positionY = mod(levelPositionFiner.y + hgtTexOffsetFiner.y, n);
-		switch (layerIndex + 1) {
-		case 0:
-			texelValueFnr = texture(tex_heightmap0, vec2(positionX/n, positionY/n), 0).xy;
-			break;
-		case 1:
-			texelValueFnr = texture(tex_heightmap1, vec2(positionX/n, positionY/n), 0).xy;
-			break;
-		case 2:
-			texelValueFnr = texture(tex_heightmap2, vec2(positionX/n, positionY/n), 0).xy;
-			break;
-		case 3:
-			texelValueFnr = texture(tex_heightmap3, vec2(positionX/n, positionY/n), 0).xy;
-			break;
-		case 4:
-			texelValueFnr = texture(tex_heightmap4, vec2(positionX/n, positionY/n), 0).xy;
-			break;									 
-		case 5:										 
-			texelValueFnr = texture(tex_heightmap5, vec2(positionX/n, positionY/n),  0).xy;
-			break;									 
-		case 6:										 
-			texelValueFnr = texture(tex_heightmap6, vec2(positionX/n, positionY/n),  0).xy;
-			break;									 
-		case 7:										 
-			texelValueFnr = texture(tex_heightmap7, vec2(positionX/n, positionY/n),  0).xy;
-			break;									 
-		case 8:										 
-			texelValueFnr = texture(tex_heightmap8, vec2(positionX/n, positionY/n),  0).xy;
-			break;									 
-		case 9:										 
-			texelValueFnr = texture(tex_heightmap9, vec2(positionX/n, positionY/n),  0).xy;
-			break;									 
-		case 10:									 
-			texelValueFnr = texture(tex_heightmap10, vec2(positionX/n, positionY/n), 0).xy;
-			break;									 
-		case 11:									 
-			texelValueFnr = texture(tex_heightmap11, vec2(positionX/n, positionY/n), 0).xy;
-			break;									 
-		case 12:									 
-			texelValueFnr = texture(tex_heightmap12, vec2(positionX/n, positionY/n), 0).xy;
-			break;
-		} 
+		//checking level position of finer level
+		levelPositionFnr = 0.5 * (position + patchOrigin) + coarserInFinerOffset;
+	
+		texPosition.x = mod(levelPositionFnr.x + hgtTexOffsetFnr.x, n);
+		texPosition.y = mod(levelPositionFnr.y + hgtTexOffsetFnr.y, n);
+		
+		texelValueFnr = getTexelValue(levelIndex + 1, texPosition);
+
 
 		//calculating blending parameter
 		blendingParamX = clamp( ( abs(levelPosition.x-cameraPosition.x) - distanceToBlendingArea )/w ,0,1);
@@ -159,16 +135,15 @@ void main()
 		terrainHeight = (texelValue.x*256+texelValue.y*65535);
 	}
 
-
-
 	//calculating layer position in cartesian coordinates
-    vec2 worldPosition = (levelPosition * levelScaleFactor * worldScaleFactor) + worldOffset;
+    worldPosition = (levelPosition * levelScaleFactor * worldScaleFactor) + worldOffset;
+
 
     x = (earthRadius + terrainHeight*4) * sin(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
     y = (earthRadius + terrainHeight*4) * sin(worldPosition.y * CONST_PIDIV180);
     z = (earthRadius + terrainHeight*4) * cos(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
 
-	levelPositionFinerOut = levelPositionFiner;
+	levelPositionFnrOut = levelPositionFnr;
     levelPositionOut = levelPosition;
     gl_Position = modelView*vec4(x, y, z, 1.0);    
 }

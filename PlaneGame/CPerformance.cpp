@@ -73,6 +73,9 @@ CPerformance::CPerformance()
     eventsCount = 0;
 
     saveToHistory = true;
+
+    testStart = false;
+    trianglesRead = 0;
 }
 
 CPerformance::~CPerformance()

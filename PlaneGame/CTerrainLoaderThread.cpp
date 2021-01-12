@@ -80,8 +80,16 @@ void CTerrainLoaderThread::run()
 
     openGl->drawingState.getDrawingStateSnapshot(&dss);      // get current scene state
 
+    logFile.open("logFileRegularGrid.txt", fstream::in | fstream::out | fstream::trunc);
+    bool ifOpened = logFile.is_open();
+    bool onlyOnce = false;
+
     while (true) {
-        time.start();
+        
+        if (openGl->performance.testStart == true && onlyOnce == false) {
+            time.start();
+            onlyOnce = true;
+        }
 
         if (dss.treeUpdating)  earth->updateTerrainTree();
 
@@ -113,5 +121,11 @@ void CTerrainLoaderThread::run()
         // update performance info
         openGl->performance.setTerrainTreeUpdatingTime(time.elapsed());
         openGl->performance.updateTerrainTreeUpdatingInfo();
+
+        if (openGl->performance.testStart == true) {
+            logFile << time.elapsed() << "\t" << openGl->performance.maxLOD << "\t" << openGl->performance.terrainsQuarterDrawed*32 << "\t" << openGl->performance.trianglesRead << "\n";
+            logFile.flush();
+        }
+
     }
 }

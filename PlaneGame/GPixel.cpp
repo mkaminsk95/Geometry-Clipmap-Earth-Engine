@@ -312,7 +312,7 @@ void GPixel::verticalBlockRawTextureReading(int lonDifference, int latDifference
         imageOffsetX += howManyToReadX;
 
     }
-    pixelMap->save("mapa.png");
+   // pixelMap->save("mapa.png");
 
     /*pixelTexture = new QOpenGLTexture(*pixelMap, QOpenGLTexture::DontGenerateMipMaps);
     pixelTexture->bind(layerIndex, QOpenGLTexture::DontResetTextureUnit);

@@ -13,48 +13,58 @@ void GClipmapThread::run() {
     
     openGl->drawingState.getDrawingStateSnapshot(&dss);      // get current scene state
     
+    fstream logFile;
+    logFile.open("logFileClipmap.txt", fstream::in | fstream::out | fstream::trunc);
+    bool ifOpened = logFile.is_open();
+
+    bool onlyOnce = false;
     for (int i = 0; i < 13; i++) {
         layersOffsets[i] = clipmap->layer[i].horizontalOffset;
         layersDegree[i] = clipmap->layer[i].readDegree;
     }
-    highestLvlOfDetail = 8;
+    highestLvlOfDetail = 12;
    
+    int n = clipmap->layer[0].n;
+    int fullLayerSize = 2 * (n - 1) * (n - 1);
+    int ringLayerSize = fullLayerSize - 2   *   ( (n - 1) / 2 )   *   ( (n - 1) / 2 );
+
     while (true) {
         
 
         if (!clipmap->clipmapReady) {
 
 
+            if (openGl->performance.testStart && onlyOnce == false) {
+                time.start();
+                onlyOnce = true;
+            }
+
             findPosition();
+            
+            treshold = 8840;
+
+            if (distanceFromEarth < 2 *    treshold) activeLvlOfDetail = 0;  else   //~18km
+            if (distanceFromEarth < 4 *    treshold) activeLvlOfDetail = 1;  else   //~36km
+            if (distanceFromEarth < 8 *    treshold) activeLvlOfDetail = 2;  else   //~72km
+            if (distanceFromEarth < 16 *   treshold) activeLvlOfDetail = 3;  else   //~144km
+            if (distanceFromEarth < 32 *   treshold) activeLvlOfDetail = 4;  else   //~288km
+            if (distanceFromEarth < 64 *   treshold) activeLvlOfDetail = 5;  else   //~576km
+            if (distanceFromEarth < 128 *  treshold) activeLvlOfDetail = 6;  else   //~1152km
+            if (distanceFromEarth < 256 *  treshold) activeLvlOfDetail = 7;  else   //~2304km 
+            if (distanceFromEarth < 512 *  treshold) activeLvlOfDetail = 8;  else   //~4608km
+            if (distanceFromEarth < 1024 * treshold) activeLvlOfDetail = 9;  else   //~9216km
+            if (distanceFromEarth < 2048 * treshold) activeLvlOfDetail = 10; else   //~18432km
+            if (distanceFromEarth < 4096 * treshold) activeLvlOfDetail = 11; else   //~36864km
+                                                     activeLvlOfDetail = 12;
+        
             computeHighestLvlOfDetail();
 
-            treshold = 20000;
-
-            if (distanceFromEarth < treshold)
-                activeLvlOfDetail = 0;
-            else if (distanceFromEarth < 2 * treshold)
-                activeLvlOfDetail = 1;
-            else if (distanceFromEarth < 4 * treshold)
-                activeLvlOfDetail = 2;
-            else if (distanceFromEarth < 8 * treshold)
-                activeLvlOfDetail = 3;
-            else if (distanceFromEarth < 16 * treshold)
-                activeLvlOfDetail = 4;
-            else if (distanceFromEarth < 32 * treshold)
-                activeLvlOfDetail = 5;
-            else if (distanceFromEarth < 64 * treshold)
-                activeLvlOfDetail = 6;
-            else if (distanceFromEarth < 128 * treshold)
-                activeLvlOfDetail = 7;
-            else 
-                activeLvlOfDetail = 8;
-           
-
-            //activeLvlOfDetail = 8;
+            activeLvlOfDetail = 1;
+            highestLvlOfDetail = 3;
 
             for (int x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
                 clipmap->layer[x].updateLayer(tlon, tlat);
-
+            
             for (int x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
                 clipmap->layer[x].computeLayerPosition(tlon, tlat);
             
@@ -64,6 +74,13 @@ void GClipmapThread::run() {
 
             clipmap->clipmapReady = true;
         
+            int trianglesRendered = fullLayerSize + ringLayerSize*(highestLvlOfDetail-activeLvlOfDetail);
+            
+
+            if (openGl->performance.testStart == true) {
+                logFile << time.elapsed() << "\t" << activeLvlOfDetail << "\t" << trianglesRendered << "\t" << openGl->performance.trianglesRead << "\n";
+                logFile.flush();
+            }
         }
 
     }
@@ -76,7 +93,7 @@ void GClipmapThread::computeHighestLvlOfDetail() {
     double camX, camY, camZ;
     double posX, posY, posZ;
     double edgeLon, edgeLat;
-    float distanceToNextEdge, distanceToPreviousEdge, distanceToHorizon;
+    float distanceToHighestLvlEdge, distanceToPreviousEdge, distanceToHorizon;
     
     //computing distance to horizon
     distanceToHorizon = sqrt(2 * 6378100 * distanceFromEarth + distanceFromEarth * distanceFromEarth);
@@ -85,23 +102,20 @@ void GClipmapThread::computeHighestLvlOfDetail() {
     edgeLon = tlon - layersOffsets[highestLvlOfDetail] * layersDegree[highestLvlOfDetail];
     CCommons::getCartesianFromSpherical(edgeLon, tlat, 6378100,&posX,&posY,&posZ);
     camera->getCamPosition(&camX, &camY, &camZ);
-    distanceToNextEdge = sqrt(pow(camX - posX, 2) + pow(camY - posY, 2) + pow(camZ - posZ, 2));
+    distanceToHighestLvlEdge = sqrt(pow(camX - posX, 2) + pow(camY - posY, 2) + pow(camZ - posZ, 2));
 
     //computing distance to previous edge
     edgeLon = tlon - layersOffsets[highestLvlOfDetail-1] * layersDegree[highestLvlOfDetail-1];
     CCommons::getCartesianFromSpherical(edgeLon, tlat, 6378100, &posX, &posY, &posZ);
     distanceToPreviousEdge = sqrt(pow(camX - posX, 2) + pow(camY - posY, 2) + pow(camZ - posZ, 2));
 
-    //CCommons::doubleIntoVSConsole(activeLvlOfDetail);
-    //CCommons::stringIntoVSConsole("    ");
-    //CCommons::doubleIntoVSConsole(highestLvlOfDetail);
-    //CCommons::stringIntoVSConsole("\n");
 
     //if horizon is more far away than layer edge, change highest edge
-    if (distanceToHorizon > distanceToNextEdge && activeLvlOfDetail != highestLvlOfDetail && highestLvlOfDetail < 8)
+    if (distanceToHorizon > distanceToHighestLvlEdge && activeLvlOfDetail != highestLvlOfDetail && highestLvlOfDetail < 13)
         highestLvlOfDetail = highestLvlOfDetail + 1;
     else if (distanceToHorizon < distanceToPreviousEdge && activeLvlOfDetail != highestLvlOfDetail)
         highestLvlOfDetail = highestLvlOfDetail - 1;
+
 }
 
 void GClipmapThread::findPosition() {
@@ -109,7 +123,7 @@ void GClipmapThread::findPosition() {
 
     double camX, camY, camZ;
     double lon, lat, rad;
-
+    
 
     double earthRadius = CONST_EARTH_RADIUS;
 

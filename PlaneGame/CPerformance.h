@@ -72,6 +72,9 @@ public:
     void disableSavingToHistory();
     void enableSavingToHistory();
 
+    int trianglesRead;
+    bool testStart;
+
 private:
     static CPerformance *instance;
 

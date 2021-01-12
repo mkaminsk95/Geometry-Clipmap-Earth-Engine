@@ -48,10 +48,10 @@ CDrawingState::CDrawingState()
     drawTerrainPoint = false;
     drawTerrainPointColor = false;
     drawTerrainWire = false;
-    drawTerrainWireColor = true;
+    drawTerrainWireColor = false;
     drawTerrainSolid = false;
-    drawTerrainSolidStrip = true;
-    drawTerrainSolidColor = true;
+    drawTerrainSolidStrip = false;
+    drawTerrainSolidColor = false;
     drawTerrainTexture = true;
     drawTerrainTextureStrip = true;
 
@@ -62,10 +62,10 @@ CDrawingState::CDrawingState()
     drawTerrainBottomPlaneTexture = true;
 
     drawTerrainNormals = false;
-    drawEarthPoint = true;
+    drawEarthPoint = false;
     drawGrid = true;
     drawAxes = true;
-    sunEnabled = true;
+    sunEnabled = false;
     treeUpdating = true;
 
     lodMultiplier = 1.74;
@@ -73,8 +73,7 @@ CDrawingState::CDrawingState()
     dontUseDiskHgt = false;
     dontUseDiskRaw = false;
 
-    activeLvlOfDetail = 3;
-    highestLvlOfDetail = 4;
+   
 }
 
 void CDrawingState::getDrawingStateSnapshot(CDrawingStateSnapshot *dss)

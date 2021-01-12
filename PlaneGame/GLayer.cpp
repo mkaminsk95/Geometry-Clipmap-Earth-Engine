@@ -5,6 +5,7 @@
 #include "GHeight.h"
 #include "CHgtFile.h"
 
+
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
@@ -53,7 +54,8 @@ GLayer::GLayer(GClipmap* clipmapPointer, float inDegree, float inHgtFileDegree, 
     pixelManager = new GPixel(this, inLayerIndex, inDegree, inRawSkipping, inRawFileResolution);
     heightManager = new GHeight(this, inLayerIndex, inDegree, inHgtSkipping, inHgtFileResolution, inHgtFileDegree);
 
-    
+    performance = CPerformance::getInstance();
+
     cumputeOffsets();
     
 }
@@ -65,7 +67,7 @@ void GLayer::buildLayer() {
     //setting shader variables
     program->setUniformValue("worldOffset", offsets);                      //placing layer in world coordinates   
     program->setUniformValue("levelScaleFactor", QVector2D(scale, scale)); //setting right scale 
-    program->setUniformValue("layerIndex", layerIndex);                    //setting right index
+    program->setUniformValue("levelIndex", layerIndex);                    //setting right index
   
     program->setUniformValue("rawTexOffset", QVector2D(rawTextureBegginingX, rawTextureBegginingY));
     program->setUniformValue("hgtTexOffset", QVector2D(hgtTextureBegginingX, hgtTextureBegginingY));
@@ -73,8 +75,8 @@ void GLayer::buildLayer() {
     if (clipmap->highestLvlOfDetail > layerIndex) {
 
 
-        program->setUniformValue("rawTexOffsetFiner", QVector2D(clipmap->layer[layerIndex + 1].rawTextureBegginingX, clipmap->layer[layerIndex + 1].rawTextureBegginingY));
-        program->setUniformValue("hgtTexOffsetFiner", QVector2D(clipmap->layer[layerIndex + 1].hgtTextureBegginingX, clipmap->layer[layerIndex + 1].hgtTextureBegginingY));
+        program->setUniformValue("rawTexOffsetFnr", QVector2D(clipmap->layer[layerIndex + 1].rawTextureBegginingX, clipmap->layer[layerIndex + 1].rawTextureBegginingY));
+        program->setUniformValue("hgtTexOffsetFnr", QVector2D(clipmap->layer[layerIndex + 1].hgtTextureBegginingX, clipmap->layer[layerIndex + 1].hgtTextureBegginingY));
         program->setUniformValue("cameraPosition", QVector2D( (horizontalOffset + allFinerHorizontalSum), (verticalOffset + allFinerVerticalSum)));
         program->setUniformValue("highestLvlOfDetail", clipmap->highestLvlOfDetail);
 
@@ -177,6 +179,7 @@ void GLayer::updateTextures() {
     heightTexture = new QOpenGLTexture(*heightManager->heightMap, QOpenGLTexture::DontGenerateMipMaps);
     heightTexture->bind(layerIndex+13);
 
+    //program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);
     program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);
     program->setUniformValue(clipmap->heightTextureLocation[layerIndex], layerIndex+13);
 
@@ -228,6 +231,8 @@ void GLayer::mapDataIntoImages(double tlon, double tlat, int lonDifference, int 
 
         firstGothrough = false;    
 
+        performance->trianglesRead += 2 * (n - 1) * (n - 1);
+     
 
     }
     else if (lonDifference != 0 || latDifference != 0) {
@@ -277,7 +282,9 @@ void GLayer::mapDataIntoImages(double tlon, double tlat, int lonDifference, int 
         oldLonLeft = oldLonLeft + lonDifference * readDegree;
         oldLonRight = oldLonRight + lonDifference * readDegree;
         
-        pixelManager->pixelMap->save("fotka.png");
+        //pixelManager->pixelMap->save("fotka.png");
+
+        performance->trianglesRead += 2 * (abs(lonDifference) * (n - 1 - latDifference) ) + 2 * (abs(latDifference) * (n - 1));
         
     }
 

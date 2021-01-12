@@ -112,6 +112,9 @@
     <ClCompile Include="GHeight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GTimingThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="mainwindow.h">
@@ -298,6 +301,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GTimingThread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

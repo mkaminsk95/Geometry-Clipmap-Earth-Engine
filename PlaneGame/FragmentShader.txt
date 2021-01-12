@@ -3,13 +3,13 @@ layout (location = 0) in vec2 position;
 
 out vec4 color;
 in vec2 levelPositionOut;
-in vec2 levelPositionFinerOut;
+in vec2 levelPositionFnrOut;
 
-uniform int layerIndex;
+uniform int levelIndex;
 
 uniform vec2 patchOrigin;
 uniform vec2 rawTexOffset;
-uniform vec2 rawTexOffsetFiner;
+uniform vec2 rawTexOffsetFnr;
 uniform int n;
 
 uniform sampler2D tex_pixelmap0; 
@@ -33,109 +33,79 @@ uniform float distanceToBlendingArea;
 uniform vec2 cameraPosition;
 uniform int highestLvlOfDetail;
 
-void main()
-{
-	vec3 pixel, pixelFnr, pixelOut;
-	float blendingParam, blendingParamX, blendingParamY;
+vec3 getTexelValue(int index, vec2 position) {
 	
-	float texPosX, texPosY;
+	vec3 texelValue;
 
-	texPosY = float(mod(levelPositionOut.y + rawTexOffset.y, n ));
-	texPosX = float(mod(levelPositionOut.x + rawTexOffset.x, n ));
-	switch (layerIndex) {
+	switch (index) {
 	case 0:
-		pixel = texture( tex_pixelmap0, vec2(texPosX/n, texPosY/n), 0).rgb;
+		texelValue = texture(tex_pixelmap0, vec2(position.x/n, position.y/n), 0).rgb;
 		break;
 	case 1:
-		pixel = texture( tex_pixelmap1, vec2(texPosX/n, texPosY/n), 0).rgb;
+		texelValue = texture(tex_pixelmap1, vec2(position.x/n, position.y/n), 0).rgb;
 		break;
 	case 2:
-		pixel = texture( tex_pixelmap2, vec2(texPosX/n, texPosY/n), 0).rgb;
+		texelValue = texture(tex_pixelmap2, vec2(position.x/n, position.y/n), 0).rgb;
 		break;
 	case 3:
-		pixel = texture( tex_pixelmap3, vec2(texPosX/n, texPosY/n), 0).rgb;
+		texelValue = texture(tex_pixelmap3, vec2(position.x/n, position.y/n), 0).rgb;
 		break;
 	case 4:
-		pixel = texture( tex_pixelmap4, vec2(texPosX/n, texPosY/n), 0).rgb;
-		break;
-	case 5:
-		pixel = texture( tex_pixelmap5, vec2(texPosX/n, texPosY/n), 0).rgb;
-		break;
-	case 6:
-		pixel = texture( tex_pixelmap6, vec2(texPosX/n, texPosY/n), 0).rgb;
-		break;
-	case 7:
-		pixel = texture( tex_pixelmap7, vec2(texPosX/n, texPosY/n), 0).rgb;
-		break;
-	case 8:
-		pixel = texture( tex_pixelmap8, vec2(texPosX/n, texPosY/n), 0).rgb;
-		break;
-	case 9:
-		pixel = texture( tex_pixelmap9, vec2(texPosX/n, texPosY/n), 0).rgb;
-		break;
-	case 10:
-		pixel = texture( tex_pixelmap10, vec2(texPosX/n, texPosY/n), 0).rgb;
-		break;
-	case 11:
-		pixel = texture( tex_pixelmap11, vec2(texPosX/n, texPosY/n), 0).rgb;
-		break;
-	case 12:
-		pixel = texture( tex_pixelmap12, vec2(texPosX/n, texPosY/n), 0).rgb;
+		texelValue = texture(tex_pixelmap4, vec2(position.x/n, position.y/n), 0).rgb;
+		break;									 
+	case 5:										 
+		texelValue = texture(tex_pixelmap5, vec2(position.x/n, position.y/n),  0).rgb;
+		break;									 
+	case 6:										 
+		texelValue = texture(tex_pixelmap6, vec2(position.x/n, position.y/n),  0).rgb;
+		break;									 
+	case 7:										 
+		texelValue = texture(tex_pixelmap7, vec2(position.x/n, position.y/n),  0).rgb;
+		break;									 
+	case 8:										 
+		texelValue = texture(tex_pixelmap8, vec2(position.x/n, position.y/n),  0).rgb;
+		break;									 
+	case 9:										 
+		texelValue = texture(tex_pixelmap9, vec2(position.x/n, position.y/n),  0).rgb;
+		break;									 
+	case 10:									 
+		texelValue = texture(tex_pixelmap10, vec2(position.x/n, position.y/n), 0).rgb;
+		break;									 
+	case 11:									 
+		texelValue = texture(tex_pixelmap11, vec2(position.x/n, position.y/n), 0).rgb;
+		break;									 
+	case 12:									 
+		texelValue = texture(tex_pixelmap12, vec2(position.x/n, position.y/n), 0).rgb;
 		break;
 	}
 
+	return texelValue;
+}
 
-	if(highestLvlOfDetail > layerIndex){
+void main()
+{
+	float blendingParam, blendingParamX, blendingParamY;
+	vec3 pixel, pixelFnr, pixelOut;
+	vec2 texPosition;
+
+	texPosition.x = mod(levelPositionOut.x + rawTexOffset.x, n);
+	texPosition.y = mod(levelPositionOut.y + rawTexOffset.y, n);
 	
+	pixel = getTexelValue(levelIndex, texPosition);
+
+
+	if(highestLvlOfDetail > levelIndex){
+	
+		texPosition.x = mod(levelPositionFnrOut.x + rawTexOffsetFnr.x, n);
+		texPosition.y = mod(levelPositionFnrOut.y + rawTexOffsetFnr.y, n);
 		
-		texPosY = float(mod(levelPositionFinerOut.y + rawTexOffsetFiner.y, n ));
-		texPosX = float(mod(levelPositionFinerOut.x + rawTexOffsetFiner.x, n ));
-		switch (layerIndex + 1) {
-		case 0:
-			pixelFnr = texture(tex_pixelmap0, vec2(texPosX/n, texPosY/n), 0).rgb;
-			break;
-		case 1:
-			pixelFnr = texture(tex_pixelmap1, vec2(texPosX/n, texPosY/n), 0).rgb;
-			break;
-		case 2:
-			pixelFnr = texture(tex_pixelmap2, vec2(texPosX/n, texPosY/n), 0).rgb;
-			break;
-		case 3:
-			pixelFnr = texture(tex_pixelmap3, vec2(texPosX/n, texPosY/n), 0).rgb;
-			break;
-		case 4:
-			pixelFnr = texture(tex_pixelmap4, vec2(texPosX/n, texPosY/n), 0).rgb;
-			break;									 
-		case 5:										 
-			pixelFnr = texture(tex_pixelmap5, vec2(texPosX/n, texPosY/n),  0).rgb;
-			break;									 
-		case 6:										 
-			pixelFnr = texture(tex_pixelmap6, vec2(texPosX/n, texPosY/n),  0).rgb;
-			break;									 
-		case 7:										 
-			pixelFnr = texture(tex_pixelmap7, vec2(texPosX/n, texPosY/n),  0).rgb;
-			break;									 
-		case 8:										 
-			pixelFnr = texture(tex_pixelmap8, vec2(texPosX/n, texPosY/n),  0).rgb;
-			break;									 
-		case 9:										 
-			pixelFnr = texture(tex_pixelmap9, vec2(texPosX/n, texPosY/n),  0).rgb;
-			break;									 
-		case 10:									 
-			pixelFnr = texture(tex_pixelmap10, vec2(texPosX/n, texPosY/n), 0).rgb;
-			break;									 
-		case 11:									 
-			pixelFnr = texture(tex_pixelmap11, vec2(texPosX/n, texPosY/n), 0).rgb;
-			break;									 
-		case 12:									 
-			pixelFnr = texture(tex_pixelmap12, vec2(texPosX/n, texPosY/n), 0).rgb;
-			break;
-		} 
+		pixelFnr = getTexelValue(levelIndex + 1, texPosition);
 
 		//calculating blending parameter
 		blendingParamX = clamp( ( abs(levelPositionOut.x-cameraPosition.x) - distanceToBlendingArea )/w ,0,1);
 		blendingParamY = clamp( ( abs(levelPositionOut.y-cameraPosition.y) - distanceToBlendingArea )/w ,0,1);
 		blendingParam = max( blendingParamX, blendingParamY);
+
 
 		pixelOut = mix( pixel, pixelFnr, blendingParam);
 	}

@@ -234,7 +234,8 @@ void CRawFile::loadPixelDataToImageFull(QImage* image, int imageOffsetX, int ima
 
     // load HGT file to memory
     filePixel.open(name.toUtf8(), fstream::in | fstream::binary);
-
+    for (int counter = 0; counter < 16; counter++) {
+        rowCheck = 0;
     for (int y = imageOffsetY; y < imageOffsetY+yToRead; y++) {
         
         //finding right input data
@@ -262,7 +263,8 @@ void CRawFile::loadPixelDataToImageFull(QImage* image, int imageOffsetX, int ima
 
         rowCheck++;
     }
-    
+
+    }
     filePixel.close();
 }
 
@@ -292,7 +294,9 @@ void CRawFile::loadPixelDataToImagePart(QImage* image, int imageOffsetX, int ima
     
     // load HGT file to memory
     filePixel.open(name.toUtf8(), fstream::in | fstream::binary);
-  
+    
+    for (int counter = 0; counter < 16; counter++) {
+        rowCheck = 0;
     for (y = imageOffsetY; y < yStopCondition; y++) {
 
         //finding right input data
@@ -321,7 +325,8 @@ void CRawFile::loadPixelDataToImagePart(QImage* image, int imageOffsetX, int ima
       
         rowCheck++;
     }
-    
+
+    }
     filePixel.close();
 }
 

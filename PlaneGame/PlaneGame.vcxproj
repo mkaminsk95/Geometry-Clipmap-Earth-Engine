@@ -117,6 +117,7 @@
     <ClCompile Include="GClipmap.cpp" />
     <ClCompile Include="GClipmapThread.cpp" />
     <ClCompile Include="GLayer.cpp" />
+    <ClCompile Include="GTimingThread.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mainwindow.cpp" />
   </ItemGroup>
@@ -144,6 +145,7 @@
     <ClInclude Include="GLayer.h" />
     <ClInclude Include="GClipmap.h" />
     <ClInclude Include="GStructures.h" />
+    <ClInclude Include="GTimingThread.h" />
     <ClInclude Include="mathlib\bbox.h" />
     <ClInclude Include="mathlib\envelopecurve.h" />
     <ClInclude Include="mathlib\euler.h" />

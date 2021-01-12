@@ -56,7 +56,7 @@ COpenGlThread::COpenGlThread(COpenGl *openGlPointer) : QThread(openGlPointer), o
     doResize = false;
 
     //////////////////////////////
-    quadtree = false;
+    quadtree = true;
 
     // set earth pointer to earth "A"
     earth = openGl->earthBufferA;
@@ -67,6 +67,8 @@ COpenGlThread::COpenGlThread(COpenGl *openGlPointer) : QThread(openGlPointer), o
     openGl->drawingState.getDrawingStateSnapshot(&dss);      // get current scene state
   
     earth->initLOD_0();
+
+    
 }
 
 void COpenGlThread::resizeEvent(int w, int h)
@@ -104,6 +106,9 @@ void COpenGlThread::run()
     openGl->drawingState.getDrawingStateSnapshot(&dss);      // get current scene state
     initializeScene();
 
+   // logFile.open("logFile.txt", fstream::in | fstream::out | fstream::trunc);
+   // bool ifOpened = logFile.is_open();
+    time.start();
     while (true) {
         time.start();
 
@@ -123,6 +128,7 @@ void COpenGlThread::run()
         checkSunLightningAndAtmosphere(); // at 85km sky is black
         drawScene();
         
+
        
        // ### OpenGL scene END
    
@@ -131,7 +137,7 @@ void COpenGlThread::run()
         openGl->drawingState.getDrawingStateSnapshot(&dss);  // get current scene state
       
 
-        if (quadtree) {
+        if (openGl->clipmapMode == false) {
 
 
             // check if new earth was loaded from disk in parraler thread
@@ -158,11 +164,14 @@ void COpenGlThread::run()
 
             // update performance info
             msleep(1);
+            
             openGl->performance.setFrameRenderingTime(time.elapsed());
             openGl->performance.updateFrameRenderingInfo();
-
+            
         }
-
+        //logFile.write("dupcia");// << time.elapsed() << " ";
+        //logFile << time.elapsed() << "\t" << openGl->performance.trianglesRead << "\n";
+        //logFile.flush();
     }
 }
 
@@ -235,10 +244,10 @@ void COpenGlThread::drawScene()
     if (dss.drawGrid)          objects.drawGrid(dss.sunEnabled);
     if (dss.drawEarthPoint)    objects.drawEarthPoint(dss.earthPointX, dss.earthPointY, dss.earthPointZ, dss.camDistanceToEarthPoint, dss.sunEnabled);
    
-    if (quadtree) {
+    if (openGl->clipmapMode == false) {
         earth->draw();
     }
-    else if (!quadtree) {
+    else if (openGl->clipmapMode == true) {
         clipmap->setDrawingStateSnapshot(& dss);
         //clipmap->setLvlsOfDetail(dss.activeLvlOfDetail, dss.highestLvlOfDetail);
         clipmap->draw();

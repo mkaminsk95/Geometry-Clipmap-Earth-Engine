@@ -42,7 +42,7 @@
 
 #include "CAnimationThread.h"
 #include "CCommons.h"
-
+#include "CPerformance.h"
 
 CAnimationThread::CAnimationThread(COpenGl *openGlPointer) : QThread(openGlPointer), openGl(openGlPointer)
 {
@@ -143,6 +143,8 @@ void CAnimationThread::manageBenchmark()
 void CAnimationThread::run()
 {
     openGl->drawingState.getDrawingStateSnapshot(&dss);      // get current scene state
+    CPerformance* performance = CPerformance::getInstance();
+    int time = 0;
 
     while (true) {
 
@@ -152,7 +154,6 @@ void CAnimationThread::run()
             return;
         }
         doMutex.unlock();
-
 
         // animation code here
         openGl->drawingState.getCamera()->checkInteractKeys();       // interact keys

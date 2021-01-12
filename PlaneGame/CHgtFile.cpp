@@ -484,10 +484,8 @@ void CHgtFile::loadHeightDataToImagePart(QImage* image, int imageOffsetX, int im
     fstream fileHeight;
     quint8 height[2];
     quint8 heightNew[2];
-    quint8 heightOld[2];
-    quint8 heightRecord[2];
-    heightRecord[0] = 0;
-    streampos position;
+
+    int howManyTimes;
 
     uchar* bits;
 
@@ -528,49 +526,53 @@ void CHgtFile::loadHeightDataToImagePart(QImage* image, int imageOffsetX, int im
                 fileHeight.read((char*)&height[0], 1);
                 fileHeight.read((char*)&height[1], 1);
 
-                
+              /*  
                 if (height[0] > 40) {
                     CCommons::stringIntoVSConsole("Jeb! ");
                     CCommons::doubleIntoVSConsole(height[0]);
                     
                     fileHeight.seekg(-4, fileHeight.cur);
+                    howManyTimes = 1;
                     fileHeight.read((char*)&heightNew[0], 1);
                     fileHeight.read((char*)&heightNew[1], 1);
 
-                    if (heightNew[0] > 40) { //new height is also corrupted
-                        CCommons::stringIntoVSConsole(" wtopa!!");
+                    while (heightNew[0] > 40) {
 
-                        fileHeight.seekg(2, fileHeight.cur);
-                    } 
-                    else {  //new height is ok
-                        
-                        fileHeight.seekp(2, fileHeight.cur);
-                        fileHeight.seekp(-2, fileHeight.cur);
+                        fileHeight.seekg(-4, fileHeight.cur);
+                        howManyTimes++;
+                        fileHeight.read((char*)&heightNew[0], 1);
+                        fileHeight.read((char*)&heightNew[1], 1);
 
-                        fileHeight.write((char*)&heightNew[0], 1);
-                        fileHeight.write((char*)&heightNew[1], 1);
-                        
-                        fileHeight.flush();
                     }
 
+                    fileHeight.seekp(2, fileHeight.cur);
+                    fileHeight.seekp(-2, fileHeight.cur);
+                    for (int i = 0; i < howManyTimes; i++) {
+                        fileHeight.write((char*)&heightNew[0], 1);
+                        fileHeight.write((char*)&heightNew[1], 1);
+                    }
+
+                    fileHeight.flush();
+
                     CCommons::stringIntoVSConsole("\n");
-                }
+                }*/
 
 
                 //jumping to the next bites block depending on the layer resolution
                 fileHeight.seekg(skip * 2 - 2, fileHeight.cur);
 
-                if (height[0] > 40) {
-                    //writing to the image
-                    *(bits + 3 * ((textureBegginingX + x) % (n))) = heightNew[1];
-                    *(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = heightNew[0];
-                }
-                else {
-                    //writing to the image
-                    *(bits + 3 * ((textureBegginingX + x) % (n))) = height[1];
-                    *(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = height[0];
-                }
-
+                //if (height[0] > 40) {
+                //    //writing to the image
+                //    *(bits + 3 * ((textureBegginingX + x) % (n))) = heightNew[1];
+                //    *(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = heightNew[0];
+                //}
+                //else {
+                //    //writing to the image
+                //    *(bits + 3 * ((textureBegginingX + x) % (n))) = height[1];
+                //    *(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = height[0];
+                //}
+                *(bits + 3 * ((textureBegginingX + x) % (n))) = height[1];
+                *(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = height[0];
 
             }
 

@@ -52,6 +52,8 @@ using namespace std;
 COpenGl::COpenGl(QGLFormat glFormat, QWidget *parent) : QGLWidget(glFormat, parent)
 {
     
+    clipmapMode = true;
+
    // create Earth Buffers
     earthBufferA = new CEarth;
     earthBufferB = new CEarth;
@@ -74,17 +76,24 @@ COpenGl::COpenGl(QGLFormat glFormat, QWidget *parent) : QGLWidget(glFormat, pare
     openGlThread = new COpenGlThread(this);
     openGlThread->start();
 
-    // start terrain loading thread
-  // terrainLoaderThread = new CTerrainLoaderThread(this);
-  // terrainLoaderThread->start();
-
+    if (clipmapMode == false) {
+        // start terrain loading thread
+        terrainLoaderThread = new CTerrainLoaderThread(this);
+        terrainLoaderThread->start();
+    }
+    
     // start animation thread
     animationThread = new CAnimationThread(this);
     animationThread->start();
 
-    // start clipmap thread 
-    clipmapThread = new GClipmapThread(this);
+    if (clipmapMode == true) {
+        // start clipmap thread 
+        clipmapThread = new GClipmapThread(this);
+    }
     
+    // start timing thread 
+    //timingThread = new GTimingThread();
+    //timingThread->start();
 }
 
 COpenGl::~COpenGl()

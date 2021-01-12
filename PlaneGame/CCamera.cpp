@@ -45,6 +45,7 @@
 #include <math.h>
 #include "CCommons.h"
 #include "CCamera.h"
+#include "CPerformance.h"
 
 
 CCamera::CCamera()
@@ -55,8 +56,8 @@ CCamera::CCamera()
     camMode = CAM_MODE_ORBIT;
 
     // INIT - earth point (center of terrain camera coordinate system)
-    earthPointLon = 17.038;
-    earthPointLat = 51.102;
+    earthPointLon = 25; //17.038;
+    earthPointLat = 0;// 51.102;
     earthPointAlt = CONST_EARTH_RADIUS + 118;
     CCommons::getCartesianFromSpherical(earthPointLon, earthPointLat, earthPointAlt,
                                         &earthPointX, &earthPointY, &earthPointZ);
@@ -70,7 +71,7 @@ CCamera::CCamera()
     // INIT - camera linked to globe center in orbit mode
     camGlobeOrbitAzim = earthPointLon;
     camGlobeOrbitElev = earthPointLat;
-    camGlobeOrbitRad = CONST_EARTH_RADIUS + 20.0*CONST_1GM;     // 20 000 km above Earth default camera
+    camGlobeOrbitRad = CONST_EARTH_RADIUS + 36.5*CONST_1GM;     // 20 000 km above Earth default camera
     CCommons::getCartesianFromSpherical(camGlobeOrbitAzim, camGlobeOrbitElev, camGlobeOrbitRad,
                                         &camGlobeX, &camGlobeY, &camGlobeZ);
 
@@ -119,6 +120,8 @@ CCamera::CCamera()
     // camera FOV & terrain clipping
     camFOV = 70.0;
     setNewWindowSize(CONST_DEF_WIDTH, CONST_DEF_HEIGHT, false);
+
+    performance = CPerformance::getInstance();
 
     updateCameraWhenInGlobeLinkage();
 }
@@ -504,9 +507,9 @@ void CCamera::mouseReleaseEventHandler(QMouseEvent *event)
 void CCamera::mouseMoveEventHandler(QMouseEvent *event)
 {
     QMutexLocker locker(drawingStateMutex);
-    int dx = event->x() - interactMouseLastPos.x();
+    float dx = event->x() - interactMouseLastPos.x();
     int dy = event->y() - interactMouseLastPos.y();
-
+    performance->testStart = true;
     double unit = 1.0;
     double orbitSlowing = 1.0;
 
@@ -907,9 +910,10 @@ void CCamera::checkInteractKeys()
 
 void CCamera::freeLookGlobalCameraForward(double dt)
 {
-    camGlobeX = camGlobeX + camGlobeFreeDirX*camVel*dt*10;
-    camGlobeY = camGlobeY + camGlobeFreeDirY*camVel*dt*10;
-    camGlobeZ = camGlobeZ + camGlobeFreeDirZ*camVel*dt*10;
+    performance->testStart = true;
+    camGlobeX = camGlobeX + camGlobeFreeDirX*camVel*dt*3;
+    camGlobeY = camGlobeY + camGlobeFreeDirY*camVel*dt*3;
+    camGlobeZ = camGlobeZ + camGlobeFreeDirZ*camVel*dt*3;
 }
 
 void CCamera::freeLookGlobalCameraBackward(double dt)

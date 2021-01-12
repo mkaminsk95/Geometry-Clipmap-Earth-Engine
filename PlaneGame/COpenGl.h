@@ -64,6 +64,7 @@
 #include "CAnimationThread.h"
 #include "GClipmapThread.h"
 #include "GClipmap.h"
+#include "GTimingThread.h"
 
 class COpenGlThread;
 class CTerrainLoaderThread;
@@ -78,6 +79,8 @@ public:
     COpenGl(QGLFormat glFormat, QWidget *parent);
     ~COpenGl();
 
+    bool clipmapMode;
+
     CCacheManager cacheManager;
     CPerformance performance;
     CDrawingState drawingState;
@@ -90,6 +93,7 @@ public:
     COpenGlThread *openGlThread;
     CTerrainLoaderThread *terrainLoaderThread;
     CAnimationThread *animationThread;
+    GTimingThread* timingThread;
 
     GClipmapThread *clipmapThread;
     GClipmap *clipmap;

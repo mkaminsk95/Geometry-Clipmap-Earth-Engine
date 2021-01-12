@@ -4,6 +4,7 @@
 
 #include "CDrawingStateSnapshot.h"
 #include "CCommons.h"
+#include "CPerformance.h"
 #include "GStructures.h"
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
@@ -55,6 +56,7 @@ public:
 
 private: 
 
+	CPerformance* performance;
 
 	point rTexBegHor, rTexBegVer, hTexBegHor, hTexBegVer;
 	int hgtTextureBegginingYBuff, hgtTextureBegginingXBuff, rawTextureBegginingYBuff, rawTextureBegginingXBuff;

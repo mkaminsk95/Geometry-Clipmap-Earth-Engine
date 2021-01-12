@@ -49,7 +49,6 @@
 #include "CDrawingStateSnapshot.h"
 
 
-
 CTerrain::CTerrain()
 {
     visible = false;
@@ -173,19 +172,20 @@ int CTerrain::getLodToRender()
 {
     CDrawingStateSnapshot *dss = earth->drawingStateSnapshot;
    
-    if (terrainPointClosestToCamDistance <     5.2*CONST_1KM*dss->lodMultiplier) return 13; else
-    if (terrainPointClosestToCamDistance <    10.4*CONST_1KM*dss->lodMultiplier) return 12; else
-    if (terrainPointClosestToCamDistance <    20.8*CONST_1KM*dss->lodMultiplier) return 11; else
-    if (terrainPointClosestToCamDistance <    41.6*CONST_1KM*dss->lodMultiplier) return 10; else
-    if (terrainPointClosestToCamDistance <    83.2*CONST_1KM*dss->lodMultiplier) return  9; else
-    if (terrainPointClosestToCamDistance <   166.4*CONST_1KM*dss->lodMultiplier) return  8; else
-    if (terrainPointClosestToCamDistance <   332.8*CONST_1KM*dss->lodMultiplier) return  7; else
-    if (terrainPointClosestToCamDistance <   665.6*CONST_1KM*dss->lodMultiplier) return  6; else
-    if (terrainPointClosestToCamDistance <  1331.2*CONST_1KM*dss->lodMultiplier) return  5; else
-    if (terrainPointClosestToCamDistance <  2662.5*CONST_1KM*dss->lodMultiplier) return  4; else
-    if (terrainPointClosestToCamDistance <  5324.9*CONST_1KM*dss->lodMultiplier) return  3; else
-    if (terrainPointClosestToCamDistance < 10649.9*CONST_1KM*dss->lodMultiplier) return  2; else
-    if (terrainPointClosestToCamDistance < 21299.7*CONST_1KM*dss->lodMultiplier) return  1; else
+
+    //if (terrainPointClosestToCamDistance <     5.2*CONST_1KM*dss->lodMultiplier) return 13; else //9km
+    if (terrainPointClosestToCamDistance <    10.4*CONST_1KM*dss->lodMultiplier) return 12; else //18
+    if (terrainPointClosestToCamDistance <    20.8*CONST_1KM*dss->lodMultiplier) return 11; else //36
+    if (terrainPointClosestToCamDistance <    41.6*CONST_1KM*dss->lodMultiplier) return 10; else //72
+    if (terrainPointClosestToCamDistance <    83.2*CONST_1KM*dss->lodMultiplier) return  9; else //144
+    if (terrainPointClosestToCamDistance <   166.4*CONST_1KM*dss->lodMultiplier) return  8; else //288
+    if (terrainPointClosestToCamDistance <   332.8*CONST_1KM*dss->lodMultiplier) return  7; else //576
+    if (terrainPointClosestToCamDistance <   665.6*CONST_1KM*dss->lodMultiplier) return  6; else //1152
+    if (terrainPointClosestToCamDistance <  1331.2*CONST_1KM*dss->lodMultiplier) return  5; else //2300
+    if (terrainPointClosestToCamDistance <  2662.5*CONST_1KM*dss->lodMultiplier) return  4; else //4600
+    if (terrainPointClosestToCamDistance <  5324.9*CONST_1KM*dss->lodMultiplier) return  3; else //9200
+    if (terrainPointClosestToCamDistance < 10649.9*CONST_1KM*dss->lodMultiplier) return  2; else //18400
+    if (terrainPointClosestToCamDistance < 21299.7*CONST_1KM*dss->lodMultiplier) return  1; else //36800
                                                                                  return  0;
 }
 
@@ -229,8 +229,8 @@ void CTerrain::updateTerrainTree()
 void CTerrain::initTerrainData(double lon, double lat, int lod, const CDrawingStateSnapshot *dss)
 {
     CCacheManager *cacheManager = CCacheManager::getInstance();
+    performance = CPerformance::getInstance();
     bool TDfound;
-
     
     if (!dss->dontUseCache) {
         TDfound = cacheManager->cacheTerrainDataFind(lon, lat, lod, earth, &terrainData);
@@ -255,7 +255,7 @@ void CTerrain::split()
     NEchild = new CTerrain(); NEchild->setEarth(earth);
     SWchild = new CTerrain(); SWchild->setEarth(earth);
     SEchild = new CTerrain(); SEchild->setEarth(earth);
-
+    
     NWchild->initTerrainData(terrainData->topLeftLon, terrainData->topLeftLat,
                              terrainData->LOD+1, dss);
     NEchild->initTerrainData(terrainData->topLeftLon+(terrainData->degreeSize/2.0), terrainData->topLeftLat,
@@ -264,6 +264,8 @@ void CTerrain::split()
                              terrainData->LOD+1, dss);
     SEchild->initTerrainData(terrainData->topLeftLon+(terrainData->degreeSize/2.0), terrainData->topLeftLat-(terrainData->degreeSize/2.0),
                              terrainData->LOD+1, dss);
+    
+    performance->trianglesRead += 192;
 }
 
 void CTerrain::merge()
@@ -282,7 +284,7 @@ bool CTerrain::draw()
         qFatal("Terrain in tree - terrainData pointer is NULL!");
 
     CDrawingStateSnapshot *dss = earth->drawingStateSnapshot;
-    CPerformance *performance = CPerformance::getInstance();
+    //CPerformance *performance = CPerformance::getInstance();
     int xStart, xStop, yStart, yStop;
     int i;
     bool childDrawed;
@@ -317,7 +319,7 @@ bool CTerrain::draw()
                    break;
         }
 
-        if (!childDrawed && terrainInCameraFOV) {
+        if (!childDrawed  && terrainInCameraFOV) {
 
             if (dss->drawTerrainPoint || dss->drawTerrainWire || dss->drawTerrainSolid || dss->drawTerrainTexture) {
                 performance->terrainsQuarterDrawed++;

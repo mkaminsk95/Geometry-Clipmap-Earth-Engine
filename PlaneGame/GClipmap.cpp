@@ -4,7 +4,7 @@
 #include "CHgtFile.h"
 #include "GLayer.h"
 
-int n = 127;          //7, 15, 31, 63, 127, 255, 511, 1023
+int n = 255;          //7, 15, 31, 63, 127, 255, 511, 1023
 int m = (n + 1) / 4; //2,  4,  8, 16
 
 GClipmap::GClipmap(COpenGl* openGlPointer) : openGl(openGlPointer)
@@ -42,6 +42,7 @@ void GClipmap::draw() {
 
         //getting aPos uniform location to insert data
         positionInputLocation = program->attributeLocation("position");
+
         heightTextureLocation[0] = program->uniformLocation("tex_heightmap0");
         heightTextureLocation[1] = program->uniformLocation("tex_heightmap1");
         heightTextureLocation[2] = program->uniformLocation("tex_heightmap2");
@@ -84,20 +85,21 @@ void GClipmap::draw() {
         drawingMode = GL_TRIANGLE_STRIP;
 
 
-        //building layers
-        layer.push_back(GLayer(this,  0.0018311,      3.75,          1,   0,          2,      4097,        1,         24576, n));  //0
-        layer.push_back(GLayer(this,  0.0036621,      3.75,          2,   1,          4,      4097,        2,         24576, n));  //1
-        layer.push_back(GLayer(this,  0.0073242,      3.75,          4,   2,          8,      4097,        1,          6144, n));  //2
-        layer.push_back(GLayer(this,  0.0146484,      3.75,          8,   3,         16,      4097,        2,          6144, n));  //3
-        layer.push_back(GLayer(this,  0.0292969,     15.00,         16,   4,          1,       513,        4,          6144, n));  //4
-        layer.push_back(GLayer(this,  0.0585938,     15.00,         32,   5,          2,       513,        1,           768, n));  //5
-        layer.push_back(GLayer(this,  0.1171876,     15.00,         64,   6,          4,       513,        2,           768, n));  //6
-        layer.push_back(GLayer(this,  0.2343752,     15.00,        128,   7,          8,       513,        4,           768, n));  //7
-        layer.push_back(GLayer(this,  0.4687504,     15.00,        256,   8,         16,       513,        1,            96, n));  //8 
-        layer.push_back(GLayer(this,  0.9375008,     60.00,        512,   9,          1,        65,        2,            96, n));  //9
-        layer.push_back(GLayer(this,  1.8750016,     60.00,       1024,  10,          2,        65,        4,            96, n));  //10
-        layer.push_back(GLayer(this,  3.7500032,     60.00,       2048,  11,          4,        65,        8,            96, n));  //11
-        layer.push_back(GLayer(this,  7.5000064,     60.00,       4096,  12,          8,        65,       16,            96, n));  //12
+        //building layers         //   degree   HgtFileDegree   Size   Inx    HgtSkip  HgtDegree  RawSkip  RawDegree                 13                                                      orginal
+        layer.push_back(GLayer(this,  0.0018311,      3.75,        1,   0,        2,      4097,      1,       24576, n));  //0  --   12
+        layer.push_back(GLayer(this,  0.0036621,      3.75,        2,   1,        4,      4097,      2,       24576, n));  //1  --   11
+        layer.push_back(GLayer(this,  0.0073242,      3.75,        4,   2,        8,      4097,      1,        6144, n));  //2  --   10
+        layer.push_back(GLayer(this,  0.0146484,      3.75,        8,   3,       16,      4097,      2,        6144, n));  //3  --    9
+        layer.push_back(GLayer(this,  0.0292969,     15.00,       16,   4,        1,       513,      4,        6144, n));  //4  --    8
+        layer.push_back(GLayer(this,  0.0585938,     15.00,       32,   5,        2,       513,      1,         768, n));  //5  --    7
+        layer.push_back(GLayer(this,  0.1171876,     15.00,       64,   6,        4,       513,      2,         768, n));  //6  --    6
+        layer.push_back(GLayer(this,  0.2343752,     15.00,      128,   7,        8,       513,      4,         768, n));  //7  --    5
+        layer.push_back(GLayer(this,  0.4687504,     15.00,      256,   8,       16,       513,      1,          96, n));  //8  --    4
+        layer.push_back(GLayer(this,  0.9375008,     60.00,      512,   9,        1,        65,      2,          96, n));  //9  --    3
+        layer.push_back(GLayer(this,  1.8750016,     60.00,     1024,  10,        2,        65,      4,          96, n));  //10 --    2
+        layer.push_back(GLayer(this,  3.7500032,     60.00,     2048,  11,        4,        65,      8,          96, n));  //11 --    1
+        layer.push_back(GLayer(this,  7.5000064,     60.00,     4096,  12,        8,        65,     16,          96, n));  //12 --    0
+                                                                                        //jednak to sa poziomy dobrane geometria nie pikselami 
 
         layer[0].setPosition(1, 1);
         layer[1].setPosition(1, 1);
@@ -423,19 +425,15 @@ void GClipmap::initializeF_Buffer() {
 
 QMatrix4x4 GClipmap::generateModelViewMatrix() {
    
-    QMatrix4x4 perspectiveMatrix;
+    QMatrix4x4 perspectiveMatrix, viewMatrix;
+
     perspectiveMatrix.perspective(drawingStateSnapshot->camFOV, windowAspectRatio, zNear, zFar);
 
-    QMatrix4x4 viewMatrix;
     viewMatrix.setToIdentity();
     QVector3D eye(drawingStateSnapshot->camPerspectiveX, drawingStateSnapshot->camPerspectiveY, drawingStateSnapshot->camPerspectiveZ);
     QVector3D center(drawingStateSnapshot->camPerspectiveLookAtX, drawingStateSnapshot->camPerspectiveLookAtY, drawingStateSnapshot->camPerspectiveLookAtZ);
-    //QVector3D center(-100000000, -1000000, 1000000);
     QVector3D up(0.0, 1.0, 0.0);
-   /* CCommons::doubleIntoVSConsole(-drawingStateSnapshot->camPerspectiveLookAtX);
-    CCommons::doubleIntoVSConsole(-drawingStateSnapshot->camPerspectiveLookAtY);
-    CCommons::doubleIntoVSConsole(-drawingStateSnapshot->camPerspectiveLookAtZ);
-    CCommons::stringIntoVSConsole("\n");*/
+
     viewMatrix.lookAt(eye, center, up);
 
     QMatrix4x4 modelViewMatrix;

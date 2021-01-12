@@ -3,6 +3,7 @@
 #define GCLIPMAPTHREAD_H
 
 #include <QThread>
+#include <QTime>
 #include "COpenGl.h"
 #include "GLayer.h"
 #include "GClipmap.h"
@@ -36,6 +37,7 @@ private:
 
     int treshold;
 
+    QTime time;
     CCamera *camera;
 	CDrawingStateSnapshot dss;
     QVector3D* cameraPosition;

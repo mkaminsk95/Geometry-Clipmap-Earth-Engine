@@ -69,6 +69,7 @@ protected:
     void run();
 
 private:
+    fstream logFile;
     COpenGl *openGl;
     QTime time;
     CDrawingStateSnapshot dss;

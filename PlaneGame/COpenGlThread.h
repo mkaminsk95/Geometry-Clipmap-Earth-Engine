@@ -73,7 +73,7 @@ private:
 
     bool quadtree;
 
-
+    fstream logFile;
     COpenGl *openGl;
     CObjects objects;
     QTime time;

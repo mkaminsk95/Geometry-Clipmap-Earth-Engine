@@ -47,6 +47,8 @@
 #include <QColor>
 #include "CEarth.h"
 #include "CTerrainData.h"
+#include "CPerformance.h"
+#include "GTimingThread.h"
 
 
 class CEarth;
@@ -71,6 +73,9 @@ private:
     double terrainPointClosestToCamDistance;
     bool visible;
     bool terrainInCameraFOV;
+
+    CPerformance* performance; 
+    GTimingThread* timingThread;
 
     //each tile has 4 sons and 1 terrainData that describes it
     CTerrainData *terrainData;  

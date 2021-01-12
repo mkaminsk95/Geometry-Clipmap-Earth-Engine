@@ -55,6 +55,7 @@
 #include <QMouseEvent>
 #include <QTimer>
 #include <QKeyEvent>
+#include "CPerformance.h"
 #include "CEarthPointsList.h"
 
 
@@ -81,6 +82,8 @@ Q_SIGNALS:
 public:
     CCamera();
     ~CCamera();
+
+    CPerformance* performance;
     friend class CDrawingState;          // for full access from CDrawingState class
 
     // public functions
