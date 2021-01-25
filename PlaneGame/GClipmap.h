@@ -22,7 +22,7 @@ class GLayer;
 class GClipmap  {
 public:
 
-	GClipmap(COpenGl *openGl);
+	GClipmap(COpenGl *openGl, int inN);
 	~GClipmap();
 
 	//public variables
@@ -63,6 +63,9 @@ public:
 	bool clipmapReady;
 	int activeLvlOfDetail, highestLvlOfDetail;
 	QVector<GLayer> layer;	
+
+	int n;
+	int m;
 
 	//public methods
 	void draw();

@@ -25,11 +25,11 @@ GLayer::GLayer(GClipmap* clipmapPointer, float inDegree, float inHgtFileDegree, 
     firstGothrough = true;
     
 
-    hgtTextureBegginingXBuff = 0;  //x
-    hgtTextureBegginingYBuff = n;  //y
+    hgtTextureBegginingX = 0;  //x
+    hgtTextureBegginingY = n;  //y
 
-    rawTextureBegginingXBuff = 0;  //x
-    rawTextureBegginingYBuff = n - 1;  //y
+    rawTextureBegginingX = 0;  //x
+    rawTextureBegginingY = (n - 1);  //y
 
     allFinerHorizontalSum = 0;
     allFinerVerticalSum = 0;
@@ -51,6 +51,7 @@ GLayer::GLayer(GClipmap* clipmapPointer, float inDegree, float inHgtFileDegree, 
 
 
     drawMode = &(clipmapPointer->drawingMode);
+ 
     pixelManager = new GPixel(this, inLayerIndex, inDegree, inRawSkipping, inRawFileResolution);
     heightManager = new GHeight(this, inLayerIndex, inDegree, inHgtSkipping, inHgtFileResolution, inHgtFileDegree);
 
@@ -60,7 +61,7 @@ GLayer::GLayer(GClipmap* clipmapPointer, float inDegree, float inHgtFileDegree, 
     
 }
 
-void GLayer::buildLayer() {
+void GLayer::buildLevel() {
     
     int m = (n + 1) / 4 - 1;
    
@@ -69,27 +70,28 @@ void GLayer::buildLayer() {
     program->setUniformValue("levelScaleFactor", QVector2D(scale, scale)); //setting right scale 
     program->setUniformValue("levelIndex", layerIndex);                    //setting right index
   
-    program->setUniformValue("rawTexOffset", QVector2D(rawTextureBegginingX, rawTextureBegginingY));
-    program->setUniformValue("hgtTexOffset", QVector2D(hgtTextureBegginingX, hgtTextureBegginingY));
-
+    program->setUniformValue("rawTexOffset", QVector2D(rawTextureBegginingXRdy, rawTextureBegginingYRdy));
+    program->setUniformValue("hgtTexOffset", QVector2D(hgtTextureBegginingXRdy, hgtTextureBegginingYRdy));
+   
+    //loop for blending parameters
     if (clipmap->highestLvlOfDetail > layerIndex) {
-
-
-        program->setUniformValue("rawTexOffsetFnr", QVector2D(clipmap->layer[layerIndex + 1].rawTextureBegginingX, clipmap->layer[layerIndex + 1].rawTextureBegginingY));
-        program->setUniformValue("hgtTexOffsetFnr", QVector2D(clipmap->layer[layerIndex + 1].hgtTextureBegginingX, clipmap->layer[layerIndex + 1].hgtTextureBegginingY));
+    
+        program->setUniformValue("rawTexOffsetFnr", QVector2D(clipmap->layer[layerIndex+1].rawTextureBegginingXRdy, clipmap->layer[layerIndex + 1].rawTextureBegginingYRdy));
+        program->setUniformValue("hgtTexOffsetFnr", QVector2D(clipmap->layer[layerIndex + 1].hgtTextureBegginingXRdy, clipmap->layer[layerIndex + 1].hgtTextureBegginingYRdy));
+    
         program->setUniformValue("cameraPosition", QVector2D( (horizontalOffset + allFinerHorizontalSum), (verticalOffset + allFinerVerticalSum)));
         program->setUniformValue("highestLvlOfDetail", clipmap->highestLvlOfDetail);
-
-        if (clipmap->layer[layerIndex + 1].positionVertical == 0) { 
-            if (clipmap->layer[layerIndex + 1].positionHorizontal == 0) 
+    
+        if (clipmap->layer[layerIndex ].positionVertical == 0) { 
+            if (clipmap->layer[layerIndex ].positionHorizontal == 0) 
                 program->setUniformValue("coarserInFinerOffset", QVector2D(m, m));
-            else if (clipmap->layer[layerIndex + 1].positionHorizontal == 1)
+            else if (clipmap->layer[layerIndex ].positionHorizontal == 1)
                 program->setUniformValue("coarserInFinerOffset", QVector2D(m+1,m));
         }
-        else if (clipmap->layer[layerIndex + 1].positionVertical == 1) {
-            if (clipmap->layer[layerIndex + 1].positionHorizontal == 0) 
+        else if (clipmap->layer[layerIndex].positionVertical == 1) {
+            if (clipmap->layer[layerIndex ].positionHorizontal == 0) 
                 program->setUniformValue("coarserInFinerOffset", QVector2D(m,m+1));
-            else if (clipmap->layer[layerIndex + 1].positionHorizontal == 1) 
+            else if (clipmap->layer[layerIndex ].positionHorizontal == 1) 
                 program->setUniformValue("coarserInFinerOffset", QVector2D(m+1,m+1));
         }
     }
@@ -156,36 +158,43 @@ void GLayer::buildLayer() {
 
 
 
-void GLayer::updateLayer(double tlon, double tlat) {
+void GLayer::refreshTextures(double tlon, double tlat) {
     
     double latDifference, lonDifference;
 
     //checking if there was a movement
     lonDifference = (-1) * (oldLon - tlon - fmod(oldLon - tlon, readDegree)) / readDegree;
-    latDifference = (-1) * (oldLat - tlat -fmod(oldLat - tlat, readDegree)) / readDegree;
+    latDifference = (-1) * (oldLat - tlat - fmod(oldLat - tlat, readDegree)) / readDegree;
 
     //mapping data
     mapDataIntoImages(tlon, tlat, lonDifference, latDifference);
 
 }
 
+void GLayer::updateOffsets() {
+    rawTextureBegginingXRdy = rawTextureBegginingX;
+    rawTextureBegginingYRdy = rawTextureBegginingY;
+    hgtTextureBegginingXRdy = hgtTextureBegginingX;
+    hgtTextureBegginingYRdy = hgtTextureBegginingY;
+}
+
 
 void GLayer::updateTextures() {
     
+    //bool result = pixelManager->pixelMap->save("image.png");
     //updating texture using new picture 
     pixelTexture = new QOpenGLTexture(*pixelManager->pixelMap, QOpenGLTexture::DontGenerateMipMaps);
     pixelTexture->bind(layerIndex, QOpenGLTexture::DontResetTextureUnit);
-
     heightTexture = new QOpenGLTexture(*heightManager->heightMap, QOpenGLTexture::DontGenerateMipMaps);
     heightTexture->bind(layerIndex+13);
 
-    //program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);
+
     program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);
     program->setUniformValue(clipmap->heightTextureLocation[layerIndex], layerIndex+13);
 
 }
 
-
+//preperation to a data mapping
 void GLayer::mapDataIntoImages(double tlon, double tlat, int lonDifference, int latDifference) {
     
     double lonLeft, lonRight;
@@ -204,9 +213,9 @@ void GLayer::mapDataIntoImages(double tlon, double tlat, int lonDifference, int 
         oldLatTop = latTop;
 
     }
+   
 
-
-    if (firstGothrough == true || (abs(latDifference) > n - 1 || abs(lonDifference) > n - 1)) {
+    if(firstGothrough == true || (abs(latDifference) > n - 1 || abs(lonDifference) > n - 1)) {
 
         //computing coordinates of corners of new moved clipmap 
         computeNewLonAndLat(tlon, tlat, &lonLeft, &lonRight, &latTop, &latDown);
@@ -216,11 +225,11 @@ void GLayer::mapDataIntoImages(double tlon, double tlat, int lonDifference, int 
         heightManager->fullHgtTextureReading(lonLeft, lonRight, latDown, latTop);
            
         //reseting texture beggining coordinate
-        hgtTextureBegginingXBuff = 0;
-        hgtTextureBegginingYBuff = n;
-        rawTextureBegginingXBuff = 0;  //x
-        rawTextureBegginingYBuff = n - 1;  //y
-            
+        hgtTextureBegginingX = 0;
+        hgtTextureBegginingY = n;
+        rawTextureBegginingX = 0;        //x
+        rawTextureBegginingY = (n - 1);  //y    
+
         //updating old coordinates
         oldLat = tlat;
         oldLon = tlon;
@@ -231,8 +240,8 @@ void GLayer::mapDataIntoImages(double tlon, double tlat, int lonDifference, int 
 
         firstGothrough = false;    
 
-        performance->trianglesRead += 2 * (n - 1) * (n - 1);
-     
+        //performance->trianglesRead += 2 * (n - 1) * (n - 1);
+        
 
     }
     else if (lonDifference != 0 || latDifference != 0) {
@@ -259,20 +268,20 @@ void GLayer::mapDataIntoImages(double tlon, double tlat, int lonDifference, int 
 
 
         if (latDifference > 0) {
-            rawTextureBegginingYBuff = (int)(rawTextureBegginingYBuff + latDifference) % (n - 1);
-            hgtTextureBegginingYBuff = (int)(hgtTextureBegginingYBuff + latDifference) % (n);
+            rawTextureBegginingY = (int)(rawTextureBegginingY + latDifference) % (n - 1);
+            hgtTextureBegginingY = (int)(hgtTextureBegginingY + latDifference) % (n);
         }
         if (latDifference < 0) {
-            rawTextureBegginingYBuff = (int)(rawTextureBegginingYBuff + latDifference + n - 1) % (n - 1);
-            hgtTextureBegginingYBuff = (int)(hgtTextureBegginingYBuff + latDifference + n) % (n);
+            rawTextureBegginingY = (int)(rawTextureBegginingY + latDifference + n - 1) % (n - 1);
+            hgtTextureBegginingY = (int)(hgtTextureBegginingY + latDifference + n) % (n);
         }
         if (lonDifference > 0) {
-            rawTextureBegginingXBuff = (int)(rawTextureBegginingXBuff + lonDifference) % (n - 1);
-            hgtTextureBegginingXBuff = (int)(hgtTextureBegginingXBuff + lonDifference) % (n);
+            rawTextureBegginingX = (int)(rawTextureBegginingX + lonDifference) % (n - 1);
+            hgtTextureBegginingX = (int)(hgtTextureBegginingX + lonDifference) % (n);
         }
         if (lonDifference < 0) {
-            rawTextureBegginingXBuff = (int)(rawTextureBegginingXBuff + lonDifference + n - 1) % (n - 1);
-            hgtTextureBegginingXBuff = (int)(hgtTextureBegginingXBuff + lonDifference + n) % (n);
+            rawTextureBegginingX = (int)(rawTextureBegginingX + lonDifference + n - 1) % (n - 1);
+            hgtTextureBegginingX = (int)(hgtTextureBegginingX + lonDifference + n) % (n);
         }
 
         oldLat = oldLat + latDifference * readDegree;
@@ -282,17 +291,17 @@ void GLayer::mapDataIntoImages(double tlon, double tlat, int lonDifference, int 
         oldLonLeft = oldLonLeft + lonDifference * readDegree;
         oldLonRight = oldLonRight + lonDifference * readDegree;
         
-        //pixelManager->pixelMap->save("fotka.png");
+        
 
-        performance->trianglesRead += 2 * (abs(lonDifference) * (n - 1 - latDifference) ) + 2 * (abs(latDifference) * (n - 1));
+        //performance->trianglesRead += 2 * (abs(lonDifference) * (n - 1 - latDifference) ) + 2 * (abs(latDifference) * (n - 1));
         
     }
 
 }
 
 
-
-void GLayer::computeLayerPosition(double tlon, double tlat) {
+//getting new position of level using camera position and offsets
+void GLayer::refreshPosition(double tlon, double tlat) {
 
 
     //adjusting layers in right place in relation to each other     
@@ -313,22 +322,25 @@ void GLayer::computeLayerPosition(double tlon, double tlat) {
         else if (clipmap->layer[layerIndex - 1].positionVertical == 1)      //top side  
             allFinerVerticalSum = clipmap->layer[layerIndex - 1].allFinerVerticalSum / 2 + 1;
 
-        offsets.setX(tlon - (horizontalOffset + allFinerHorizontalSum) * readDegree);
-        offsets.setY(tlat - (verticalOffset + allFinerVerticalSum) * readDegree);
+       layerPositionLon = tlon - (horizontalOffset + allFinerHorizontalSum) * readDegree;
+       layerPositionLat = tlat - (verticalOffset + allFinerVerticalSum) * readDegree;
 
     }
     else {
-        offsets.setX(tlon - horizontalOffset * readDegree);
-        offsets.setY(tlat - verticalOffset * readDegree);
+       layerPositionLon = tlon - horizontalOffset * readDegree;
+       layerPositionLat = tlat - verticalOffset * readDegree;
     }
 
-    rawTextureBegginingX = rawTextureBegginingXBuff;
-    rawTextureBegginingY = rawTextureBegginingYBuff;
-    hgtTextureBegginingX = hgtTextureBegginingXBuff;
-    hgtTextureBegginingY = hgtTextureBegginingYBuff;
-    
+
+
 }
 
+void GLayer::updatePosition() {
+    offsets.setX(layerPositionLon);
+    offsets.setY(layerPositionLat);
+}
+
+//calculating position of bottom-left corner of a level in reference to camera
 void GLayer::cumputeOffsets() {
 
     if (layerIndex == 0) {
@@ -348,56 +360,57 @@ void GLayer::cumputeOffsets() {
     }
 }
 
+//toroidal access scenarios
 void GLayer::computeTextureOffsets(int latDifference, int lonDifference, point *texBegHor, point *texBegVer, bool rawReading) {
 
     if (rawReading) {
         if (latDifference > 0) {
 
             if (lonDifference > 0) {
-                texBegHor->x = (rawTextureBegginingXBuff + lonDifference) % (n - 1);
-                texBegHor->y = (rawTextureBegginingYBuff + latDifference) % (n - 1);
-                texBegVer->x = rawTextureBegginingXBuff;
-                texBegVer->y = rawTextureBegginingYBuff;
+                texBegHor->x = (rawTextureBegginingX + lonDifference) % (n - 1);
+                texBegHor->y = (rawTextureBegginingY + latDifference) % (n - 1);
+                texBegVer->x = rawTextureBegginingX;
+                texBegVer->y = rawTextureBegginingY;
             }
             else if (lonDifference == 0) {
-                texBegHor->x = rawTextureBegginingXBuff;
-                texBegHor->y = (rawTextureBegginingYBuff + latDifference) % (n - 1);
+                texBegHor->x = rawTextureBegginingX;
+                texBegHor->y = (rawTextureBegginingY + latDifference) % (n - 1);
             }
             else if (lonDifference < 0) {
-                texBegHor->x = (rawTextureBegginingXBuff + lonDifference + n - 1) % (n - 1);
-                texBegHor->y = (rawTextureBegginingYBuff + latDifference) % (n - 1);
-                texBegVer->x = (rawTextureBegginingXBuff + lonDifference + n - 1) % (n - 1);
-                texBegVer->y = rawTextureBegginingYBuff;
+                texBegHor->x = (rawTextureBegginingX + lonDifference + n - 1) % (n - 1);
+                texBegHor->y = (rawTextureBegginingY + latDifference) % (n - 1);
+                texBegVer->x = (rawTextureBegginingX + lonDifference + n - 1) % (n - 1);
+                texBegVer->y = rawTextureBegginingY;
             }
         }
         else if (latDifference == 0) {
 
             if (lonDifference > 0) {
-                texBegVer->x = rawTextureBegginingXBuff;
-                texBegVer->y = rawTextureBegginingYBuff;
+                texBegVer->x = rawTextureBegginingX;
+                texBegVer->y = rawTextureBegginingY;
             }
             else if (lonDifference < 0) {
-                texBegVer->x = (rawTextureBegginingXBuff + lonDifference + n - 1) % (n - 1);
-                texBegVer->y = rawTextureBegginingYBuff;
+                texBegVer->x = (rawTextureBegginingX + lonDifference + n - 1) % (n - 1);
+                texBegVer->y = rawTextureBegginingY;
             }
         }
         else if (latDifference < 0) {
 
             if (lonDifference > 0) {
-                texBegHor->x = (rawTextureBegginingXBuff + lonDifference) % (n - 1);
-                texBegHor->y = rawTextureBegginingYBuff;
-                texBegVer->x = rawTextureBegginingXBuff;
-                texBegVer->y = (rawTextureBegginingYBuff + latDifference + n - 1) % (n - 1);
+                texBegHor->x = (rawTextureBegginingX + lonDifference) % (n - 1);
+                texBegHor->y = rawTextureBegginingY;
+                texBegVer->x = rawTextureBegginingX;
+                texBegVer->y = (rawTextureBegginingY + latDifference + n - 1) % (n - 1);
             }
             else if (lonDifference == 0) {
-                texBegHor->x = rawTextureBegginingXBuff;
-                texBegHor->y = rawTextureBegginingYBuff;
+                texBegHor->x = rawTextureBegginingX;
+                texBegHor->y = rawTextureBegginingY;
             }
             else if (lonDifference < 0) {
-                texBegHor->x = (rawTextureBegginingXBuff + lonDifference + n - 1) % (n - 1);
-                texBegHor->y = rawTextureBegginingYBuff;
-                texBegVer->x = (rawTextureBegginingXBuff + lonDifference + n - 1) % (n - 1);
-                texBegVer->y = (rawTextureBegginingYBuff + latDifference + n - 1) % (n - 1);
+                texBegHor->x = (rawTextureBegginingX + lonDifference + n - 1) % (n - 1);
+                texBegHor->y = rawTextureBegginingY;
+                texBegVer->x = (rawTextureBegginingX + lonDifference + n - 1) % (n - 1);
+                texBegVer->y = (rawTextureBegginingY + latDifference + n - 1) % (n - 1);
             }
         }
     }
@@ -405,61 +418,83 @@ void GLayer::computeTextureOffsets(int latDifference, int lonDifference, point *
         if (latDifference > 0) {
 
             if (lonDifference > 0) {
-                texBegHor->x = (hgtTextureBegginingXBuff + lonDifference) % (n);
-                texBegHor->y = (hgtTextureBegginingYBuff + latDifference) % (n);
-                texBegVer->x = hgtTextureBegginingXBuff;
-                texBegVer->y = hgtTextureBegginingYBuff;
+                texBegHor->x = (hgtTextureBegginingX + lonDifference) % (n);
+                texBegHor->y = (hgtTextureBegginingY + latDifference) % (n);
+                texBegVer->x = hgtTextureBegginingX;
+                texBegVer->y = hgtTextureBegginingY;
             }
             else if (lonDifference == 0) {
-                texBegHor->x = hgtTextureBegginingXBuff;
-                texBegHor->y = (hgtTextureBegginingYBuff + latDifference) % (n);
+                texBegHor->x = hgtTextureBegginingX;
+                texBegHor->y = (hgtTextureBegginingY + latDifference) % (n);
             }
             else if (lonDifference < 0) {
-                texBegHor->x = (hgtTextureBegginingXBuff + lonDifference + n) % (n);
-                texBegHor->y = (hgtTextureBegginingYBuff + latDifference) % (n);
-                texBegVer->x = (hgtTextureBegginingXBuff + lonDifference + n) % (n);
-                texBegVer->y = hgtTextureBegginingYBuff;
+                texBegHor->x = (hgtTextureBegginingX + lonDifference + n) % (n);
+                texBegHor->y = (hgtTextureBegginingY + latDifference) % (n);
+                texBegVer->x = (hgtTextureBegginingX + lonDifference + n) % (n);
+                texBegVer->y = hgtTextureBegginingY;
             }
         }
         else if (latDifference == 0) {
 
             if (lonDifference > 0) {
-                texBegVer->x = hgtTextureBegginingXBuff;
-                texBegVer->y = hgtTextureBegginingYBuff;
+                texBegVer->x = hgtTextureBegginingX;
+                texBegVer->y = hgtTextureBegginingY;
             }
             else if (lonDifference < 0) {
-                texBegVer->x = (hgtTextureBegginingXBuff + lonDifference + n) % (n);
-                texBegVer->y = hgtTextureBegginingYBuff;
+                texBegVer->x = (hgtTextureBegginingX + lonDifference + n) % (n);
+                texBegVer->y = hgtTextureBegginingY;
             }
         }
         else if (latDifference < 0) {
 
             if (lonDifference > 0) {
-                texBegHor->x = (hgtTextureBegginingXBuff + lonDifference) % (n);
-                texBegHor->y = hgtTextureBegginingYBuff;
-                texBegVer->x = hgtTextureBegginingXBuff;
-                texBegVer->y = (hgtTextureBegginingYBuff + latDifference + n) % (n);
+                texBegHor->x = (hgtTextureBegginingX + lonDifference) % (n);
+                texBegHor->y = hgtTextureBegginingY;
+                texBegVer->x = hgtTextureBegginingX;
+                texBegVer->y = (hgtTextureBegginingY + latDifference + n) % (n);
             }
             else if (lonDifference == 0) {
-                texBegHor->x = hgtTextureBegginingXBuff;
-                texBegHor->y = hgtTextureBegginingYBuff;
+                texBegHor->x = hgtTextureBegginingX;
+                texBegHor->y = hgtTextureBegginingY;
             }
             else if (lonDifference < 0) {
-                texBegHor->x = (hgtTextureBegginingXBuff + lonDifference + n) % (n);
-                texBegHor->y = hgtTextureBegginingYBuff;
-                texBegVer->x = (hgtTextureBegginingXBuff + lonDifference + n) % (n);
-                texBegVer->y = (hgtTextureBegginingYBuff + latDifference + n) % (n);
+                texBegHor->x = (hgtTextureBegginingX + lonDifference + n) % (n);
+                texBegHor->y = hgtTextureBegginingY;
+                texBegVer->x = (hgtTextureBegginingX + lonDifference + n) % (n);
+                texBegVer->y = (hgtTextureBegginingY + latDifference + n) % (n);
             }
         }
     }
 }
 
+//determining position of moved level
 void GLayer::computeNewLonAndLat(double tlon, double tlat, double *lonLeft, double *lonRight, double *latTop, double *latDown) {
 
-    *lonLeft = tlon - horizontalOffset * readDegree; //Left Right
-    *lonRight = *lonLeft + (n - 1) * readDegree;
-    *latTop = tlat + verticalOffset * readDegree;   //Top Down
-    *latDown = *latTop - (n - 1) * readDegree;
+    if (!layerIndex == 0) {
+
+
+        if (clipmap->layer[layerIndex - 1].positionHorizontal == 0)         //left side
+            allFinerHorizontalSum = clipmap->layer[layerIndex - 1].allFinerHorizontalSum / 2;
+        else if (clipmap->layer[layerIndex - 1].positionHorizontal == 1)    //right side
+            allFinerHorizontalSum = clipmap->layer[layerIndex - 1].allFinerHorizontalSum / 2 + 1;
+
+        if (clipmap->layer[layerIndex - 1].positionVertical == 0)           //down side    
+            allFinerVerticalSum = clipmap->layer[layerIndex - 1].allFinerVerticalSum / 2;
+        else if (clipmap->layer[layerIndex - 1].positionVertical == 1)      //top side  
+            allFinerVerticalSum = clipmap->layer[layerIndex - 1].allFinerVerticalSum / 2 + 1;
+
+        *lonLeft = (tlon - (horizontalOffset + allFinerHorizontalSum) * readDegree); //Left Right
+        *lonRight = *lonLeft + (n - 1) * readDegree;
+        *latDown = (tlat - (verticalOffset + allFinerVerticalSum) * readDegree);  //Top Down
+        *latTop = *latDown + (n - 1) * readDegree;
+    }
+    else {
+
+        *lonLeft = (tlon - horizontalOffset * readDegree); //Left Right
+        *lonRight = *lonLeft + (n - 1) * readDegree;
+        *latDown = (tlat - verticalOffset * readDegree);  //Top Down
+        *latTop = *latDown + (n - 1) * readDegree;
+    }
 }
 
 
@@ -497,7 +532,9 @@ void GLayer::drawC(float originX, float originY) {
     
     vaoC->bind();
     indexC_Buffer->bind();
+
     glDrawElements(*drawMode, clipmap->howManyToRenderC, GL_UNSIGNED_INT, 0);
+
     indexC_Buffer->release();
     vaoC->release();
 }
@@ -507,7 +544,9 @@ void GLayer::drawD(float originX, float originY) {
     
     vaoD->bind();
     indexD_Buffer->bind();
+
     glDrawElements(*drawMode, clipmap->howManyToRenderD, GL_UNSIGNED_INT, 0);
+
     indexD_Buffer->release();
     vaoD->release();
 }
@@ -517,7 +556,9 @@ void GLayer::drawE(float originX, float originY) {
 
     vaoE->bind();
     indexE_Buffer->bind();
+
     glDrawElements(*drawMode, clipmap->howManyToRenderE, GL_UNSIGNED_INT, 0);
+
     indexE_Buffer->release();
     vaoE->release();
 }
@@ -525,7 +566,6 @@ void GLayer::drawE(float originX, float originY) {
 void GLayer::drawF(float originX, float originY) {
 
     program->setUniformValue("patchOrigin", QVector2D(originX, originY));
-    //program->setUniformValue("color", QVector3D(R, G, B));
 
     vaoB->bind();
     indexB_Buffer->bind();

@@ -86,6 +86,10 @@ public:
     CPerformance* performance;
     friend class CDrawingState;          // for full access from CDrawingState class
 
+    //testing
+    float camSpeed;
+    float distance;
+
     // public functions
     void setDrawingStateMutex(QMutex *m);
     void getCamPosition(double *x, double *y, double *z);

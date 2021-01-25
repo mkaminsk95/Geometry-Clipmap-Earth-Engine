@@ -15,12 +15,24 @@ GPixel::GPixel(GLayer* layerPointer, int inLayerIndex, double inReadDegree, int 
 
     layerIndex = inLayerIndex;
  
-    readDegree = inReadDegree;
     rawSkipping = inRawSkipping;
     rawFileResolution = inRawFileResolution;
+    pointDegree = inReadDegree;
 
     n = layer->n;
-    pixelMap = new QImage(n - 1, n - 1, QImage::Format_RGB888);
+
+    if (inLayerIndex > 1) {
+        readDegree = inReadDegree / 4;
+        pixelMap = new QImage((n - 1) * 4, (n - 1) * 4, QImage::Format_RGB888);
+    }
+    else if (inLayerIndex == 1) {
+        readDegree = inReadDegree / 2;
+        pixelMap = new QImage((n - 1) * 2, (n - 1) * 2, QImage::Format_RGB888);
+    }
+    else if (inLayerIndex == 0) {
+        readDegree = inReadDegree;
+        pixelMap = new QImage((n - 1), (n - 1), QImage::Format_RGB888);
+    }
 }
 
 void GPixel::fullRawTextureReading(double lonLeft, double lonRight, double latDown, double latTop) {
@@ -62,6 +74,8 @@ void GPixel::fullRawTextureReading(double lonLeft, double lonRight, double latDo
         for (double j = maxTilesLat; j > latDown; j -= RAW_FILE_DEGREE) {
 
             checkHowManyPointsToRead_Y(&howManyToReadY, verticalPosition, latTop, latDown, j, RAW_FILE_DEGREE);
+            howManyToReadY = howManyToReadY;
+            
             checkFileOffset_Y(&fileVerticalOffset, verticalPosition, latTop, maxTilesLat);
 
             CRawFile::sphericalToRawFilePath(&filePath, i, j, layerIndex);
@@ -70,6 +84,7 @@ void GPixel::fullRawTextureReading(double lonLeft, double lonRight, double latDo
                 rawFileResolution, rawSkipping,
                 fileHorizontalOffset, fileVerticalOffset);
 
+            pixelMap->save("mapa.png");
             if (j - 2 * RAW_FILE_DEGREE > latDown)
                 verticalPosition = 1;   //middle 
             else
@@ -109,19 +124,19 @@ void GPixel::horizontalBlockRawTextureReading(int lonDifference, int latDifferen
 
 
     //finding longitude of corners
-    double lonLeftHor = oldLonLeft + lonDifference * readDegree;
-    double lonRightHor = oldLonRight + lonDifference * readDegree;
+    double lonLeftHor = oldLonLeft + lonDifference * pointDegree;
+    double lonRightHor = oldLonRight + lonDifference * pointDegree;
 
     //finding latitude of corners
     double latTopHor;
     double latDownHor;
     if (latDifference > 0) {
-        latTopHor = oldLatTop + latDifference * readDegree;
+        latTopHor = oldLatTop + latDifference * pointDegree;
         latDownHor = oldLatTop;
     }
     else if (latDifference < 0) {
         latTopHor = oldLatDown;
-        latDownHor = oldLatDown + latDifference * readDegree;
+        latDownHor = oldLatDown + latDifference * pointDegree;
     }
 
     //Finding top left tile 
@@ -143,7 +158,7 @@ void GPixel::horizontalBlockRawTextureReading(int lonDifference, int latDifferen
 
         if (withOvelflow && i + RAW_FILE_DEGREE == 360) {
             i = 0;
-            lonRightHor = oldLonRight + lonDifference * readDegree;
+            lonRightHor = oldLonRight + lonDifference * pointDegree;
         }
 
 
@@ -173,7 +188,7 @@ void GPixel::horizontalBlockRawTextureReading(int lonDifference, int latDifferen
             CRawFile::loadPixelDataToImagePart(pixelMap, imageOffsetX, imageOffsetY,
                 filePath, howManyToReadX, howManyToReadY, rawFileResolution, rawSkipping,
                 fileHorizontalOffset, fileVerticalOffset,
-                texBegHor.x, n - 1 - texBegHor.y);
+                texBegHor.x, n - 1 - texBegHor.y, layerIndex);
 
 
             if (j - 2 * RAW_FILE_DEGREE > latDown)
@@ -221,26 +236,26 @@ void GPixel::verticalBlockRawTextureReading(int lonDifference, int latDifference
     //finding longitude of corners
     double lonLeftVer, lonRightVer;
     if (lonDifference < 0) {
-        lonLeftVer = oldLonLeft + lonDifference * readDegree;
+        lonLeftVer = oldLonLeft + lonDifference * pointDegree;
         lonRightVer = oldLonLeft;
     }
     else if (lonDifference > 0) {
         lonLeftVer = oldLonRight;
-        lonRightVer = oldLonRight + lonDifference * readDegree;
+        lonRightVer = oldLonRight + lonDifference * pointDegree;
     }
 
     //finding latitude of corners
     double latTopVer, latDownVer;
     if (latDifference > 0) {
         latTopVer = oldLatTop;
-        latDownVer = oldLatDown + latDifference * readDegree;
+        latDownVer = oldLatDown + latDifference * pointDegree;
     }
     else if (latDifference == 0) {
         latTopVer = oldLatTop;
         latDownVer = oldLatDown;
     }
     else if (latDifference < 0) {
-        latTopVer = oldLatTop + latDifference * readDegree;
+        latTopVer = oldLatTop + latDifference * pointDegree;
         latDownVer = oldLatDown;
     }
 
@@ -263,7 +278,7 @@ void GPixel::verticalBlockRawTextureReading(int lonDifference, int latDifference
 
         if (withOvelflow && i + RAW_FILE_DEGREE == 360) {
             i = 0;
-            lonRightVer = oldLonRight + lonDifference * readDegree;
+            lonRightVer = oldLonRight + lonDifference * pointDegree;
         }
 
         if (latTopVer - (maxTilesLat - RAW_FILE_DEGREE) > latTopVer - latDownVer)
@@ -292,7 +307,7 @@ void GPixel::verticalBlockRawTextureReading(int lonDifference, int latDifference
             CRawFile::loadPixelDataToImagePart(pixelMap, imageOffsetX, imageOffsetY,
                 filePath, howManyToReadX, howManyToReadY, rawFileResolution, rawSkipping,
                 fileHorizontalOffset, fileVerticalOffset,
-                texBegVer.x, n - 1 - texBegVer.y);
+                texBegVer.x, n - 1 - texBegVer.y, layerIndex);
 
 
             if (j - 2 * RAW_FILE_DEGREE > latDown)
@@ -312,7 +327,7 @@ void GPixel::verticalBlockRawTextureReading(int lonDifference, int latDifference
         imageOffsetX += howManyToReadX;
 
     }
-   // pixelMap->save("mapa.png");
+    pixelMap->save("mapa.png");
 
     /*pixelTexture = new QOpenGLTexture(*pixelMap, QOpenGLTexture::DontGenerateMipMaps);
     pixelTexture->bind(layerIndex, QOpenGLTexture::DontResetTextureUnit);

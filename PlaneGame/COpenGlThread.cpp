@@ -106,11 +106,8 @@ void COpenGlThread::run()
     openGl->drawingState.getDrawingStateSnapshot(&dss);      // get current scene state
     initializeScene();
 
-   // logFile.open("logFile.txt", fstream::in | fstream::out | fstream::trunc);
-   // bool ifOpened = logFile.is_open();
     time.start();
     while (true) {
-        time.start();
 
         doMutex.lock();
         if (doTerminate) {
@@ -133,7 +130,6 @@ void COpenGlThread::run()
        // ### OpenGL scene END
    
         openGl->swapBuffers();
-
         openGl->drawingState.getDrawingStateSnapshot(&dss);  // get current scene state
       
 
@@ -169,9 +165,7 @@ void COpenGlThread::run()
             openGl->performance.updateFrameRenderingInfo();
             
         }
-        //logFile.write("dupcia");// << time.elapsed() << " ";
-        //logFile << time.elapsed() << "\t" << openGl->performance.trianglesRead << "\n";
-        //logFile.flush();
+
     }
 }
 

@@ -2,6 +2,8 @@
 #include "CCommons.h"
 #include <chrono>
 #include <math.h>
+#include <GLayer.h>
+#include <vector>
 
 GClipmapThread::GClipmapThread(COpenGl* openGlPointer) : QThread(openGlPointer), openGl(openGlPointer)
 {
@@ -12,82 +14,71 @@ GClipmapThread::GClipmapThread(COpenGl* openGlPointer) : QThread(openGlPointer),
 void GClipmapThread::run() {
     
     openGl->drawingState.getDrawingStateSnapshot(&dss);      // get current scene state
-    
-    fstream logFile;
-    logFile.open("logFileClipmap.txt", fstream::in | fstream::out | fstream::trunc);
-    bool ifOpened = logFile.is_open();
 
-    bool onlyOnce = false;
+    vector<GLayer*> layer;
+    for (int i = 0; i < 13; i++)
+        layer.push_back(&clipmap->layer[i]);
+
     for (int i = 0; i < 13; i++) {
-        layersOffsets[i] = clipmap->layer[i].horizontalOffset;
-        layersDegree[i] = clipmap->layer[i].readDegree;
+        layersOffsets[i] = layer[i]->horizontalOffset;
+        layersDegree[i] =  layer[i]->readDegree;
     }
     highestLvlOfDetail = 12;
    
-    int n = clipmap->layer[0].n;
-    int fullLayerSize = 2 * (n - 1) * (n - 1);
-    int ringLayerSize = fullLayerSize - 2   *   ( (n - 1) / 2 )   *   ( (n - 1) / 2 );
 
     while (true) {
         
 
         if (!clipmap->clipmapReady) {
-
-
-            if (openGl->performance.testStart && onlyOnce == false) {
-                time.start();
-                onlyOnce = true;
-            }
-
+         
+           
             findPosition();
             
             treshold = 8840;
 
-            if (distanceFromEarth < 2 *    treshold) activeLvlOfDetail = 0;  else   //~18km
-            if (distanceFromEarth < 4 *    treshold) activeLvlOfDetail = 1;  else   //~36km
-            if (distanceFromEarth < 8 *    treshold) activeLvlOfDetail = 2;  else   //~72km
-            if (distanceFromEarth < 16 *   treshold) activeLvlOfDetail = 3;  else   //~144km
-            if (distanceFromEarth < 32 *   treshold) activeLvlOfDetail = 4;  else   //~288km
-            if (distanceFromEarth < 64 *   treshold) activeLvlOfDetail = 5;  else   //~576km
-            if (distanceFromEarth < 128 *  treshold) activeLvlOfDetail = 6;  else   //~1152km
-            if (distanceFromEarth < 256 *  treshold) activeLvlOfDetail = 7;  else   //~2304km 
-            if (distanceFromEarth < 512 *  treshold) activeLvlOfDetail = 8;  else   //~4608km
-            if (distanceFromEarth < 1024 * treshold) activeLvlOfDetail = 9;  else   //~9216km
-            if (distanceFromEarth < 2048 * treshold) activeLvlOfDetail = 10; else   //~18432km
-            if (distanceFromEarth < 4096 * treshold) activeLvlOfDetail = 11; else   //~36864km
-                                                     activeLvlOfDetail = 12;
-        
-            computeHighestLvlOfDetail();
+            getActiveLvlOfDetail();
+            getHighestLvlOfDetail();
+            
+    
 
-            activeLvlOfDetail = 1;
-            highestLvlOfDetail = 3;
 
             for (int x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
-                clipmap->layer[x].updateLayer(tlon, tlat);
+                layer[x]->refreshTextures(tlon, tlat);         
             
             for (int x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
-                clipmap->layer[x].computeLayerPosition(tlon, tlat);
-            
+                layer[x]->refreshPosition(tlon, tlat);
 
+          
             clipmap->activeLvlOfDetail =  activeLvlOfDetail;
             clipmap->highestLvlOfDetail = highestLvlOfDetail;
 
             clipmap->clipmapReady = true;
         
-            int trianglesRendered = fullLayerSize + ringLayerSize*(highestLvlOfDetail-activeLvlOfDetail);
-            
-
-            if (openGl->performance.testStart == true) {
-                logFile << time.elapsed() << "\t" << activeLvlOfDetail << "\t" << trianglesRendered << "\t" << openGl->performance.trianglesRead << "\n";
-                logFile.flush();
-            }
         }
 
     }
     
 };
 
-void GClipmapThread::computeHighestLvlOfDetail() {
+void GClipmapThread::getActiveLvlOfDetail() {
+
+
+    if (distanceFromEarth < 2 * treshold)    activeLvlOfDetail = 0;  else   //~18km
+    if (distanceFromEarth < 4 * treshold)    activeLvlOfDetail = 1;  else   //~36km
+    if (distanceFromEarth < 8 * treshold)    activeLvlOfDetail = 2;  else   //~72km
+    if (distanceFromEarth < 16 * treshold)   activeLvlOfDetail = 3;  else   //~144km
+    if (distanceFromEarth < 32 * treshold)   activeLvlOfDetail = 4;  else   //~288km
+    if (distanceFromEarth < 64 * treshold)   activeLvlOfDetail = 5;  else   //~576km
+    if (distanceFromEarth < 128 * treshold)  activeLvlOfDetail = 6;  else   //~1152km
+    if (distanceFromEarth < 256 * treshold)  activeLvlOfDetail = 7;  else   //~2304km 
+    if (distanceFromEarth < 512 * treshold)  activeLvlOfDetail = 8;  else   //~4608km
+    if (distanceFromEarth < 1024 * treshold) activeLvlOfDetail = 9;  else   //~9216km
+    if (distanceFromEarth < 2048 * treshold) activeLvlOfDetail = 10; else   //~18432km
+    if (distanceFromEarth < 4096 * treshold) activeLvlOfDetail = 11; else   //~36864km
+                                             activeLvlOfDetail = 12;
+}
+
+void GClipmapThread::getHighestLvlOfDetail() {
 
 
     double camX, camY, camZ;
@@ -111,7 +102,7 @@ void GClipmapThread::computeHighestLvlOfDetail() {
 
 
     //if horizon is more far away than layer edge, change highest edge
-    if (distanceToHorizon > distanceToHighestLvlEdge && activeLvlOfDetail != highestLvlOfDetail && highestLvlOfDetail < 13)
+    if (distanceToHorizon > distanceToHighestLvlEdge && highestLvlOfDetail < 13)
         highestLvlOfDetail = highestLvlOfDetail + 1;
     else if (distanceToHorizon < distanceToPreviousEdge && activeLvlOfDetail != highestLvlOfDetail)
         highestLvlOfDetail = highestLvlOfDetail - 1;

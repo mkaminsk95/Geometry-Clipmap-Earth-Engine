@@ -64,7 +64,6 @@
 #include "CAnimationThread.h"
 #include "GClipmapThread.h"
 #include "GClipmap.h"
-#include "GTimingThread.h"
 
 class COpenGlThread;
 class CTerrainLoaderThread;

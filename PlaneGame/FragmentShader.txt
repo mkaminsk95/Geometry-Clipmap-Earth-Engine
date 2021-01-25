@@ -88,25 +88,24 @@ void main()
 	vec3 pixel, pixelFnr, pixelOut;
 	vec2 texPosition;
 
-	texPosition.x = mod(levelPositionOut.x + rawTexOffset.x, n);
-	texPosition.y = mod(levelPositionOut.y + rawTexOffset.y, n);
+	texPosition.x = mod(levelPositionOut.x + 0.5 + rawTexOffset.x, n);
+	texPosition.y = mod(levelPositionOut.y + 1.5 + rawTexOffset.y, n);
 	
 	pixel = getTexelValue(levelIndex, texPosition);
 
 
 	if(highestLvlOfDetail > levelIndex){
 	
-		texPosition.x = mod(levelPositionFnrOut.x + rawTexOffsetFnr.x, n);
-		texPosition.y = mod(levelPositionFnrOut.y + rawTexOffsetFnr.y, n);
+		texPosition.x = mod(levelPositionFnrOut.x + 0.5 + rawTexOffsetFnr.x, n);
+		texPosition.y = mod(levelPositionFnrOut.y + 1.5 + rawTexOffsetFnr.y, n);
 		
 		pixelFnr = getTexelValue(levelIndex + 1, texPosition);
-
+	
 		//calculating blending parameter
 		blendingParamX = clamp( ( abs(levelPositionOut.x-cameraPosition.x) - distanceToBlendingArea )/w ,0,1);
 		blendingParamY = clamp( ( abs(levelPositionOut.y-cameraPosition.y) - distanceToBlendingArea )/w ,0,1);
 		blendingParam = max( blendingParamX, blendingParamY);
-
-
+	
 		pixelOut = mix( pixel, pixelFnr, blendingParam);
 	}
 	else {

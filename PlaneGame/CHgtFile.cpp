@@ -393,7 +393,7 @@ void CHgtFile::loadHeightDataToImageFull(QImage* image, int imageOffsetX, int im
     uchar* bits;
 
 
-
+    int howManyTimes;
     long offset;
     int n = image->height() - 1;
     int rowCheck = 0; //variable tracks next rows in raw file
@@ -422,29 +422,58 @@ void CHgtFile::loadHeightDataToImageFull(QImage* image, int imageOffsetX, int im
                 fileHeight.read((char*)&height[0], 1);
                 fileHeight.read((char*)&height[1], 1);
 
-                if (height[0] > heightOld[0]+6 && skip == 1) {
-                    
+                if (height[0] > 40) {
+                    CCommons::stringIntoVSConsole("Jeb! ");
+                    CCommons::doubleIntoVSConsole(height[0]);
 
-                    //fileHeight.seekg(-4, fileHeight.cur);
-                    //fileHeight.read((char*)&heightNew[0], 1);
-                    //fileHeight.read((char*)&heightNew[1], 1);
-                    //fileHeight.seekp(-2, fileHeight.cur);
-                    //
-                    //fileHeight.write((char*)&heightNew[0], 1);
-                    //fileHeight.write((char*)&heightNew[1], 1);
-                    //fileHeight.write((char*)&heightNew[0], 1);
-                    //fileHeight.write((char*)&heightNew[1], 1);
+                    fileHeight.seekg(-4, fileHeight.cur);
+                    howManyTimes = 1;
+                    fileHeight.read((char*)&heightNew[0], 1);
+                    fileHeight.read((char*)&heightNew[1], 1);
+
+                    while (heightNew[0] > 40) {
+
+                        fileHeight.seekg(-4, fileHeight.cur);
+                        howManyTimes++;
+                        fileHeight.read((char*)&heightNew[0], 1);
+                        fileHeight.read((char*)&heightNew[1], 1);
+
+                    }
+
+                    fileHeight.seekp(2, fileHeight.cur);
+                    fileHeight.seekp(-2, fileHeight.cur);
+                    for (int i = 0; i < howManyTimes; i++) {
+                        fileHeight.write((char*)&heightNew[0], 1);
+                        fileHeight.write((char*)&heightNew[1], 1);
+                    }
+
+                    fileHeight.flush();
+
+                    CCommons::stringIntoVSConsole("\n");
                 }
+
 
                 //jumping to the next bites block depending on the layer resolution
                 fileHeight.seekg(skip * 2 - 2, fileHeight.cur);
 
-                //writing to the image
-                *(bits + 3 * x) = height[1];
-                *(bits + 3 * x + 1) = height[0];
+                if (height[0] > 40) {
+                    //writing to the image
+                    *(bits + 3 * x) =     heightNew[1];
+                    *(bits + 3 * x + 1) = heightNew[0];
+                }
+                else {
+                    //writing to the image
+                    *(bits + 3 * x) =     height[1];
+                    *(bits + 3 * x + 1) = height[0];
+                }
 
-                heightOld[0] = height[0];
-                heightOld[1] = height[1];
+                //jumping to the next bites block depending on the layer resolution
+                //fileHeight.seekg(skip * 2 - 2, fileHeight.cur);
+
+                //writing to the image
+                //*(bits + 3 * x) = height[1];
+                //*(bits + 3 * x + 1) = height[0];
+
             }
 
            
@@ -526,7 +555,7 @@ void CHgtFile::loadHeightDataToImagePart(QImage* image, int imageOffsetX, int im
                 fileHeight.read((char*)&height[0], 1);
                 fileHeight.read((char*)&height[1], 1);
 
-              /*  
+                
                 if (height[0] > 40) {
                     CCommons::stringIntoVSConsole("Jeb! ");
                     CCommons::doubleIntoVSConsole(height[0]);
@@ -555,24 +584,24 @@ void CHgtFile::loadHeightDataToImagePart(QImage* image, int imageOffsetX, int im
                     fileHeight.flush();
 
                     CCommons::stringIntoVSConsole("\n");
-                }*/
+                }
 
 
                 //jumping to the next bites block depending on the layer resolution
                 fileHeight.seekg(skip * 2 - 2, fileHeight.cur);
 
-                //if (height[0] > 40) {
-                //    //writing to the image
-                //    *(bits + 3 * ((textureBegginingX + x) % (n))) = heightNew[1];
-                //    *(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = heightNew[0];
-                //}
-                //else {
-                //    //writing to the image
-                //    *(bits + 3 * ((textureBegginingX + x) % (n))) = height[1];
-                //    *(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = height[0];
-                //}
-                *(bits + 3 * ((textureBegginingX + x) % (n))) = height[1];
-                *(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = height[0];
+                if (height[0] > 40) {
+                    //writing to the image
+                    *(bits + 3 * ((textureBegginingX + x) % (n))) = heightNew[1];
+                    *(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = heightNew[0];
+                }
+                else {
+                    //writing to the image
+                    *(bits + 3 * ((textureBegginingX + x) % (n))) = height[1];
+                    *(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = height[0];
+                }
+                //*(bits + 3 * ((textureBegginingX + x) % (n))) = height[1];
+                //*(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = height[0];
 
             }
 

@@ -27,6 +27,7 @@ public:
 	
 
 	GClipmap* clipmap;
+	//GPixel pixel;
 	GPixel* pixelManager;
 	GHeight* heightManager;
 	QOpenGLShaderProgram* program;
@@ -37,16 +38,20 @@ public:
 	float allFinerHorizontalSum, allFinerVerticalSum;
 	bool isActive;
 
+	double layerPositionLon, layerPositionLat;
 	double oldLon, oldLat;
 	double oldLonLeft, oldLonRight, oldLatTop, oldLatDown;
 
 	double readDegree;
 	bool firstGothrough;
 
-	void buildLayer();
-	void computeLayerPosition(double tlon, double tlat);
-	void updateLayer(double tlon, double tlat);
+	void buildLevel();
+	void refreshPosition(double tlon, double tlat);
+	void refreshTextures(double tlon, double tlat);
+	
+	void updatePosition();
 	void updateTextures();
+	void updateOffsets();
 	
 	void setPosition(int inPositionHorizontal, int inPositionVertical) {
 		positionHorizontal = inPositionHorizontal;
@@ -59,7 +64,7 @@ private:
 	CPerformance* performance;
 
 	point rTexBegHor, rTexBegVer, hTexBegHor, hTexBegVer;
-	int hgtTextureBegginingYBuff, hgtTextureBegginingXBuff, rawTextureBegginingYBuff, rawTextureBegginingXBuff;
+	int hgtTextureBegginingYRdy, hgtTextureBegginingXRdy, rawTextureBegginingYRdy, rawTextureBegginingXRdy;
 	int hgtTextureBegginingY, hgtTextureBegginingX, rawTextureBegginingY, rawTextureBegginingX;
 
 

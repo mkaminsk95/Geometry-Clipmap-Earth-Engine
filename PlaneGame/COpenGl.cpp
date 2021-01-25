@@ -54,12 +54,15 @@ COpenGl::COpenGl(QGLFormat glFormat, QWidget *parent) : QGLWidget(glFormat, pare
     
     clipmapMode = true;
 
+    // create Clipmap
+    //n sizes 7, 15, 31, 63, 127, 255, 511, 1023
+    clipmap = new GClipmap(this, 127);
+
+
    // create Earth Buffers
     earthBufferA = new CEarth;
     earthBufferB = new CEarth;
-
-    // create Clipmap
-    clipmap = new GClipmap(this);
+    
 
     setFocusPolicy(Qt::StrongFocus);
 

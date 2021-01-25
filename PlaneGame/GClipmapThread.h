@@ -45,7 +45,8 @@ private:
 	//methods
     void run();
     void findPosition();
-	void computeHighestLvlOfDetail();
+	void getHighestLvlOfDetail();
+    void getActiveLvlOfDetail();
 
 };
 

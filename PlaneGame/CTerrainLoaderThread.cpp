@@ -83,6 +83,7 @@ void CTerrainLoaderThread::run()
     logFile.open("logFileRegularGrid.txt", fstream::in | fstream::out | fstream::trunc);
     bool ifOpened = logFile.is_open();
     bool onlyOnce = false;
+    bool firstTime = true;
 
     while (true) {
         
@@ -122,10 +123,20 @@ void CTerrainLoaderThread::run()
         openGl->performance.setTerrainTreeUpdatingTime(time.elapsed());
         openGl->performance.updateTerrainTreeUpdatingInfo();
 
-        if (openGl->performance.testStart == true) {
-            logFile << time.elapsed() << "\t" << openGl->performance.maxLOD << "\t" << openGl->performance.terrainsQuarterDrawed*32 << "\t" << openGl->performance.trianglesRead << "\n";
-            logFile.flush();
-        }
+        //if (firstTime == true) {
+        //    time.start();
+        //    firstTime = false;
+        //}
 
+
+       // if (openGl->performance.testStart == true) {
+       //     //logFile << time.elapsed() << "\t" << openGl->performance.maxLOD << "\t" << openGl->performance.terrainsQuarterDrawed*32 << "\t" << openGl->performance.trianglesRead << "\n";
+       //     if (time.elapsed() < 120000)
+       //         logFile << time.elapsed() << "\t"<< openGl->performance.trianglesRead << "\n";
+       //     logFile.flush();
+       // }
+
+        logFile << time.elapsed() << "\n";
+        logFile.flush();
     }
 }

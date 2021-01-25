@@ -107,8 +107,8 @@ void main()
     levelPosition = position + patchOrigin;
 
 
-	texPosition.x = mod(levelPosition.x + hgtTexOffset.x, n);
-	texPosition.y = mod(levelPosition.y + hgtTexOffset.y, n);
+	texPosition.x = mod(levelPosition.x  + 0.5 + hgtTexOffset.x, n);
+	texPosition.y = mod(levelPosition.y  + 0.5 + hgtTexOffset.y, n);
 
 	texelValue = getTexelValue(levelIndex, texPosition);
 
@@ -118,8 +118,8 @@ void main()
 		//checking level position of finer level
 		levelPositionFnr = 0.5 * (position + patchOrigin) + coarserInFinerOffset;
 	
-		texPosition.x = mod(levelPositionFnr.x + hgtTexOffsetFnr.x, n);
-		texPosition.y = mod(levelPositionFnr.y + hgtTexOffsetFnr.y, n);
+		texPosition.x = mod(levelPositionFnr.x + 0.5 + hgtTexOffsetFnr.x, n);
+		texPosition.y = mod(levelPositionFnr.y + 0.5 + hgtTexOffsetFnr.y, n);
 		
 		texelValueFnr = getTexelValue(levelIndex + 1, texPosition);
 
@@ -129,19 +129,20 @@ void main()
 		blendingParamY = clamp( ( abs(levelPosition.y-cameraPosition.y) - distanceToBlendingArea )/w ,0,1);
 		blendingParam = max( blendingParamX, blendingParamY);
 
-		terrainHeight = mix( (texelValue.x*256+texelValue.y*65535), (texelValueFnr.x*256+texelValueFnr.y*65535), blendingParam);
+		
+		terrainHeight = mix( (texelValue.x*256+texelValue.y*65280), (texelValueFnr.x*256+texelValueFnr.y*65280), blendingParam);
 	}
 	else {
-		terrainHeight = (texelValue.x*256+texelValue.y*65535);
+		terrainHeight = (texelValue.x*256+texelValue.y*65280);
 	}
 
 	//calculating layer position in cartesian coordinates
     worldPosition = (levelPosition * levelScaleFactor * worldScaleFactor) + worldOffset;
 
 
-    x = (earthRadius + terrainHeight*4) * sin(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
-    y = (earthRadius + terrainHeight*4) * sin(worldPosition.y * CONST_PIDIV180);
-    z = (earthRadius + terrainHeight*4) * cos(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
+    x = (earthRadius + terrainHeight) * sin(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
+    y = (earthRadius + terrainHeight) * sin(worldPosition.y * CONST_PIDIV180);
+    z = (earthRadius + terrainHeight) * cos(worldPosition.x * CONST_PIDIV180) * cos(worldPosition.y * CONST_PIDIV180);
 
 	levelPositionFnrOut = levelPositionFnr;
     levelPositionOut = levelPosition;

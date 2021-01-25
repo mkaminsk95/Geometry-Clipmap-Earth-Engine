@@ -86,6 +86,7 @@ void GHeight::fullHgtTextureReading(double lonLeft, double lonRight, double latD
         imageOffsetX += howManyToReadX;
     }
 
+   
 }
 
 void GHeight::horizontalBlockHgtTextureReading(int lonDifference, int latDifference,

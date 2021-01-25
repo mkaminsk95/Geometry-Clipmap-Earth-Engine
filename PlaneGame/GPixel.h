@@ -34,6 +34,8 @@ public:
 	int rawSkipping;		//We read every n-th point in rawFile
 	int rawFileResolution;	//How many point there are in one scanline in corresponding Raw file 
 
+	double pointDegree;     //Distance between points in grid (may differ from readDegree)
+
 	void fullRawTextureReading(double lonLeft, double lonRight, double latDown, double latTop);
 	void horizontalBlockRawTextureReading(int lonDifference, int latDifference, double lonLeft, double lonRight, double latDown, double latTop, 
 								double oldLonLeft, double oldLonRight, double oldLatDown, double oldLatTop, point texBegHor);

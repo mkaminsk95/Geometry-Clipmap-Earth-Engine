@@ -4,10 +4,8 @@
 #include "CHgtFile.h"
 #include "GLayer.h"
 
-int n = 255;          //7, 15, 31, 63, 127, 255, 511, 1023
-int m = (n + 1) / 4; //2,  4,  8, 16
 
-GClipmap::GClipmap(COpenGl* openGlPointer) : openGl(openGlPointer)
+GClipmap::GClipmap(COpenGl* openGlPointer, int inN) : openGl(openGlPointer)
 {
     camera = openGl->drawingState.getCamera();
 
@@ -21,6 +19,10 @@ GClipmap::GClipmap(COpenGl* openGlPointer) : openGl(openGlPointer)
     
     initialized = false;     
     clipmapReady = false;
+    
+    n = inN;
+    m = (n + 1) / 4; //2,  4,  8, 16
+
 
     activeLvlOfDetail = 8;
     highestLvlOfDetail = 8;
@@ -85,28 +87,31 @@ void GClipmap::draw() {
         drawingMode = GL_TRIANGLE_STRIP;
 
 
-        //building layers         //   degree   HgtFileDegree   Size   Inx    HgtSkip  HgtDegree  RawSkip  RawDegree                 13                                                      orginal
-        layer.push_back(GLayer(this,  0.0018311,      3.75,        1,   0,        2,      4097,      1,       24576, n));  //0  --   12
-        layer.push_back(GLayer(this,  0.0036621,      3.75,        2,   1,        4,      4097,      2,       24576, n));  //1  --   11
-        layer.push_back(GLayer(this,  0.0073242,      3.75,        4,   2,        8,      4097,      1,        6144, n));  //2  --   10
-        layer.push_back(GLayer(this,  0.0146484,      3.75,        8,   3,       16,      4097,      2,        6144, n));  //3  --    9
-        layer.push_back(GLayer(this,  0.0292969,     15.00,       16,   4,        1,       513,      4,        6144, n));  //4  --    8
-        layer.push_back(GLayer(this,  0.0585938,     15.00,       32,   5,        2,       513,      1,         768, n));  //5  --    7
-        layer.push_back(GLayer(this,  0.1171876,     15.00,       64,   6,        4,       513,      2,         768, n));  //6  --    6
-        layer.push_back(GLayer(this,  0.2343752,     15.00,      128,   7,        8,       513,      4,         768, n));  //7  --    5
-        layer.push_back(GLayer(this,  0.4687504,     15.00,      256,   8,       16,       513,      1,          96, n));  //8  --    4
-        layer.push_back(GLayer(this,  0.9375008,     60.00,      512,   9,        1,        65,      2,          96, n));  //9  --    3
-        layer.push_back(GLayer(this,  1.8750016,     60.00,     1024,  10,        2,        65,      4,          96, n));  //10 --    2
-        layer.push_back(GLayer(this,  3.7500032,     60.00,     2048,  11,        4,        65,      8,          96, n));  //11 --    1
-        layer.push_back(GLayer(this,  7.5000064,     60.00,     4096,  12,        8,        65,     16,          96, n));  //12 --    0
+        //building layers         //   degree   HgtFileDegree   Size   Inx    HgtSkip    HgtRes  RawSkip     RawRes                 13                                                      orginal
+        layer.push_back(GLayer(this,  0.0018311,      3.75,        1,   0,        2,      4097,      1,       24576, n));  //0  --  12
+        layer.push_back(GLayer(this,  0.0036621,      3.75,        2,   1,        4,      4097,      1,       24576, n));  //1  --  11
+        layer.push_back(GLayer(this,  0.0073242,      3.75,        4,   2,        8,      4097,      1,       24576, n));  //2  --  10
+        layer.push_back(GLayer(this,  0.0146484,      3.75,        8,   3,       16,      4097,      2,       24576, n));  //3  --   9
+
+        layer.push_back(GLayer(this,  0.0292969,     15.00,       16,   4,        1,       513,      1,        6144, n));  //4  --   8
+        layer.push_back(GLayer(this,  0.0585938,     15.00,       32,   5,        2,       513,      2,        6144, n));  //5  --   7
+        layer.push_back(GLayer(this,  0.1171876,     15.00,       64,   6,        4,       513,      4,        6144, n));  //6  --   6
+        
+        layer.push_back(GLayer(this,  0.2343752,     15.00,      128,   7,        8,       513,      1,         768, n));  //7  --   5 
+        layer.push_back(GLayer(this,  0.4687504,     15.00,      256,   8,       16,       513,      2,         768, n));  //8  --   4
+        layer.push_back(GLayer(this,  0.9375008,     60.00,      512,   9,        1,        65,      4,         768, n));  //9  --   3
+        
+        layer.push_back(GLayer(this,  1.8750016,     60.00,     1024,  10,        2,        65,      1,          96, n));  //10 --   2
+        layer.push_back(GLayer(this,  3.7500032,     60.00,     2048,  11,        4,        65,      2,          96, n));  //11 --   1
+        layer.push_back(GLayer(this,  7.5000064,     60.00,     4096,  12,        8,        65,      4,          96, n));  //12 --   0
                                                                                         //jednak to sa poziomy dobrane geometria nie pikselami 
 
-        layer[0].setPosition(1, 1);
-        layer[1].setPosition(1, 1);
+        layer[0].setPosition(1, 0);
+        layer[1].setPosition(0, 0);
         layer[2].setPosition(1, 1);
         layer[3].setPosition(1, 1);
         layer[4].setPosition(1, 1);
-        layer[5].setPosition(1, 1);
+        layer[5].setPosition(0, 0);
         layer[6].setPosition(1, 1);
         layer[7].setPosition(1, 1);
         layer[8].setPosition(1, 1);
@@ -147,17 +152,24 @@ void GClipmap::draw() {
     
 
     if(clipmapReady) {
+        
+        activeLvlOfDetail = openGl->clipmapThread->activeLvlOfDetail;
+        highestLvlOfDetail = openGl->clipmapThread->highestLvlOfDetail;
 
         for (int x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
             layer[x].updateTextures();
 
-        activeLvlOfDetail = openGl->clipmapThread->activeLvlOfDetail;
-        highestLvlOfDetail = openGl->clipmapThread->highestLvlOfDetail;
+        for (int x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
+            layer[x].updatePosition();
+
+        for (int x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
+            layer[x].updateOffsets();
+
         clipmapReady = false;
     }
 
     for (int x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
-        layer[x].buildLayer();
+        layer[x].buildLevel();
     
 
     program->release();

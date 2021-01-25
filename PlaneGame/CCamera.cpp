@@ -52,12 +52,16 @@ CCamera::CCamera()
 {
     double unit = 1.0;
 
+
+    camSpeed = 0.02;
+    distance = 8867;
+
     camLinkage = CAM_LINKAGE_GLOBE;
     camMode = CAM_MODE_ORBIT;
 
     // INIT - earth point (center of terrain camera coordinate system)
-    earthPointLon = 25; //17.038;
-    earthPointLat = 0;// 51.102;
+    earthPointLon = 34.7189; //17.038;
+    earthPointLat = 1.097;// 51.102;
     earthPointAlt = CONST_EARTH_RADIUS + 118;
     CCommons::getCartesianFromSpherical(earthPointLon, earthPointLat, earthPointAlt,
                                         &earthPointX, &earthPointY, &earthPointZ);
@@ -68,10 +72,11 @@ CCamera::CCamera()
     camVel = 1.0;                // [m/sec] must be re-set when cam altitude is setup !!!
     camVelFromAlt = true;
 
+    
     // INIT - camera linked to globe center in orbit mode
     camGlobeOrbitAzim = earthPointLon;
     camGlobeOrbitElev = earthPointLat;
-    camGlobeOrbitRad = CONST_EARTH_RADIUS + 36.5*CONST_1GM;     // 20 000 km above Earth default camera
+    camGlobeOrbitRad = CONST_EARTH_RADIUS + distance*CONST_1KM;     // 20 000 km above Earth default camera
     CCommons::getCartesianFromSpherical(camGlobeOrbitAzim, camGlobeOrbitElev, camGlobeOrbitRad,
                                         &camGlobeX, &camGlobeY, &camGlobeZ);
 
@@ -506,148 +511,152 @@ void CCamera::mouseReleaseEventHandler(QMouseEvent *event)
 
 void CCamera::mouseMoveEventHandler(QMouseEvent *event)
 {
-    QMutexLocker locker(drawingStateMutex);
-    float dx = event->x() - interactMouseLastPos.x();
-    int dy = event->y() - interactMouseLastPos.y();
-    performance->testStart = true;
-    double unit = 1.0;
-    double orbitSlowing = 1.0;
+    //while(true) {
+        QMutexLocker locker(drawingStateMutex);
+        float dx = event->x() - interactMouseLastPos.x();//camSpeed;// event->x() - interactMouseLastPos.x();
+        int dy = event->y() - interactMouseLastPos.y(); // event->y() - interactMouseLastPos.y();
+        performance->testStart = true;
+        double unit = 1.0;
+        double orbitSlowing = 1.0;
 
-    if (!sunMovingMode) {
+        if (!sunMovingMode) {
 
-        if (camMode==CAM_MODE_FREELOOK) {
+            if (camMode == CAM_MODE_FREELOOK) {
 
-            // free look camera
-            if (interactMouseLeftButton && !interactMouseRightButton) {
-                switch (camLinkage) {
-                    case CAM_LINKAGE_GLOBE:     camGlobeFreeAzim -= dx*camPix2AngleX;
-                                                camGlobeFreeElev -= dy*camPix2AngleY;
+                // free look camera
+                if (interactMouseLeftButton && !interactMouseRightButton) {
+                    switch (camLinkage) {
+                    case CAM_LINKAGE_GLOBE:     camGlobeFreeAzim -= dx * camPix2AngleX;
+                        camGlobeFreeElev -= dy * camPix2AngleY;
 
-                                                if (camGlobeFreeElev>89.5) camGlobeFreeElev = 89.5;
-                                                if (camGlobeFreeElev<-89.5) camGlobeFreeElev = -89.5;
-                                                if (camGlobeFreeAzim>360.0) camGlobeFreeAzim -= 360.0;
-                                                if (camGlobeFreeAzim<0.0) camGlobeFreeAzim += 360.0;
+                        if (camGlobeFreeElev > 89.5) camGlobeFreeElev = 89.5;
+                        if (camGlobeFreeElev < -89.5) camGlobeFreeElev = -89.5;
+                        if (camGlobeFreeAzim > 360.0) camGlobeFreeAzim -= 360.0;
+                        if (camGlobeFreeAzim < 0.0) camGlobeFreeAzim += 360.0;
 
-                                                // update direction vector (look_at)
-                                                CCommons::getCartesianFromSpherical(camGlobeFreeAzim, camGlobeFreeElev, unit,
-                                                                                    &camGlobeFreeDirX, &camGlobeFreeDirY, &camGlobeFreeDirZ);
-                                                updateCameraWhenInGlobeLinkage();
-                                                break;
+                        // update direction vector (look_at)
+                        CCommons::getCartesianFromSpherical(camGlobeFreeAzim, camGlobeFreeElev, unit,
+                            &camGlobeFreeDirX, &camGlobeFreeDirY, &camGlobeFreeDirZ);
+                        updateCameraWhenInGlobeLinkage();
+                        break;
 
-                    case CAM_LINKAGE_TERRAIN:   camTerrainFreeAzim -= dx*camPix2AngleX;
-                                                camTerrainFreeElev -= dy*camPix2AngleY;
+                    case CAM_LINKAGE_TERRAIN:   camTerrainFreeAzim -= dx * camPix2AngleX;
+                        camTerrainFreeElev -= dy * camPix2AngleY;
 
-                                                if (camTerrainFreeElev>89.5) camTerrainFreeElev = 89.5;
-                                                if (camTerrainFreeElev<-89.5) camTerrainFreeElev = -89.5;
-                                                if (camTerrainFreeAzim>360.0) camTerrainFreeAzim -= 360.0;
-                                                if (camTerrainFreeAzim<0.0) camTerrainFreeAzim += 360.0;
+                        if (camTerrainFreeElev > 89.5) camTerrainFreeElev = 89.5;
+                        if (camTerrainFreeElev < -89.5) camTerrainFreeElev = -89.5;
+                        if (camTerrainFreeAzim > 360.0) camTerrainFreeAzim -= 360.0;
+                        if (camTerrainFreeAzim < 0.0) camTerrainFreeAzim += 360.0;
 
-                                                // update direction vector (look_at)
-                                                CCommons::getCartesianFromSpherical(camTerrainFreeAzim, camTerrainFreeElev, unit,
-                                                                                    &camTerrainFreeDirX, &camTerrainFreeDirY, &camTerrainFreeDirZ);
-                                                updateCameraWhenInTerrainLinkage();
-                                                break;
+                        // update direction vector (look_at)
+                        CCommons::getCartesianFromSpherical(camTerrainFreeAzim, camTerrainFreeElev, unit,
+                            &camTerrainFreeDirX, &camTerrainFreeDirY, &camTerrainFreeDirZ);
+                        updateCameraWhenInTerrainLinkage();
+                        break;
+                    }
+                }
+
+            }
+            else {
+
+                // orbit camera
+                if (interactMouseLeftButton ^ interactMouseRightButton) {
+
+                    // change azim/elev
+                    if (interactMouseLeftButton) {
+                        switch (camLinkage) {
+                        case CAM_LINKAGE_GLOBE:     if (camAltGround < (CONST_1GM * 3.0)) {
+                            orbitSlowing = sin((CONST_PI / 2.0) * (camAltGround / (CONST_1GM * 3.0)));  // slow down orbiting when close to earth
+                        }
+
+                                              camGlobeOrbitAzim -= dx * camPix2AngleX * orbitSlowing;
+                                              camGlobeOrbitElev += dy * camPix2AngleY * orbitSlowing;
+
+                                              if (camGlobeOrbitElev > 89.5) camGlobeOrbitElev = 89.5;
+                                              if (camGlobeOrbitElev < -89.5) camGlobeOrbitElev = -89.5;
+                                              if (camGlobeOrbitAzim > 360.0) camGlobeOrbitAzim -= 360.0;
+                                              if (camGlobeOrbitAzim < 0.0) camGlobeOrbitAzim += 360.0;
+
+                                              camGlobeFreeAzim = camGlobeOrbitAzim + 180.0; // to look at center of coordinate system in freelook mode
+                                              camGlobeFreeElev = -camGlobeOrbitElev;        // to look at center of coordinate system in freelook mode
+
+                                              // update position vector
+                                              CCommons::getCartesianFromSpherical(camGlobeOrbitAzim, camGlobeOrbitElev, camGlobeOrbitRad,
+                                                  &camGlobeX, &camGlobeY, &camGlobeZ);
+                                              updateCameraWhenInGlobeLinkage();
+                                              break;
+
+                        case CAM_LINKAGE_TERRAIN:   camTerrainOrbitAzim -= dx * camPix2AngleX;
+                            camTerrainOrbitElev += dy * camPix2AngleY;
+
+                            if (camTerrainOrbitElev > 89.5) camTerrainOrbitElev = 89.5;
+                            if (camTerrainOrbitElev < -89.5) camTerrainOrbitElev = -89.5;
+                            if (camTerrainOrbitAzim > 360.0) camTerrainOrbitAzim -= 360.0;
+                            if (camTerrainOrbitAzim < 0.0) camTerrainOrbitAzim += 360.0;
+
+                            camTerrainFreeAzim = camTerrainOrbitAzim + 180.0; // to look at center of coordinate system in freelook mode
+                            camTerrainFreeElev = -camTerrainOrbitElev;        // to look at center of coordinate system in freelook mode
+
+                            // update position vector
+                            CCommons::getCartesianFromSpherical(camTerrainOrbitAzim, camTerrainOrbitElev, camTerrainOrbitRad,
+                                &camTerrainX, &camTerrainY, &camTerrainZ);
+                            updateCameraWhenInTerrainLinkage();
+                            break;
+                        }
+                    }
+
+                    // zooming
+                    if (interactMouseRightButton) {
+                        switch (camLinkage) {
+                        case CAM_LINKAGE_GLOBE:     if (dy < 0) camGlobeOrbitRad = (camGlobeOrbitRad - CONST_EARTH_RADIUS) * 0.95 + CONST_EARTH_RADIUS;
+                            if (dy > 0) camGlobeOrbitRad = (camGlobeOrbitRad - CONST_EARTH_RADIUS) * 1.05 + CONST_EARTH_RADIUS;
+
+                            // block camera position > 1 milion km
+                            if (camGlobeOrbitRad > 1000.0 * CONST_1GM) camGlobeOrbitRad = 1000.0 * CONST_1GM;
+
+                            CCommons::getCartesianFromSpherical(camGlobeOrbitAzim, camGlobeOrbitElev, camGlobeOrbitRad,
+                                &camGlobeX, &camGlobeY, &camGlobeZ);
+                            updateCameraWhenInGlobeLinkage();
+                            break;
+
+                        case CAM_LINKAGE_TERRAIN:   if (dy < 0) camTerrainOrbitRad *= 0.95;
+                            if (dy > 0) camTerrainOrbitRad *= 1.05;
+
+                            // block camera position > 1 milion km
+                            if (camTerrainOrbitRad > 1000.0 * CONST_1GM) camTerrainOrbitRad = 1000.0 * CONST_1GM;
+
+                            CCommons::getCartesianFromSpherical(camTerrainOrbitAzim, camTerrainOrbitElev, camTerrainOrbitRad,
+                                &camTerrainX, &camTerrainY, &camTerrainZ);
+                            updateCameraWhenInTerrainLinkage();
+                            break;
+                        }
+                    }
+
                 }
             }
 
-        } else {
+        }
+        else {
 
-            // orbit camera
-            if (interactMouseLeftButton ^ interactMouseRightButton) {
-
-                // change azim/elev
+            if (interactMouseLeftButton ^ interactMouseRightButton)
                 if (interactMouseLeftButton) {
-                    switch(camLinkage) {
-                        case CAM_LINKAGE_GLOBE:     if (camAltGround<(CONST_1GM*3.0)) {
-                                                        orbitSlowing = sin((CONST_PI/2.0)*(camAltGround/(CONST_1GM*3.0)));  // slow down orbiting when close to earth
-                                                    }
+                    sunLon -= dx * camPix2AngleX;
+                    sunLat += dy * camPix2AngleY;
 
-                                                    camGlobeOrbitAzim -= dx*camPix2AngleX*orbitSlowing;
-                                                    camGlobeOrbitElev += dy*camPix2AngleY*orbitSlowing;
+                    if (sunLat > CONST_SUN_MAX_LAT) sunLat = CONST_SUN_MAX_LAT;
+                    if (sunLat < -CONST_SUN_MAX_LAT) sunLat = -CONST_SUN_MAX_LAT;
+                    if (sunLon > 360.0) sunLon -= 360.0;
+                    if (sunLon < 0.0) sunLon += 360.0;
 
-                                                    if (camGlobeOrbitElev>89.5) camGlobeOrbitElev = 89.5;
-                                                    if (camGlobeOrbitElev<-89.5) camGlobeOrbitElev = -89.5;
-                                                    if (camGlobeOrbitAzim>360.0) camGlobeOrbitAzim -= 360.0;
-                                                    if (camGlobeOrbitAzim<0.0) camGlobeOrbitAzim += 360.0;
-
-                                                    camGlobeFreeAzim = camGlobeOrbitAzim + 180.0; // to look at center of coordinate system in freelook mode
-                                                    camGlobeFreeElev = -camGlobeOrbitElev;        // to look at center of coordinate system in freelook mode
-
-                                                    // update position vector
-                                                    CCommons::getCartesianFromSpherical(camGlobeOrbitAzim, camGlobeOrbitElev, camGlobeOrbitRad,
-                                                                                        &camGlobeX, &camGlobeY, &camGlobeZ);
-                                                    updateCameraWhenInGlobeLinkage();
-                                                    break;
-
-                        case CAM_LINKAGE_TERRAIN:   camTerrainOrbitAzim -= dx*camPix2AngleX;
-                                                    camTerrainOrbitElev += dy*camPix2AngleY;
-
-                                                    if (camTerrainOrbitElev>89.5) camTerrainOrbitElev = 89.5;
-                                                    if (camTerrainOrbitElev<-89.5) camTerrainOrbitElev = -89.5;
-                                                    if (camTerrainOrbitAzim>360.0) camTerrainOrbitAzim -= 360.0;
-                                                    if (camTerrainOrbitAzim<0.0) camTerrainOrbitAzim += 360.0;
-
-                                                    camTerrainFreeAzim = camTerrainOrbitAzim + 180.0; // to look at center of coordinate system in freelook mode
-                                                    camTerrainFreeElev = -camTerrainOrbitElev;        // to look at center of coordinate system in freelook mode
-
-                                                    // update position vector
-                                                    CCommons::getCartesianFromSpherical(camTerrainOrbitAzim, camTerrainOrbitElev, camTerrainOrbitRad,
-                                                                                        &camTerrainX, &camTerrainY, &camTerrainZ);
-                                                    updateCameraWhenInTerrainLinkage();
-                                                    break;
-                    }
+                    // update sun vector
+                    updateSunVectors();
+                    emit SIGNALupdateSunInfo(sunLon, sunLat, sunAzim, sunElev);
                 }
 
-                // zooming
-                if (interactMouseRightButton) {
-                    switch(camLinkage) {
-                        case CAM_LINKAGE_GLOBE:     if (dy<0) camGlobeOrbitRad = (camGlobeOrbitRad-CONST_EARTH_RADIUS)*0.95 + CONST_EARTH_RADIUS;
-                                                    if (dy>0) camGlobeOrbitRad = (camGlobeOrbitRad-CONST_EARTH_RADIUS)*1.05 + CONST_EARTH_RADIUS;
-
-                                                    // block camera position > 1 milion km
-                                                    if (camGlobeOrbitRad>1000.0*CONST_1GM) camGlobeOrbitRad = 1000.0*CONST_1GM;
-
-                                                    CCommons::getCartesianFromSpherical(camGlobeOrbitAzim, camGlobeOrbitElev, camGlobeOrbitRad,
-                                                                                        &camGlobeX, &camGlobeY, &camGlobeZ);
-                                                    updateCameraWhenInGlobeLinkage();
-                                                    break;
-
-                        case CAM_LINKAGE_TERRAIN:   if (dy<0) camTerrainOrbitRad *= 0.95;
-                                                    if (dy>0) camTerrainOrbitRad *= 1.05;
-
-                                                    // block camera position > 1 milion km
-                                                    if (camTerrainOrbitRad>1000.0*CONST_1GM) camTerrainOrbitRad = 1000.0*CONST_1GM;
-
-                                                    CCommons::getCartesianFromSpherical(camTerrainOrbitAzim, camTerrainOrbitElev, camTerrainOrbitRad,
-                                                                                        &camTerrainX, &camTerrainY, &camTerrainZ);
-                                                    updateCameraWhenInTerrainLinkage();
-                                                    break;
-                    }
-                }
-
-            }
         }
 
-    } else {
-
-        if (interactMouseLeftButton ^ interactMouseRightButton)
-            if (interactMouseLeftButton) {
-                sunLon -= dx*camPix2AngleX;
-                sunLat += dy*camPix2AngleY;
-
-                if (sunLat>CONST_SUN_MAX_LAT) sunLat = CONST_SUN_MAX_LAT;
-                if (sunLat<-CONST_SUN_MAX_LAT) sunLat = -CONST_SUN_MAX_LAT;
-                if (sunLon>360.0) sunLon -= 360.0;
-                if (sunLon<0.0) sunLon += 360.0;
-
-                // update sun vector
-                updateSunVectors();
-                emit SIGNALupdateSunInfo(sunLon, sunLat, sunAzim, sunElev);
-            }
-
-    }
-
-    interactMouseLastPos = event->pos();
+        interactMouseLastPos = event->pos();
+    //}
 }
 
 void CCamera::updateSunVectors()
@@ -911,9 +920,9 @@ void CCamera::checkInteractKeys()
 void CCamera::freeLookGlobalCameraForward(double dt)
 {
     performance->testStart = true;
-    camGlobeX = camGlobeX + camGlobeFreeDirX*camVel*dt*3;
-    camGlobeY = camGlobeY + camGlobeFreeDirY*camVel*dt*3;
-    camGlobeZ = camGlobeZ + camGlobeFreeDirZ*camVel*dt*3;
+    camGlobeX = camGlobeX + camGlobeFreeDirX*camVel*dt*4;
+    camGlobeY = camGlobeY + camGlobeFreeDirY*camVel*dt*4;
+    camGlobeZ = camGlobeZ + camGlobeFreeDirZ*camVel*dt*4;
 }
 
 void CCamera::freeLookGlobalCameraBackward(double dt)

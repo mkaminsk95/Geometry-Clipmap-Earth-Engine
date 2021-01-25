@@ -234,8 +234,7 @@ void CRawFile::loadPixelDataToImageFull(QImage* image, int imageOffsetX, int ima
 
     // load HGT file to memory
     filePixel.open(name.toUtf8(), fstream::in | fstream::binary);
-    for (int counter = 0; counter < 16; counter++) {
-        rowCheck = 0;
+
     for (int y = imageOffsetY; y < imageOffsetY+yToRead; y++) {
         
         //finding right input data
@@ -264,14 +263,13 @@ void CRawFile::loadPixelDataToImageFull(QImage* image, int imageOffsetX, int ima
         rowCheck++;
     }
 
-    }
     filePixel.close();
 }
 
 void CRawFile::loadPixelDataToImagePart(QImage* image, int imageOffsetX, int imageOffsetY, QString name,
                                      int xToRead, int yToRead, int fileResolution, int skip, 
                                      int filePositionHorizontalOffset, int filePositionVerticalOffset, 
-                                     int textureBegginingX, int textureBegginingY)
+                                     int textureBegginingX, int textureBegginingY, int levelIndex)
 {
     fstream filePixel;
     quint8 pixel[3];
@@ -279,10 +277,18 @@ void CRawFile::loadPixelDataToImagePart(QImage* image, int imageOffsetX, int ima
 
     long offset;
 
+    int imageSizeFactor; //variable used in two smallest levels because they use smaller image
     int x, y;
     int yStopCondition, xStopCondition;
     int rowCheck = 0;  //variable tracks next rows in raw file
     int n = image->height();
+
+    if (levelIndex == 0)
+        imageSizeFactor = 1;
+    else if (levelIndex == 1)
+        imageSizeFactor = 2;
+    else
+        imageSizeFactor = 4;
 
     y = imageOffsetY;
     x = imageOffsetX;
@@ -295,16 +301,16 @@ void CRawFile::loadPixelDataToImagePart(QImage* image, int imageOffsetX, int ima
     // load HGT file to memory
     filePixel.open(name.toUtf8(), fstream::in | fstream::binary);
     
-    for (int counter = 0; counter < 16; counter++) {
-        rowCheck = 0;
+    
     for (y = imageOffsetY; y < yStopCondition; y++) {
 
         //finding right input data
         filePixel.seekg(offset + 3 * skip * rowCheck * fileResolution);
    
         //finding right row of image (texture)
-        bits = image->scanLine((n - 1) - fmod(textureBegginingY + y, n));
-        
+        //bits = image->scanLine((n - 1) - fmod(textureBegginingY*4 + y, n));
+        bits = image->scanLine((n - 1) - fmod(textureBegginingY * imageSizeFactor + y, n));
+
         for (x = imageOffsetX; x < xStopCondition; x++) {
 
 
@@ -317,16 +323,18 @@ void CRawFile::loadPixelDataToImagePart(QImage* image, int imageOffsetX, int ima
             filePixel.seekg(skip * 3 - 3, filePixel.cur);
 
             //writing to the image
-            *(bits + 3 * ( (textureBegginingX + x) % (n) )    ) = pixel[0];
-            *(bits + 3 * ( (textureBegginingX + x) % (n) ) + 1) = pixel[1];
-            *(bits + 3 * ( (textureBegginingX + x) % (n) ) + 2) = pixel[2];
-           
+            //*(bits + 3 * ( (textureBegginingX*4 + x) % (n) )    ) = pixel[0];
+            //*(bits + 3 * ( (textureBegginingX*4 + x) % (n) ) + 1) = pixel[1];
+            //*(bits + 3 * ( (textureBegginingX*4 + x) % (n) ) + 2) = pixel[2];
+            *(bits + 3 * ((textureBegginingX * imageSizeFactor + x) % (n))) = pixel[0];
+            *(bits + 3 * ((textureBegginingX * imageSizeFactor + x) % (n)) + 1) = pixel[1];
+            *(bits + 3 * ((textureBegginingX * imageSizeFactor + x) % (n)) + 2) = pixel[2];
+
         }
       
         rowCheck++;
     }
 
-    }
     filePixel.close();
 }
 
@@ -335,13 +343,13 @@ void CRawFile::sphericalToRawFilePath(QString* filePath, float lon, float lat, i
 
     QString filePathTmp;
 
-    if (layerIndex >= 8) {
+    if (layerIndex >= 10) {
         filePathTmp = "E:\\HgtReader_data\\Textures\\L00_L02";
     }
-    else if (layerIndex >= 5) {
+    else if (layerIndex >= 7) {
         filePathTmp = "E:\\HgtReader_data\\Textures\\L03_L05";
     }
-    else if (layerIndex >= 2) {
+    else if (layerIndex >= 4) {
         filePathTmp = "E:\\HgtReader_data\\Textures\\L06_L08";
     }
     else {

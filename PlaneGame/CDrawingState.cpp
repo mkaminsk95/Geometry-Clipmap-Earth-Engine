@@ -63,13 +63,13 @@ CDrawingState::CDrawingState()
 
     drawTerrainNormals = false;
     drawEarthPoint = false;
-    drawGrid = true;
+    drawGrid = false;
     drawAxes = true;
     sunEnabled = false;
     treeUpdating = true;
 
     lodMultiplier = 1.74;
-    dontUseCache = false;
+    dontUseCache = true;
     dontUseDiskHgt = false;
     dontUseDiskRaw = false;
 
