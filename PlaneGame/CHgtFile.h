@@ -77,8 +77,8 @@ public:
     void fileSetHeightBlock(int *buffer, int x, int y, int sx, int sy, int skip);
     void fileSetHeightBlock(quint16 *buffer, int x, int y, int sx, int sy, int skip);
     static void loadHeightDataToImageFull(QImage* image, int imageOffsetX, int imageOffsetY, QString name, int xToRead, int yToRead, int fileResolution, int skip, int positionHorizontalOffset, int positionVerticalOffset);
-	static void loadHeightDataToImagePart(QImage* image, int imageOffsetX, int imageOffsetY, QString name, int xToRead, int yToRead, int fileResolution, int skip, int filePositionHorizontalOffset, int filePositionVerticalOffset, int textureBegginingX, int textureBegginingY);
-    static void sphericalToHeightFilePath(QString* filePath, float lon, float lat, int layerIndex);
+	static void loadHeightDataToImagePart(QImage* image, int imageOffsetX, int imageOffsetY, QString name, int xToRead, int yToRead, int fileResolution, int skip, int filePositionHorizontalOffset, int filePositionVerticalOffset, int textureOriginX, int textureOriginY);
+    static void sphericalToHeightFilePath(QString* filePath, float lon, float lat, int levelIndex);
 	static void sphericalToFilePath(QString* filePath, float lon, float lat, int LOD);
     void savePGM(QString name);
 

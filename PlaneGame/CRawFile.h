@@ -98,7 +98,7 @@ public:
     static void loadPixelDataToImageFull(QImage* image, int imageOffsetX, int imageOffsetY, QString name, 
         int xToRead, int yToRead, int fileResolution, int skip, int positionHorizontalOffset, int positionVerticalOffset);
     static void loadPixelDataToImagePart(QImage* image, int imageOffsetX, int imageOffsetY, QString name, int xToRead, int yToRead, int fileResolution, int skip, int filePositionHorizontalOffset,
-        int filePositionVerticalOffset, int textureBegginingX, int textureBegginingY, int levelIndex);
+        int filePositionVerticalOffset, int textureOriginX, int textureOriginY, int levelIndex);
     
    
     static void sphericalToRawFilePath(QString* filePath, float lon, float lat, int LOD);

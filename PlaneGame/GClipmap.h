@@ -16,7 +16,7 @@
 
 
 class COpenGl;
-class GLayer;
+class GLevel;
 
 
 class GClipmap  {
@@ -62,7 +62,7 @@ public:
 
 	bool clipmapReady;
 	int activeLvlOfDetail, highestLvlOfDetail;
-	QVector<GLayer> layer;	
+	QVector<GLevel> level;	
 
 	int n;
 	int m;

@@ -2,8 +2,9 @@
 #include "CCommons.h"
 #include <chrono>
 #include <math.h>
-#include <GLayer.h>
+#include <GLevel.h>
 #include <vector>
+#include "CPerformance.h"
 
 GClipmapThread::GClipmapThread(COpenGl* openGlPointer) : QThread(openGlPointer), openGl(openGlPointer)
 {
@@ -13,47 +14,49 @@ GClipmapThread::GClipmapThread(COpenGl* openGlPointer) : QThread(openGlPointer),
 
 void GClipmapThread::run() {
     
-    openGl->drawingState.getDrawingStateSnapshot(&dss);      // get current scene state
+    CPerformance* performance = CPerformance::getInstance();
 
-    vector<GLayer*> layer;
-    for (int i = 0; i < 13; i++)
-        layer.push_back(&clipmap->layer[i]);
+    vector<GLevel*> level;
 
     for (int i = 0; i < 13; i++) {
-        layersOffsets[i] = layer[i]->horizontalOffset;
-        layersDegree[i] =  layer[i]->readDegree;
+        level.push_back(&clipmap->level[i]);
+        levelsOffsets[i] = level[i]->horizontalOffset;
+        levelsDegree[i] =  level[i]->readDegree;
     }
     highestLvlOfDetail = 12;
    
 
+  
     while (true) {
         
-
+        
         if (!clipmap->clipmapReady) {
-         
-           
-            findPosition();
             
+    
+            performance->trianglesRead = 0;
+
+
+
+            findPosition();
+
             treshold = 8840;
 
             getActiveLvlOfDetail();
             getHighestLvlOfDetail();
-            
-    
 
 
             for (int x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
-                layer[x]->refreshTextures(tlon, tlat);         
-            
+                level[x]->refreshTextures(tlon, tlat);         
+        
             for (int x = activeLvlOfDetail; x <= highestLvlOfDetail; x++)
-                layer[x]->refreshPosition(tlon, tlat);
+                level[x]->refreshPositions(tlon, tlat);
 
-          
             clipmap->activeLvlOfDetail =  activeLvlOfDetail;
             clipmap->highestLvlOfDetail = highestLvlOfDetail;
 
             clipmap->clipmapReady = true;
-        
+
+
         }
 
     }
@@ -81,32 +84,33 @@ void GClipmapThread::getActiveLvlOfDetail() {
 void GClipmapThread::getHighestLvlOfDetail() {
 
 
-    double camX, camY, camZ;
-    double posX, posY, posZ;
-    double edgeLon, edgeLat;
-    float distanceToHighestLvlEdge, distanceToPreviousEdge, distanceToHorizon;
-    
-    //computing distance to horizon
-    distanceToHorizon = sqrt(2 * 6378100 * distanceFromEarth + distanceFromEarth * distanceFromEarth);
-    
-    //computing distance to next layer edge
-    edgeLon = tlon - layersOffsets[highestLvlOfDetail] * layersDegree[highestLvlOfDetail];
-    CCommons::getCartesianFromSpherical(edgeLon, tlat, 6378100,&posX,&posY,&posZ);
-    camera->getCamPosition(&camX, &camY, &camZ);
-    distanceToHighestLvlEdge = sqrt(pow(camX - posX, 2) + pow(camY - posY, 2) + pow(camZ - posZ, 2));
 
-    //computing distance to previous edge
-    edgeLon = tlon - layersOffsets[highestLvlOfDetail-1] * layersDegree[highestLvlOfDetail-1];
-    CCommons::getCartesianFromSpherical(edgeLon, tlat, 6378100, &posX, &posY, &posZ);
-    distanceToPreviousEdge = sqrt(pow(camX - posX, 2) + pow(camY - posY, 2) + pow(camZ - posZ, 2));
+        double camX, camY, camZ;
+        double posX, posY, posZ;
+        double edgeLon, edgeLat;
+        float distanceToHighestLvlEdge, distanceToPreviousEdge, distanceToHorizon;
+        
+        //computing distance to horizon
+        distanceToHorizon = sqrt(2 * 6378100 * distanceFromEarth + distanceFromEarth * distanceFromEarth);
+        
+        //computing distance to next level edge
+        edgeLon = tlon - levelsOffsets[highestLvlOfDetail] * levelsDegree[highestLvlOfDetail];
+        CCommons::getCartesianFromSpherical(edgeLon, tlat, 6378100,&posX,&posY,&posZ);
+        camera->getCamPosition(&camX, &camY, &camZ);
+        distanceToHighestLvlEdge = sqrt(pow(camX - posX, 2) + pow(camY - posY, 2) + pow(camZ - posZ, 2));
+
+        //computing distance to previous edge
+        edgeLon = tlon - levelsOffsets[highestLvlOfDetail-1] * levelsDegree[highestLvlOfDetail-1];
+        CCommons::getCartesianFromSpherical(edgeLon, tlat, 6378100, &posX, &posY, &posZ);
+        distanceToPreviousEdge = sqrt(pow(camX - posX, 2) + pow(camY - posY, 2) + pow(camZ - posZ, 2));
 
 
-    //if horizon is more far away than layer edge, change highest edge
-    if (distanceToHorizon > distanceToHighestLvlEdge && highestLvlOfDetail < 13)
-        highestLvlOfDetail = highestLvlOfDetail + 1;
-    else if (distanceToHorizon < distanceToPreviousEdge && activeLvlOfDetail != highestLvlOfDetail)
-        highestLvlOfDetail = highestLvlOfDetail - 1;
-
+        //if horizon is more far away than level edge, change highest edge
+        if (distanceToHorizon > distanceToHighestLvlEdge && highestLvlOfDetail < 12)
+            highestLvlOfDetail = highestLvlOfDetail + 1;
+        else if (distanceToHorizon < distanceToPreviousEdge && activeLvlOfDetail != highestLvlOfDetail)
+            highestLvlOfDetail = highestLvlOfDetail - 1;
+       
 }
 
 void GClipmapThread::findPosition() {

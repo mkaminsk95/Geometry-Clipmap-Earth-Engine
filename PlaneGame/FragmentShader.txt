@@ -106,7 +106,9 @@ void main()
 		blendingParamY = clamp( ( abs(levelPositionOut.y-cameraPosition.y) - distanceToBlendingArea )/w ,0,1);
 		blendingParam = max( blendingParamX, blendingParamY);
 	
+		blendingParam = 0;
 		pixelOut = mix( pixel, pixelFnr, blendingParam);
+		//pixelOut = mix( vec3(pixel.y,pixel.z,pixel.x), pixelFnr, blendingParam);
 	}
 	else {
 		pixelOut = pixel;

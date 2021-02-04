@@ -97,12 +97,16 @@ void CTerrain::findTerrainPointClosestToCam()
     QVector3D vecCamPos2Terrain;
     double vecCamPos2TerrainDistance;
     int i;
+   // distanceToEarth = 1;
 
     terrainPointClosestToCamDistance = 2000.0*CONST_1GM; // 2 milions km it's far beyond the maximum position of the camera
     for (i=0; i<81; i++) {
-        vecCamPos2Terrain = terrainData->sphere[i] - dss->camPosition;
-        vecCamPos2TerrainDistance = vecCamPos2Terrain.length();
+        
 
+        vecCamPos2Terrain = terrainData->sphere[i] - dss->camPosition;
+        
+        vecCamPos2TerrainDistance = vecCamPos2Terrain.length();
+        
         if (vecCamPos2TerrainDistance<terrainPointClosestToCamDistance) {
             terrainPointClosestToCam = &(terrainData->sphere[i]);
             terrainPointClosestToCamDistance = vecCamPos2TerrainDistance;
@@ -145,8 +149,12 @@ bool CTerrain::getTerrainVisibility()
 
     findTerrainPointClosestToCam();
 
-        vecCamPos2TerrainNormal = (*terrainPointClosestToCam) - dss->camPosition;
+    vecCamPos2TerrainNormal = (*terrainPointClosestToCam) - dss->camPosition;
+    
+   
     vecCamPos2TerrainBehindCameraNormal = vecCamPos2TerrainNormal + dss->camLookingDirectionNormal * (10000.0);
+    //vecCamPos2TerrainBehindCameraNormal = vecCamPos2TerrainNormal + lookingDir * (10000.0);
+    
     vecCamPos2TerrainBehindCameraNormal.normalize();
     vecCamPos2TerrainNormal.normalize();
 
@@ -162,8 +170,11 @@ bool CTerrain::getTerrainVisibility()
 
     // check if terrain is in camera FOV
     if (QVector3D::dotProduct(dss->camLookingDirectionNormal, vecCamPos2TerrainBehindCameraNormal) > dss->camClippingAngleCosine)
+    //if (QVector3D::dotProduct(lookingDir, vecCamPos2TerrainBehindCameraNormal) > dss->camClippingAngleCosine)
         terrainInCameraFOV = true; else
         terrainInCameraFOV = false;
+
+    terrainInCameraFOV = true;
 
     return (cameraCloseToTerrain || !beyondTheHorizon) ? true : false;
 }
@@ -265,7 +276,7 @@ void CTerrain::split()
     SEchild->initTerrainData(terrainData->topLeftLon+(terrainData->degreeSize/2.0), terrainData->topLeftLat-(terrainData->degreeSize/2.0),
                              terrainData->LOD+1, dss);
     
-    performance->trianglesRead += 192;
+    performance->trianglesRead += 512;
 }
 
 void CTerrain::merge()

@@ -5,7 +5,7 @@
 #include <QThread>
 #include <QTime>
 #include "COpenGl.h"
-#include "GLayer.h"
+#include "GLevel.h"
 #include "GClipmap.h"
 #include "CCommons.h"
 
@@ -26,12 +26,12 @@ public:
     double distanceFromEarth;
     double tlon, tlat;
     
-    float layersOffsets[13];
-    double layersDegree[13];
+    float levelsOffsets[13];
+    double levelsDegree[13];
     int n;
 
 
-    GLayer layer;
+    GLevel level;
 
 private:
 

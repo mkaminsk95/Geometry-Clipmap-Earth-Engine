@@ -66,7 +66,8 @@ public:
 
     void initLOD_0();
     void setDrawingStateSnapshot(CDrawingStateSnapshot *dss);
-    void updateTerrainTree();
+	void updateTerrainTree(QVector3D distanceToEarth, QVector3D lookingDir);
+	void updateTerrainTree();
     void draw();
 };
 

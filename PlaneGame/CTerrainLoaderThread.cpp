@@ -80,17 +80,23 @@ void CTerrainLoaderThread::run()
 
     openGl->drawingState.getDrawingStateSnapshot(&dss);      // get current scene state
 
+    //////////////////////////////////
+
     logFile.open("logFileRegularGrid.txt", fstream::in | fstream::out | fstream::trunc);
     bool ifOpened = logFile.is_open();
     bool onlyOnce = false;
     bool firstTime = true;
+    int i = 1;
+    int LOD = 0;
+    int count = 0;
+
+    double tlon = 0, tlat = 0;
+    double x, y, z;
+    openGl->order = 0;
+    //////////////////////////////////
 
     while (true) {
-        
-        if (openGl->performance.testStart == true && onlyOnce == false) {
-            time.start();
-            onlyOnce = true;
-        }
+            
 
         if (dss.treeUpdating)  earth->updateTerrainTree();
 
@@ -123,20 +129,19 @@ void CTerrainLoaderThread::run()
         openGl->performance.setTerrainTreeUpdatingTime(time.elapsed());
         openGl->performance.updateTerrainTreeUpdatingInfo();
 
-        //if (firstTime == true) {
-        //    time.start();
-        //    firstTime = false;
-        //}
 
 
-       // if (openGl->performance.testStart == true) {
-       //     //logFile << time.elapsed() << "\t" << openGl->performance.maxLOD << "\t" << openGl->performance.terrainsQuarterDrawed*32 << "\t" << openGl->performance.trianglesRead << "\n";
-       //     if (time.elapsed() < 120000)
-       //         logFile << time.elapsed() << "\t"<< openGl->performance.trianglesRead << "\n";
-       //     logFile.flush();
-       // }
 
-        logFile << time.elapsed() << "\n";
-        logFile.flush();
+
+            
+            
+            
+            
+
+
+        
+
+
+        
     }
 }

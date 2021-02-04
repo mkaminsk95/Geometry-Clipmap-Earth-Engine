@@ -88,7 +88,7 @@ private:
     void merge();
     int getLodToRender();
     void findTerrainPointClosestToCam();
-    bool getTerrainVisibility();
+    bool getTerrainVisibility        ();
 };
 
 #endif // CTERRAIN_H

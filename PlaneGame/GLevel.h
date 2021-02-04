@@ -1,6 +1,6 @@
 
-#ifndef GLAYER_h
-#define GLAYER_h
+#ifndef GLevel_h
+#define GLevel_h
 
 #include "CDrawingStateSnapshot.h"
 #include "CCommons.h"
@@ -17,11 +17,11 @@ class GPixel;
 class GHeight;
 class GClipmap;
 
-class GLayer {
+class GLevel {
 public:
 
-	GLayer() {}
-	GLayer(GClipmap* clipmapPointer, float degree, float inHgtFiledegree, float inScale, int inLayerIndex, 
+	GLevel() {}
+	GLevel(GClipmap* clipmapPointer, float degree, float inHgtFiledegree, float inScale, int inlevelIndex, 
 			int inHgtSkipping, int inFileResolution, int inRawSkipping,int inRawFileResolution, int n);
 
 	
@@ -38,39 +38,45 @@ public:
 	float allFinerHorizontalSum, allFinerVerticalSum;
 	bool isActive;
 
-	double layerPositionLon, layerPositionLat;
+	double levelPositionLon, levelPositionLat;
 	double oldLon, oldLat;
 	double oldLonLeft, oldLonRight, oldLatTop, oldLatDown;
 
 	double readDegree;
 	bool firstGothrough;
 
-	void buildLevel();
-	void refreshPosition(double tlon, double tlat);
+	void computeOffsets();
+
 	void refreshTextures(double tlon, double tlat);
+	void refreshPositions(double tlon, double tlat);
 	
 	void updatePosition();
 	void updateTextures();
-	void updateOffsets();
+	void updateOriginPoints();
+	void buildLevel();
+
 	
 	void setPosition(int inPositionHorizontal, int inPositionVertical) {
 		positionHorizontal = inPositionHorizontal;
 		positionVertical = inPositionVertical;
 	}
 
+	bool imageReleased;
+	void releaseImage();
+	void initializeImage();
 
 private: 
 
 	CPerformance* performance;
 
 	point rTexBegHor, rTexBegVer, hTexBegHor, hTexBegVer;
-	int hgtTextureBegginingYRdy, hgtTextureBegginingXRdy, rawTextureBegginingYRdy, rawTextureBegginingXRdy;
-	int hgtTextureBegginingY, hgtTextureBegginingX, rawTextureBegginingY, rawTextureBegginingX;
+	int hgttextureOriginYRdy, hgttextureOriginXRdy, rawtextureOriginYRdy, rawtextureOriginXRdy;
+	int hgttextureOriginY, hgttextureOriginX, rawtextureOriginY, rawtextureOriginX;
 
 
 	int scale;			//How big is the clipmap
 	int* drawMode;		//Are we drawing lines or triangles
-	int layerIndex;		//Index of the layer
+	int levelIndex;		//Index of the level
 	
 	QVector2D offsets;
 	int fillerPositionHorizontal;
@@ -108,7 +114,7 @@ private:
 	void computeTextureOffsets(int latDifference, int lonDifference, point* texBegHor, point* texBegVer, bool rawReading);
 	void computeNewLonAndLat(double tlon, double tlat, double *lonLeft, double *lonRight, double *latTop, double *latDown);
 
-	void cumputeOffsets();
+	
 	void drawA(float originX, float originY);
 	void drawB(float originX, float originY);
 	void drawC(float originX, float originY);

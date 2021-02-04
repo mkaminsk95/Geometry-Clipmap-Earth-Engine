@@ -102,6 +102,8 @@ void COpenGlThread::run()
     unsigned int texID;
     CEarth *tmp;
 
+    bool earthSwitched = false;
+
     openGl->makeCurrent();
     openGl->drawingState.getDrawingStateSnapshot(&dss);      // get current scene state
     initializeScene();
@@ -125,8 +127,8 @@ void COpenGlThread::run()
         checkSunLightningAndAtmosphere(); // at 85km sky is black
         drawScene();
         
+ 
 
-       
        // ### OpenGL scene END
    
         openGl->swapBuffers();
@@ -147,6 +149,8 @@ void COpenGlThread::run()
                 earth->setDrawingStateSnapshot(&dss);       // set drawing state used in >this< thread
 
                 openGl->earthBufferReadyToExchange = false;
+                
+
                 openGl->earthBufferExchange.wakeOne();      // wake terrain loading thread
             }
             openGl->earthBufferMutex.unlock();

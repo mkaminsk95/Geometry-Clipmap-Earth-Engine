@@ -250,7 +250,7 @@ void CRawFile::loadPixelDataToImageFull(QImage* image, int imageOffsetX, int ima
             filePixel.read((char*)&pixel[1], 1);
             filePixel.read((char*)&pixel[2], 1);
           
-            //jumping to the next bites block depending on the layer resolution
+            //jumping to the next bites block depending on the level resolution
             filePixel.seekg(skip*3-3, filePixel.cur);
 
             //writing to the image
@@ -269,7 +269,7 @@ void CRawFile::loadPixelDataToImageFull(QImage* image, int imageOffsetX, int ima
 void CRawFile::loadPixelDataToImagePart(QImage* image, int imageOffsetX, int imageOffsetY, QString name,
                                      int xToRead, int yToRead, int fileResolution, int skip, 
                                      int filePositionHorizontalOffset, int filePositionVerticalOffset, 
-                                     int textureBegginingX, int textureBegginingY, int levelIndex)
+                                     int textureOriginX, int textureOriginY, int levelIndex)
 {
     fstream filePixel;
     quint8 pixel[3];
@@ -308,8 +308,8 @@ void CRawFile::loadPixelDataToImagePart(QImage* image, int imageOffsetX, int ima
         filePixel.seekg(offset + 3 * skip * rowCheck * fileResolution);
    
         //finding right row of image (texture)
-        //bits = image->scanLine((n - 1) - fmod(textureBegginingY*4 + y, n));
-        bits = image->scanLine((n - 1) - fmod(textureBegginingY * imageSizeFactor + y, n));
+        //bits = image->scanLine((n - 1) - fmod(textureOriginY*4 + y, n));
+        bits = image->scanLine((n - 1) - fmod(textureOriginY * imageSizeFactor + y, n));
 
         for (x = imageOffsetX; x < xStopCondition; x++) {
 
@@ -319,16 +319,16 @@ void CRawFile::loadPixelDataToImagePart(QImage* image, int imageOffsetX, int ima
             filePixel.read((char*)&pixel[1], 1);
             filePixel.read((char*)&pixel[2], 1);
 
-            //jumping to the next bites block depending on the layer resolution
+            //jumping to the next bites block depending on the level resolution
             filePixel.seekg(skip * 3 - 3, filePixel.cur);
 
             //writing to the image
-            //*(bits + 3 * ( (textureBegginingX*4 + x) % (n) )    ) = pixel[0];
-            //*(bits + 3 * ( (textureBegginingX*4 + x) % (n) ) + 1) = pixel[1];
-            //*(bits + 3 * ( (textureBegginingX*4 + x) % (n) ) + 2) = pixel[2];
-            *(bits + 3 * ((textureBegginingX * imageSizeFactor + x) % (n))) = pixel[0];
-            *(bits + 3 * ((textureBegginingX * imageSizeFactor + x) % (n)) + 1) = pixel[1];
-            *(bits + 3 * ((textureBegginingX * imageSizeFactor + x) % (n)) + 2) = pixel[2];
+            //*(bits + 3 * ( (textureOriginX*4 + x) % (n) )    ) = pixel[0];
+            //*(bits + 3 * ( (textureOriginX*4 + x) % (n) ) + 1) = pixel[1];
+            //*(bits + 3 * ( (textureOriginX*4 + x) % (n) ) + 2) = pixel[2];
+            *(bits + 3 * ((textureOriginX * imageSizeFactor + x) % (n))) = pixel[0];
+            *(bits + 3 * ((textureOriginX * imageSizeFactor + x) % (n)) + 1) = pixel[1];
+            *(bits + 3 * ((textureOriginX * imageSizeFactor + x) % (n)) + 2) = pixel[2];
 
         }
       
@@ -339,17 +339,17 @@ void CRawFile::loadPixelDataToImagePart(QImage* image, int imageOffsetX, int ima
 }
 
 
-void CRawFile::sphericalToRawFilePath(QString* filePath, float lon, float lat, int layerIndex) {
+void CRawFile::sphericalToRawFilePath(QString* filePath, float lon, float lat, int levelIndex) {
 
     QString filePathTmp;
 
-    if (layerIndex >= 10) {
+    if (levelIndex >= 10) {
         filePathTmp = "E:\\HgtReader_data\\Textures\\L00_L02";
     }
-    else if (layerIndex >= 7) {
+    else if (levelIndex >= 7) {
         filePathTmp = "E:\\HgtReader_data\\Textures\\L03_L05";
     }
-    else if (layerIndex >= 4) {
+    else if (levelIndex >= 4) {
         filePathTmp = "E:\\HgtReader_data\\Textures\\L06_L08";
     }
     else {

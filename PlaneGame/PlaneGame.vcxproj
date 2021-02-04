@@ -116,7 +116,7 @@
     <ClCompile Include="CTerrainLoaderThread.cpp" />
     <ClCompile Include="GClipmap.cpp" />
     <ClCompile Include="GClipmapThread.cpp" />
-    <ClCompile Include="GLayer.cpp" />
+    <ClCompile Include="GLevel.cpp" />
     <ClCompile Include="GTimingThread.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mainwindow.cpp" />
@@ -142,7 +142,7 @@
     <ClInclude Include="GPixel.h" />
     <ClInclude Include="GClipmapThread.h" />
     <ClInclude Include="CObjects.h" />
-    <ClInclude Include="GLayer.h" />
+    <ClInclude Include="GLevel.h" />
     <ClInclude Include="GClipmap.h" />
     <ClInclude Include="GStructures.h" />
     <ClInclude Include="GTimingThread.h" />

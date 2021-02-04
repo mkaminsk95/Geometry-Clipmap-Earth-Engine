@@ -1,21 +1,21 @@
 #include "GHeight.h"
-#include "GLayer.h"
+#include "GLevel.h"
 #include "GClipmap.h"
 #include "CHgtFile.h"
 
-GHeight::GHeight(GLayer* layerPointer, int inLayerIndex, double inReadDegree, int inHgtSkipping, int inHgtFileResolution, double inHgtFileDegree) : layer(layerPointer) {
+GHeight::GHeight(GLevel* levelPointer, int inlevelIndex, double inReadDegree, int inHgtSkipping, int inHgtFileResolution, double inHgtFileDegree) : level(levelPointer) {
 		
-	clipmap = layerPointer->clipmap;
-	program = layerPointer->program;
+	clipmap = levelPointer->clipmap;
+	program = levelPointer->program;
 
-    layerIndex = inLayerIndex;
+    levelIndex = inlevelIndex;
 
     readDegree = inReadDegree;
     hgtSkipping = inHgtSkipping;
     hgtFileResolution = inHgtFileResolution;
     hgtFileDegree = inHgtFileDegree;
 
-    n = layer->n;
+    n = level->n;
     heightMap = new QImage(n, n, QImage::Format_RGB888);
 }
 
@@ -63,7 +63,7 @@ void GHeight::fullHgtTextureReading(double lonLeft, double lonRight, double latD
             checkFileOffset_Y(&fileVerticalOffset, verticalPosition, latTop, maxTilesLat);
 
         
-            CHgtFile::sphericalToHeightFilePath(&filePath, i, j, layerIndex);
+            CHgtFile::sphericalToHeightFilePath(&filePath, i, j, levelIndex);
             CHgtFile::loadHeightDataToImageFull(heightMap, imageOffsetX, imageOffsetY,
                 filePath, howManyToReadX, howManyToReadY,
                 hgtFileResolution, hgtSkipping,
@@ -157,7 +157,7 @@ void GHeight::horizontalBlockHgtTextureReading(int lonDifference, int latDiffere
             checkFileOffset_Y(&fileVerticalOffset, verticalPosition, latTopHor, maxTilesLat);
 
 
-            CHgtFile::sphericalToHeightFilePath(&filePath, i, j, layerIndex);
+            CHgtFile::sphericalToHeightFilePath(&filePath, i, j, levelIndex);
             CHgtFile::loadHeightDataToImagePart(heightMap, imageOffsetX, imageOffsetY,
                 filePath, howManyToReadX, howManyToReadY, hgtFileResolution, hgtSkipping,
                 fileHorizontalOffset, fileVerticalOffset,
@@ -261,7 +261,7 @@ void GHeight::verticalBlockHgtTextureReading(int lonDifference, int latDifferenc
             checkFileOffset_Y(&fileVerticalOffset, verticalPosition, latTopVer, maxTilesLat);
 
 
-            CHgtFile::sphericalToHeightFilePath(&filePath, i, j, layerIndex);
+            CHgtFile::sphericalToHeightFilePath(&filePath, i, j, levelIndex);
             
             CHgtFile::loadHeightDataToImagePart(heightMap, imageOffsetX, imageOffsetY,
                 filePath, howManyToReadX, howManyToReadY, hgtFileResolution, hgtSkipping,
@@ -292,7 +292,7 @@ void GHeight::verticalBlockHgtTextureReading(int lonDifference, int latDifferenc
 
 void GHeight::findingTopLeftFileToRead(double* maxTilesLon, double* maxTilesLat, double lonLeft, double latTop, double degree) {
     
-    if (layerIndex <= 8) {
+    if (levelIndex <= 8) {
 
         if (lonLeft < 0) {
             if (fmod(lonLeft, degree) != 0)

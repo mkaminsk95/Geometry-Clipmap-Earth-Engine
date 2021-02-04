@@ -1,5 +1,5 @@
 #include "GPixel.h"
-#include "GLayer.h"
+#include "GLevel.h"
 #include "GClipmap.h"
 #include "CRawFile.h"
 
@@ -8,35 +8,52 @@
 
 double RAW_FILE_DEGREE = 45;
 
-GPixel::GPixel(GLayer* layerPointer, int inLayerIndex, double inReadDegree, int inRawSkipping, int inRawFileResolution) : layer(layerPointer) {
+GPixel::GPixel(GLevel* levelPointer, int inlevelIndex, double inReadDegree, int inRawSkipping, int inRawFileResolution) : level(levelPointer) {
 
-    clipmap = layerPointer->clipmap;
-    program = layerPointer->program;
+    clipmap = levelPointer->clipmap;
+    program = levelPointer->program;
 
-    layerIndex = inLayerIndex;
+    levelIndex = inlevelIndex;
  
     rawSkipping = inRawSkipping;
     rawFileResolution = inRawFileResolution;
     pointDegree = inReadDegree;
 
-    n = layer->n;
+    n = level->n;
 
-    if (inLayerIndex > 1) {
+    if (levelIndex > 1)
         readDegree = inReadDegree / 4;
-        pixelMap = new QImage((n - 1) * 4, (n - 1) * 4, QImage::Format_RGB888);
-    }
-    else if (inLayerIndex == 1) {
+    else if (levelIndex == 1)
         readDegree = inReadDegree / 2;
-        pixelMap = new QImage((n - 1) * 2, (n - 1) * 2, QImage::Format_RGB888);
-    }
-    else if (inLayerIndex == 0) {
+    else if (levelIndex == 0)
         readDegree = inReadDegree;
+       
+    
+}
+
+void GPixel::initializeImage() {
+
+
+    if (levelIndex > 1)
+        pixelMap = new QImage((n - 1) * 4, (n - 1) * 4, QImage::Format_RGB888);
+    else if (levelIndex == 1)
+        pixelMap = new QImage((n - 1) * 2, (n - 1) * 2, QImage::Format_RGB888);
+    else if (levelIndex == 0)
         pixelMap = new QImage((n - 1), (n - 1), QImage::Format_RGB888);
-    }
+
+    imageReleased = false;
+}
+
+void GPixel::releaseImage() {
+    delete pixelMap;
+
+    imageReleased = true;
 }
 
 void GPixel::fullRawTextureReading(double lonLeft, double lonRight, double latDown, double latTop) {
-   
+
+
+
     double maxTilesLon, maxTilesLat;
     
     int imageOffsetX = 0, imageOffsetY = 0;
@@ -78,13 +95,13 @@ void GPixel::fullRawTextureReading(double lonLeft, double lonRight, double latDo
             
             checkFileOffset_Y(&fileVerticalOffset, verticalPosition, latTop, maxTilesLat);
 
-            CRawFile::sphericalToRawFilePath(&filePath, i, j, layerIndex);
+            CRawFile::sphericalToRawFilePath(&filePath, i, j, levelIndex);
             CRawFile::loadPixelDataToImageFull(pixelMap, imageOffsetX, imageOffsetY,
                 filePath, howManyToReadX, howManyToReadY,
                 rawFileResolution, rawSkipping,
                 fileHorizontalOffset, fileVerticalOffset);
 
-            pixelMap->save("mapa.png");
+            
             if (j - 2 * RAW_FILE_DEGREE > latDown)
                 verticalPosition = 1;   //middle 
             else
@@ -100,12 +117,12 @@ void GPixel::fullRawTextureReading(double lonLeft, double lonRight, double latDo
 
         imageOffsetX += howManyToReadX;
     }
-    pixelMap->save("mapa.png");
+  
 
     /*pixelTexture = new QOpenGLTexture(*pixelMap, QOpenGLTexture::DontGenerateMipMaps);
-    pixelTexture->bind(layerIndex, QOpenGLTexture::DontResetTextureUnit);
+    pixelTexture->bind(levelIndex, QOpenGLTexture::DontResetTextureUnit);
    
-    program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);*/
+    program->setUniformValue(clipmap->pixelTextureLocation[levelIndex], levelIndex);*/
 }
 
 
@@ -183,12 +200,12 @@ void GPixel::horizontalBlockRawTextureReading(int lonDifference, int latDifferen
             checkFileOffset_Y(&fileVerticalOffset, verticalPosition, latTopHor, maxTilesLat);
 
 
-            CRawFile::sphericalToRawFilePath(&filePath, i, j, layerIndex);
+            CRawFile::sphericalToRawFilePath(&filePath, i, j, levelIndex);
 
             CRawFile::loadPixelDataToImagePart(pixelMap, imageOffsetX, imageOffsetY,
                 filePath, howManyToReadX, howManyToReadY, rawFileResolution, rawSkipping,
                 fileHorizontalOffset, fileVerticalOffset,
-                texBegHor.x, n - 1 - texBegHor.y, layerIndex);
+                texBegHor.x, n - 1 - texBegHor.y, levelIndex);
 
 
             if (j - 2 * RAW_FILE_DEGREE > latDown)
@@ -208,13 +225,11 @@ void GPixel::horizontalBlockRawTextureReading(int lonDifference, int latDifferen
         imageOffsetX += howManyToReadX;
 
     }
-    pixelMap->save("mapa.png");
-
 
     /*pixelTexture = new QOpenGLTexture(*pixelMap, QOpenGLTexture::DontGenerateMipMaps);
-    pixelTexture->bind(layerIndex, QOpenGLTexture::DontResetTextureUnit);
+    pixelTexture->bind(levelIndex, QOpenGLTexture::DontResetTextureUnit);
 
-    program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);*/
+    program->setUniformValue(clipmap->pixelTextureLocation[levelIndex], levelIndex);*/
 }
 
 
@@ -302,12 +317,12 @@ void GPixel::verticalBlockRawTextureReading(int lonDifference, int latDifference
             checkFileOffset_Y(&fileVerticalOffset, verticalPosition, latTopVer, maxTilesLat);
 
 
-            CRawFile::sphericalToRawFilePath(&filePath, i, j, layerIndex);
+            CRawFile::sphericalToRawFilePath(&filePath, i, j, levelIndex);
 
             CRawFile::loadPixelDataToImagePart(pixelMap, imageOffsetX, imageOffsetY,
                 filePath, howManyToReadX, howManyToReadY, rawFileResolution, rawSkipping,
                 fileHorizontalOffset, fileVerticalOffset,
-                texBegVer.x, n - 1 - texBegVer.y, layerIndex);
+                texBegVer.x, n - 1 - texBegVer.y, levelIndex);
 
 
             if (j - 2 * RAW_FILE_DEGREE > latDown)
@@ -327,12 +342,9 @@ void GPixel::verticalBlockRawTextureReading(int lonDifference, int latDifference
         imageOffsetX += howManyToReadX;
 
     }
-    pixelMap->save("mapa.png");
+   
 
-    /*pixelTexture = new QOpenGLTexture(*pixelMap, QOpenGLTexture::DontGenerateMipMaps);
-    pixelTexture->bind(layerIndex, QOpenGLTexture::DontResetTextureUnit);
 
-    program->setUniformValue(clipmap->pixelTextureLocation[layerIndex], layerIndex);*/
 }
 
 void GPixel::findingTopLeftFileToRead(double* maxTilesLon, double* maxTilesLat, double lonLeft, double latTop, double degree) {

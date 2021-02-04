@@ -68,7 +68,7 @@ CDrawingState::CDrawingState()
     sunEnabled = false;
     treeUpdating = true;
 
-    lodMultiplier = 1.74;
+    lodMultiplier = 1.74 * 1;
     dontUseCache = true;
     dontUseDiskHgt = false;
     dontUseDiskRaw = false;

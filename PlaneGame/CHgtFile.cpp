@@ -453,7 +453,7 @@ void CHgtFile::loadHeightDataToImageFull(QImage* image, int imageOffsetX, int im
                 }
 
 
-                //jumping to the next bites block depending on the layer resolution
+                //jumping to the next bites block depending on the level resolution
                 fileHeight.seekg(skip * 2 - 2, fileHeight.cur);
 
                 if (height[0] > 40) {
@@ -467,7 +467,7 @@ void CHgtFile::loadHeightDataToImageFull(QImage* image, int imageOffsetX, int im
                     *(bits + 3 * x + 1) = height[0];
                 }
 
-                //jumping to the next bites block depending on the layer resolution
+                //jumping to the next bites block depending on the level resolution
                 //fileHeight.seekg(skip * 2 - 2, fileHeight.cur);
 
                 //writing to the image
@@ -508,7 +508,7 @@ void CHgtFile::loadHeightDataToImageFull(QImage* image, int imageOffsetX, int im
 void CHgtFile::loadHeightDataToImagePart(QImage* image, int imageOffsetX, int imageOffsetY, QString name,
     int xToRead, int yToRead, int fileResolution, int skip,
     int filePositionHorizontalOffset, int filePositionVerticalOffset,
-    int textureBegginingX, int textureBegginingY)
+    int textureOriginX, int textureOriginY)
 {
     fstream fileHeight;
     quint8 height[2];
@@ -546,7 +546,7 @@ void CHgtFile::loadHeightDataToImagePart(QImage* image, int imageOffsetX, int im
     
 
             //finding right row of image (texture)
-            bits = image->scanLine((n - 1) - fmod(textureBegginingY + y, n));
+            bits = image->scanLine((n - 1) - fmod(textureOriginY + y, n));
 
             for (x = imageOffsetX; x < xStopCondition; x++) {
 
@@ -587,21 +587,21 @@ void CHgtFile::loadHeightDataToImagePart(QImage* image, int imageOffsetX, int im
                 }
 
 
-                //jumping to the next bites block depending on the layer resolution
+                //jumping to the next bites block depending on the level resolution
                 fileHeight.seekg(skip * 2 - 2, fileHeight.cur);
 
                 if (height[0] > 40) {
                     //writing to the image
-                    *(bits + 3 * ((textureBegginingX + x) % (n))) = heightNew[1];
-                    *(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = heightNew[0];
+                    *(bits + 3 * ((textureOriginX + x) % (n))) = heightNew[1];
+                    *(bits + 3 * ((textureOriginX + x) % (n)) + 1) = heightNew[0];
                 }
                 else {
                     //writing to the image
-                    *(bits + 3 * ((textureBegginingX + x) % (n))) = height[1];
-                    *(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = height[0];
+                    *(bits + 3 * ((textureOriginX + x) % (n))) = height[1];
+                    *(bits + 3 * ((textureOriginX + x) % (n)) + 1) = height[0];
                 }
-                //*(bits + 3 * ((textureBegginingX + x) % (n))) = height[1];
-                //*(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = height[0];
+                //*(bits + 3 * ((textureOriginX + x) % (n))) = height[1];
+                //*(bits + 3 * ((textureOriginX + x) % (n)) + 1) = height[0];
 
             }
 
@@ -612,13 +612,13 @@ void CHgtFile::loadHeightDataToImagePart(QImage* image, int imageOffsetX, int im
         for (y = imageOffsetY; y < yStopCondition; y++) {
 
             //finding right row of image (texture)
-            bits = image->scanLine((n - 1) - fmod(textureBegginingY + y, n));
+            bits = image->scanLine((n - 1) - fmod(textureOriginY + y, n));
 
             for (x = imageOffsetX; x < xStopCondition; x++) {
 
                 //writing to the image
-                *(bits + 3 * ((textureBegginingX + x) % (n))) = 0;
-                *(bits + 3 * ((textureBegginingX + x) % (n)) + 1) = 0;
+                *(bits + 3 * ((textureOriginX + x) % (n))) = 0;
+                *(bits + 3 * ((textureOriginX + x) % (n)) + 1) = 0;
 
             }
 
@@ -630,14 +630,14 @@ void CHgtFile::loadHeightDataToImagePart(QImage* image, int imageOffsetX, int im
     fileHeight.close();
 }
 
-void CHgtFile::sphericalToHeightFilePath(QString* filePath, float lon, float lat, int layerIndex) {
+void CHgtFile::sphericalToHeightFilePath(QString* filePath, float lon, float lat, int levelIndex) {
 
     QString filePathTmp;
 
-    if (layerIndex >= 9) {
+    if (levelIndex >= 9) {
         filePathTmp = "E:\\HgtReader_data\\L00-L03";
     }
-    else if (layerIndex >= 4) {
+    else if (levelIndex >= 4) {
         filePathTmp = "E:\\HgtReader_data\\L04-L08";
     }
     else {

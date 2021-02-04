@@ -6,8 +6,9 @@
 #include <QOpenGLTexture>
 #include <qopenglshaderprogram.h>
 #include "GStructures.h"
+#include "QImage"
 
-class GLayer;
+class GLevel;
 class GClipmap;
 
 
@@ -17,20 +18,23 @@ class GPixel
 public:
 
 
-	GPixel(GLayer* layerPointer, int inLayerIndex, double inReadDegree, int inRawSkipping, int inRawFileResolution);
+	GPixel(GLevel* levelPointer, int inlevelIndex, double inReadDegree, int inRawSkipping, int inRawFileResolution);
+	void initializeImage();
+	void releaseImage();
+	QImage pixell;
 
-
-	GLayer* layer;
+	GLevel* level;
 	GClipmap* clipmap;
 	QOpenGLShaderProgram* program;
 
-	int layerIndex;
+	int levelIndex;
 	int n;
 	
 	QOpenGLTexture* pixelTexture;
 	QImage* pixelMap;
+	bool imageReleased;
 
-	double readDegree;		//How big is angle between two neighbours points in layer
+	double readDegree;		//How big is angle between two neighbours points in level
 	int rawSkipping;		//We read every n-th point in rawFile
 	int rawFileResolution;	//How many point there are in one scanline in corresponding Raw file 
 

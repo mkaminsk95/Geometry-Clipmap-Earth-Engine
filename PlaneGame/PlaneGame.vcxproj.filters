@@ -103,9 +103,6 @@
     <ClCompile Include="GClipmap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GLayer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GPixel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -113,6 +110,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GTimingThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GLevel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -193,9 +193,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CTerrainData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GClipmapThread.h">
@@ -304,6 +301,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GTimingThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GLevel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

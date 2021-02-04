@@ -136,7 +136,7 @@ void main()
 		terrainHeight = (texelValue.x*256+texelValue.y*65280);
 	}
 
-	//calculating layer position in cartesian coordinates
+	//calculating level position in cartesian coordinates
     worldPosition = (levelPosition * levelScaleFactor * worldScaleFactor) + worldOffset;
 
 

@@ -7,7 +7,7 @@
 #include <qopenglshaderprogram.h>
 #include "GStructures.h"
 
-class GLayer;
+class GLevel;
 class GClipmap;
 
 
@@ -15,19 +15,19 @@ class GHeight
 {
 public: 
 
-	GHeight(GLayer* layerPointer, int inLayerIndex, double inReadDegree, int inHgtSkipping, int inHgtFileResolution, double inHgtFileDegree);
+	GHeight(GLevel* levelPointer, int inlevelIndex, double inReadDegree, int inHgtSkipping, int inHgtFileResolution, double inHgtFileDegree);
 
-	GLayer* layer;
+	GLevel* level;
 	GClipmap* clipmap;
 	QOpenGLShaderProgram* program;
 
-	int layerIndex;
+	int levelIndex;
 	int n;
 
 	QOpenGLTexture* heightTexture;
 	QImage* heightMap;
 
-	double readDegree;		//How big is angle between two neighbours points in layer
+	double readDegree;		//How big is angle between two neighbours points in level
 	int hgtSkipping;		//We read every n-th point in rawFile
 	int hgtFileResolution;	//How many point there are in one scanline in corresponding Raw file 
 	double hgtFileDegree;

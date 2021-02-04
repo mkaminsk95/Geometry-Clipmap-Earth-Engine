@@ -60,8 +60,8 @@ CCamera::CCamera()
     camMode = CAM_MODE_ORBIT;
 
     // INIT - earth point (center of terrain camera coordinate system)
-    earthPointLon = 34.7189; //17.038;
-    earthPointLat = 1.097;// 51.102;
+    earthPointLon = 21.3611; //17.038;
+    earthPointLat = 12.9231;// 51.102;
     earthPointAlt = CONST_EARTH_RADIUS + 118;
     CCommons::getCartesianFromSpherical(earthPointLon, earthPointLat, earthPointAlt,
                                         &earthPointX, &earthPointY, &earthPointZ);

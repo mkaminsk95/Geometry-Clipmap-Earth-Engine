@@ -89,6 +89,8 @@ public:
     QMutex earthBufferMutex;
     QWaitCondition earthBufferExchange;
     bool earthBufferReadyToExchange;
+    bool earthDrawed;
+    int order;
     COpenGlThread *openGlThread;
     CTerrainLoaderThread *terrainLoaderThread;
     CAnimationThread *animationThread;

@@ -56,7 +56,7 @@ COpenGl::COpenGl(QGLFormat glFormat, QWidget *parent) : QGLWidget(glFormat, pare
 
     // create Clipmap
     //n sizes 7, 15, 31, 63, 127, 255, 511, 1023
-    clipmap = new GClipmap(this, 127);
+    clipmap = new GClipmap(this, 255);
 
 
    // create Earth Buffers
@@ -69,6 +69,7 @@ COpenGl::COpenGl(QGLFormat glFormat, QWidget *parent) : QGLWidget(glFormat, pare
     // set mutex for safe thread access to drawing state ( !! very important !! )
     drawingState.setDrawingStateMutex(&drawingStateMutex);
     earthBufferReadyToExchange = false;
+    earthDrawed = false;
 
     // tell cache manager about earths
     cacheManager.setEarthBuffers(earthBufferA, earthBufferB);
